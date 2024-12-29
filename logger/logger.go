@@ -2,7 +2,6 @@ package logger
 
 import (
 	"context"
-	"fmt"
 	"github.com/natefinch/lumberjack"
 	"github.com/timandy/routine"
 	"go.opentelemetry.io/contrib/propagators/b3"
@@ -125,9 +124,10 @@ func _log(lvl zapcore.Level, template string, args ...interface{}) {
 	ctx := CurrentSpan(context.Background(), "hello world")
 	tid := TraceID(ctx)
 	sid := SpanID(ctx)
-	fmt.Println(tid)
-	fmt.Println(sid)
-	Log.Log(zapcore.InfoLevel, "%s %s "+template, append(args, tid, sid))
+	var param []interface{}
+	param = append(param, tid, sid)
+	param = append(param, args...)
+	Log.Logf(zapcore.InfoLevel, "%s %s "+template, param...)
 }
 
 func Infof(template string, args ...interface{}) {
@@ -160,6 +160,14 @@ func WarnF(template string, args ...interface{}) {
 
 func Warn(args ...interface{}) {
 	_log(zapcore.ErrorLevel, "", args)
+}
+
+func FatalF(template string, args ...interface{}) {
+	_log(zapcore.FatalLevel, template, args...)
+}
+
+func Fatal(args ...interface{}) {
+	_log(zapcore.FatalLevel, "", args)
 }
 
 //func Debug(args ...interface{}) {

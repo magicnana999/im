@@ -4,6 +4,7 @@ import (
 	sql "database/sql"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/magicnana999/im/logger"
 )
 
 const (
@@ -23,41 +24,36 @@ func init() {
 
 	// if there is an error opening the connection, handle it
 	if err != nil {
-		log.Fatal(err.Error())
+		logger.Fatal(err.Error())
 	}
 
 	pingErr := db.Ping()
 	if pingErr != nil {
-		log.Fatal(pingErr)
+		logger.Fatal(pingErr)
 	}
 
 	DB = db
 }
 
-func Select(s string) error {
-	rows, err := DB.Query(s)
+type User struct {
+	UserId   int64
+	NickName string
+}
+
+func Select(sql string, arg ...any) error {
+	rows, err := DB.Query(sql)
 	if err != nil {
 		return err
 	}
 
 	defer rows.Close()
 
-	fmt.Println(rows.Columns())
-	ct, err := rows.ColumnTypes()
-	if err != nil {
-		return err
-	}
-
-	for i := 0; i < len(ct); i++ {
-		fmt.Println(ct[i].Name(), ct[i].ScanType().Name())
-	}
-
 	for rows.Next() {
-		var user_id int64
-		rows.Scan(&user_id)
-		fmt.Println(user_id)
+		if err := rows.Scan(arg); err != nil {
+			logger.Error(err)
+			return fmt.Errorf("no data found %v", err)
+		}
 	}
 
 	return nil
-
 }

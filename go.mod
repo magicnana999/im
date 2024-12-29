@@ -1,10 +1,16 @@
-module github.com/magicnana999/im/logger
+module github.com/magicnana999/im
 
 go 1.23.1
 
 require (
+	github.com/bwmarrin/snowflake v0.3.0
+	github.com/denisbrodbeck/machineid v1.0.1
 	github.com/gin-gonic/gin v1.10.0
+	github.com/go-sql-driver/mysql v1.8.1
 	github.com/natefinch/lumberjack v2.0.0+incompatible
+	github.com/rs/xid v1.6.0
+	github.com/seehuhn/mt19937 v1.0.0
+	github.com/sony/sonyflake v1.2.0
 	github.com/timandy/routine v1.1.4
 	go.opentelemetry.io/contrib/propagators/b3 v1.33.0
 	go.opentelemetry.io/otel v1.33.0
@@ -15,6 +21,7 @@ require (
 )
 
 require (
+	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/BurntSushi/toml v1.4.0 // indirect
 	github.com/bytedance/sonic v1.11.6 // indirect
 	github.com/bytedance/sonic/loader v0.1.1 // indirect
