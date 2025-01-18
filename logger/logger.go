@@ -2,26 +2,17 @@ package logger
 
 import (
 	"context"
+	"fmt"
+	"github.com/magicnana999/im/tracer"
 	"github.com/natefinch/lumberjack"
-	"github.com/timandy/routine"
-	"go.opentelemetry.io/contrib/propagators/b3"
-	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
-	"go.opentelemetry.io/otel/sdk/trace"
-	oteltrace "go.opentelemetry.io/otel/trace"
+	//"github.com/timandy/routine"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"os"
 )
 
 var (
-	ThreadLocal routine.ThreadLocal[context.Context] = routine.NewThreadLocal[context.Context]()
-	Log         *zap.SugaredLogger
-)
-
-var (
-	PD                   *trace.TracerProvider
-	loggerSpanContextKey string = "trace_current_span"
+	Log *zap.SugaredLogger
 )
 
 func init() {
@@ -30,8 +21,22 @@ func init() {
 	core := zapcore.NewCore(encoder, writeSyncer, zapcore.DebugLevel)
 	logger := zap.New(core, zap.AddCaller(), zap.AddCallerSkip(1))
 	Log = logger.Sugar()
-	defer Log.Sync()
-	InitTracer()
+	defer func() {
+		if err := Log.Sync(); err != nil {
+			fmt.Printf("Error syncing log: %v\n", err)
+		}
+	}()
+}
+
+func demo() {
+	ctx := context.Background()
+	ctx = NewSpan(ctx, "root")
+	Info(ctx, "haha1")
+	Info(ctx, "haha2")
+
+	ctx = NewSpan(ctx, "sub")
+	Info(ctx, "haha3")
+
 }
 
 func getEncoder() zapcore.Encoder {
@@ -53,7 +58,7 @@ func getEncoder() zapcore.Encoder {
 
 func getLogWriter() zapcore.WriteSyncer {
 	lumberJackLogger := &lumberjack.Logger{
-		Filename:   "logs/upc.log",
+		Filename:   "logs/im.log",
 		MaxSize:    10, // 10M
 		MaxBackups: 5,  // 5个
 		MaxAge:     30, // 最多30天
@@ -64,174 +69,66 @@ func getLogWriter() zapcore.WriteSyncer {
 		zapcore.AddSync(lumberJackLogger))
 }
 
-func InitTracer() error {
-
-	otel.SetTextMapPropagator(b3.New())
-
-	f, _ := os.Create("trace.txt")
-
-	exp, _ := stdouttrace.New(
-		stdouttrace.WithWriter(f),
-		stdouttrace.WithPrettyPrint(),
-		stdouttrace.WithoutTimestamps(),
-	)
-
-	PD = trace.NewTracerProvider(
-		trace.WithBatcher(exp),
-		trace.WithSampler(trace.NeverSample()),
-	)
-
-	otel.SetTracerProvider(PD)
-	return nil
+func NewSpan(ctx context.Context, name string) context.Context {
+	return tracer.NewSpan(ctx, name)
 }
 
-func CurrentSpan(ctx context.Context, spanName string) context.Context {
-	started := ThreadLocal.Get()
-
-	if started == nil {
-		started = StartSpan(ctx, spanName)
-		if started != nil {
-			ThreadLocal.Set(started)
-		}
-	}
-	return started
-}
-
-func StartSpan(ctx context.Context, spanName string) context.Context {
-	spanCtx, span := PD.Tracer("").Start(ctx, spanName)
-	startCtx := context.WithValue(spanCtx, loggerSpanContextKey, span)
-	defer span.End()
-	return startCtx
+func EndSpan(ctx context.Context) {
+	tracer.EndSpan(ctx)
 }
 
 func TraceID(ctx context.Context) string {
-	span, ok := ctx.Value(loggerSpanContextKey).(oteltrace.Span)
-	if !ok {
-		return ""
-	}
-	return span.SpanContext().TraceID().String()
+	return tracer.TraceID(ctx)
 }
 
 func SpanID(ctx context.Context) string {
-	span, ok := ctx.Value(loggerSpanContextKey).(oteltrace.Span)
-	if !ok {
-		return ""
-	}
-	return span.SpanContext().SpanID().String()
+	return tracer.SpanID(ctx)
 }
-
-func _log(lvl zapcore.Level, template string, args ...interface{}) {
-	ctx := CurrentSpan(context.Background(), "hello world")
+func _log(ctx context.Context, lvl zapcore.Level, template string, args ...interface{}) {
 	tid := TraceID(ctx)
 	sid := SpanID(ctx)
 	var param []interface{}
 	param = append(param, tid, sid)
 	param = append(param, args...)
-	Log.Logf(zapcore.InfoLevel, "%s %s "+template, param...)
+	Log.Logf(lvl, "%s %s "+template, param...)
 }
 
-func Infof(template string, args ...interface{}) {
-	_log(zapcore.InfoLevel, template, args...)
+func InfoF(ctx context.Context, template string, args ...interface{}) {
+	_log(ctx, zapcore.InfoLevel, template, args...)
 }
 
-func Info(args ...interface{}) {
-	_log(zapcore.InfoLevel, "", args)
+func Info(ctx context.Context, args ...interface{}) {
+	_log(ctx, zapcore.InfoLevel, "%s", args...)
 }
 
-func DebugF(template string, args ...interface{}) {
-	_log(zapcore.DebugLevel, template, args...)
+func DebugF(ctx context.Context, template string, args ...interface{}) {
+	_log(ctx, zapcore.DebugLevel, template, args...)
 }
 
-func Debug(args ...interface{}) {
-	_log(zapcore.DebugLevel, "", args)
+func Debug(ctx context.Context, args ...interface{}) {
+	_log(ctx, zapcore.DebugLevel, "", args...)
 }
 
-func ErrorF(template string, args ...interface{}) {
-	_log(zapcore.ErrorLevel, template, args...)
+func ErrorF(ctx context.Context, template string, args ...interface{}) {
+	_log(ctx, zapcore.ErrorLevel, template, args...)
 }
 
-func Error(args ...interface{}) {
-	_log(zapcore.ErrorLevel, "", args)
+func Error(ctx context.Context, args ...interface{}) {
+	_log(ctx, zapcore.ErrorLevel, "", args...)
 }
 
-func WarnF(template string, args ...interface{}) {
-	_log(zapcore.ErrorLevel, template, args...)
+func WarnF(ctx context.Context, template string, args ...interface{}) {
+	_log(ctx, zapcore.ErrorLevel, template, args...)
 }
 
-func Warn(args ...interface{}) {
-	_log(zapcore.ErrorLevel, "", args)
+func Warn(ctx context.Context, args ...interface{}) {
+	_log(ctx, zapcore.ErrorLevel, "", args...)
 }
 
-func FatalF(template string, args ...interface{}) {
-	_log(zapcore.FatalLevel, template, args...)
+func FatalF(ctx context.Context, template string, args ...interface{}) {
+	_log(ctx, zapcore.FatalLevel, template, args...)
 }
 
-func Fatal(args ...interface{}) {
-	_log(zapcore.FatalLevel, "", args)
+func Fatal(ctx context.Context, args ...interface{}) {
+	_log(ctx, zapcore.FatalLevel, "", args...)
 }
-
-//func Debug(args ...interface{}) {
-//	log.Debug(args...)
-//}
-//func Debugf(template string, args ...interface{}) {
-//	log.Debugf(template, args...)
-//}
-//
-//func Info(args ...interface{}) {
-//	traceId, uri, err := _traceId()
-//	if err != nil {
-//		log.Info(args...)
-//	}
-//	log.Infof("%s %s %s", traceId, uri, args)
-//}
-//func Infof(template string, args ...interface{}) {
-//
-//	traceId, uri, err := _traceId()
-//	if err != nil {
-//		log.Infof(template, args)
-//	}
-//	log.Infof("%s %s "+template, traceId, uri, args)
-//
-//}
-//
-//func Warn(args ...interface{}) {
-//	log.Warn(args...)
-//}
-//func Warnf(template string, args ...interface{}) {
-//	log.Warnf(template, args...)
-//}
-//func Error(args ...interface{}) {
-//	traceId, uri, err := _traceId()
-//	if err != nil {
-//		log.Error(args)
-//	}
-//
-//	log.Errorf("%s %s %s", traceId, uri, args)
-//}
-//func Errorf(template string, args ...interface{}) {
-//
-//	traceId, uri, err := _traceId()
-//	if err != nil {
-//		log.Errorf("%s %s %s", traceId, uri, args)
-//	}
-//
-//	log.Errorf("%s %s "+template, traceId, uri, args)
-//}
-//func DPanic(args ...interface{}) {
-//	log.DPanic(args...)
-//}
-//func DPanicf(template string, args ...interface{}) {
-//	log.DPanicf(template, args...)
-//}
-//func Panic(args ...interface{}) {
-//	log.Panic(args...)
-//}
-//func Panicf(template string, args ...interface{}) {
-//	log.Panicf(template, args...)
-//}
-//func Fatal(args ...interface{}) {
-//	log.Fatal(args...)
-//}
-//func Fatalf(template string, args ...interface{}) {
-//	log.Fatalf(template, args...)
-//}

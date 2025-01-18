@@ -2,6 +2,7 @@ package logger
 
 import (
 	"fmt"
+	"github.com/magicnana999/im/tracer"
 	"go.opentelemetry.io/otel"
 
 	"github.com/gin-gonic/gin"
@@ -17,10 +18,9 @@ const (
 )
 
 func GinMiddleware(service string) gin.HandlerFunc {
-	tracer := PD.Tracer(tracerName)
 
 	return func(c *gin.Context) {
-		c.Set(tracerKey, tracer)
+		c.Set(tracerKey, tracer.Tracer)
 		savedCtx := c.Request.Context()
 		defer func() {
 			c.Request = c.Request.WithContext(savedCtx)
@@ -36,7 +36,7 @@ func GinMiddleware(service string) gin.HandlerFunc {
 		if spanName == "" {
 			spanName = fmt.Sprintf("HTTP %s route not found", c.Request.Method)
 		}
-		ctx, span := tracer.Start(ctx, spanName, opts...)
+		ctx, span := tracer.Tracer.Start(ctx, spanName, opts...)
 		defer span.End()
 
 		c.Request = c.Request.WithContext(ctx)

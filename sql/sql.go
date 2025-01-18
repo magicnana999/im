@@ -40,7 +40,10 @@ type User struct {
 	NickName string
 }
 
-func Select(sql string, arg ...any) error {
+func Select() error {
+
+	sql := "select user_id,nick_name from im_user order by user_id asc limit 2"
+
 	rows, err := DB.Query(sql)
 	if err != nil {
 		return err
@@ -48,11 +51,15 @@ func Select(sql string, arg ...any) error {
 
 	defer rows.Close()
 
+	var userId int64
+	var nickName string
+
 	for rows.Next() {
-		if err := rows.Scan(arg); err != nil {
+		if err := rows.Scan(&userId, &nickName); err != nil {
 			logger.Error(err)
 			return fmt.Errorf("no data found %v", err)
 		}
+		fmt.Println(userId, nickName)
 	}
 
 	return nil
