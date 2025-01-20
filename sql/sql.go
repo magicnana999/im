@@ -1,6 +1,7 @@
 package sql
 
 import (
+	"context"
 	sql "database/sql"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
@@ -24,12 +25,12 @@ func init() {
 
 	// if there is an error opening the connection, handle it
 	if err != nil {
-		logger.Fatal(err.Error())
+		logger.Fatal(context.Background(), err.Error())
 	}
 
 	pingErr := db.Ping()
 	if pingErr != nil {
-		logger.Fatal(pingErr)
+		logger.Fatal(context.Background(), pingErr.Error())
 	}
 
 	DB = db
@@ -56,7 +57,7 @@ func Select() error {
 
 	for rows.Next() {
 		if err := rows.Scan(&userId, &nickName); err != nil {
-			logger.Error(err)
+			logger.Error(context.Background(), err)
 			return fmt.Errorf("no data found %v", err)
 		}
 		fmt.Println(userId, nickName)

@@ -1,0 +1,20 @@
+2025-01-19T14:48:50.231+0800 INFO 5289f2245525cc38256b1dba204fc592 a22694cb6b6363db context.Background.WithValue(trace.traceContextKeyType, trace.nonRecordingSpan)%!(EXTRA string=haha1)
+2025-01-19T14:48:50.232+0800 INFO 5289f2245525cc38256b1dba204fc592 a22694cb6b6363db context.Background.WithValue(trace.traceContextKeyType, trace.nonRecordingSpan)%!(EXTRA string=haha2)
+2025-01-19T14:48:50.232+0800 INFO 5289f2245525cc38256b1dba204fc592 625e683af6a1abc4 context.Background.WithValue(trace.traceContextKeyType, trace.nonRecordingSpan).WithValue(trace.traceContextKeyType, trace.nonRecordingSpan)%!(EXTRA string=haha3)
+2025-01-19T14:48:50.232+0800 INFO 7d4468decff059ae5635525fd99be5b5 9254cfdbe925a10c context.Background.WithValue(trace.traceContextKeyType, trace.nonRecordingSpan)%!(EXTRA string=haha4)
+2025-01-19T15:21:22.243+0800 INFO 没有Trace,哈哈
+2025-01-19T15:21:22.245+0800 INFO 没有Trace,呵呵
+2025-01-19T15:23:00.073+0800 INFO 无Trace,哈哈
+2025-01-19T15:23:00.074+0800 INFO 没有Trace,呵呵
+2025-01-19T15:23:00.074+0800 INFO d1bef6cfcc78a0a4945ecdd5721ac9d8 cbf1748758c9109a 有Trace,哈哈1
+2025-01-19T15:23:00.074+0800 INFO d1bef6cfcc78a0a4945ecdd5721ac9d8 cbf1748758c9109a 有Trace,哈哈2
+2025-01-19T15:23:21.641+0800 INFO 无Trace,哈哈
+2025-01-19T15:23:21.641+0800 INFO 无Trace,呵呵
+2025-01-19T15:23:21.641+0800 INFO 9dc937662e76398168ff91ee5f439a5f fc97f53216ff3ac8 有Trace,哈哈1
+2025-01-19T15:23:21.641+0800 INFO 9dc937662e76398168ff91ee5f439a5f fc97f53216ff3ac8 有Trace,哈哈2
+2025-01-19T15:23:21.641+0800 INFO 无Trace,呵呵
+2025-01-19T15:23:45.515+0800 INFO 无Trace,哈哈
+2025-01-19T15:23:48.069+0800 INFO 无Trace,呵呵
+2025-01-19T15:24:15.920+0800 INFO 84974f43e54bd38e24351a5de1c785cb 33e914e60197b171 有Trace,哈哈1
+2025-01-19T15:24:18.716+0800 INFO 84974f43e54bd38e24351a5de1c785cb 33e914e60197b171 有Trace,哈哈2
+2025-01-19T15:24:36.949+0800 INFO 无Trace,呵呵

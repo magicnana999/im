@@ -15,6 +15,10 @@ func Test_all(t *testing.T) {
 	ctx = NewSpan(ctx, "sub")
 	fmt.Println(TraceID(ctx), SpanID(ctx))
 	EndSpan(ctx)
+
+	c := context.Background()
+	c = NewSpan(c, "root")
+	fmt.Println(TraceID(c), SpanID(c))
 }
 
 func Test_demo(t *testing.T) {

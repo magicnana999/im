@@ -1,30 +1,20 @@
 package main
 
 import (
-	"context"
-	"fmt"
-	broker "github.com/magicnana999/im/broker/brokerstate"
 	"github.com/magicnana999/im/logger"
-	"github.com/petermattis/goid"
-	"sync"
+	"github.com/panjf2000/gnet/v2"
+	"github.com/timandy/routine"
 )
 
 func main() {
 
-	fmt.Println(goid.Get())
-	ctx := context.Background()
-	logger.Info(ctx, "Start im broker ...")
+	gnet.NewClient()
+	server := &gnet.Server{
+		// 设置自定义的Codec
+		Codec: &MyCodec{},
+	}
 
-	var wait sync.WaitGroup
-	wait.Add(1)
-	go startBroker(ctx, &wait)
+	logger.InfoF("Start im broker %d", routine.Goid())
+	server.Start()
 
-	wait.Wait()
-	logger.Info(ctx, "Im broker is stop")
-}
-
-func startBroker(ctx context.Context, wg *sync.WaitGroup) {
-	broker := broker.NewBroker(ctx, wg, "192.168.1.1", 0)
-	broker.Start()
-	logger.Info(ctx, "Start im broker success")
 }

@@ -10,21 +10,15 @@ require (
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/natefinch/lumberjack v2.0.0+incompatible
-	github.com/petermattis/goid v0.0.0-20241211131331-93ee7e083c43
+	github.com/panjf2000/gnet/v2 v2.7.1
 	github.com/rs/xid v1.6.0
 	github.com/seehuhn/mt19937 v1.0.0
 	github.com/sony/sonyflake v1.2.0
-	go.opentelemetry.io/contrib/bridges/otelslog v0.9.0
+	github.com/timandy/routine v1.1.4
 	go.opentelemetry.io/contrib/propagators/b3 v1.33.0
 	go.opentelemetry.io/otel v1.34.0
-	go.opentelemetry.io/otel/exporters/stdout/stdoutlog v0.10.0
-	go.opentelemetry.io/otel/exporters/stdout/stdoutmetric v1.34.0
 	go.opentelemetry.io/otel/exporters/stdout/stdouttrace v1.33.0
-	go.opentelemetry.io/otel/log v0.10.0
-	go.opentelemetry.io/otel/metric v1.34.0
 	go.opentelemetry.io/otel/sdk v1.34.0
-	go.opentelemetry.io/otel/sdk/log v0.10.0
-	go.opentelemetry.io/otel/sdk/metric v1.34.0
 	go.opentelemetry.io/otel/trace v1.34.0
 	go.uber.org/zap v1.27.0
 )
@@ -53,14 +47,18 @@ require (
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
+	github.com/panjf2000/ants/v2 v2.11.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.2 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.12 // indirect
+	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	go.opentelemetry.io/auto/sdk v1.1.0 // indirect
-	go.uber.org/multierr v1.10.0 // indirect
+	go.opentelemetry.io/otel/metric v1.34.0 // indirect
+	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/arch v0.8.0 // indirect
 	golang.org/x/crypto v0.23.0 // indirect
 	golang.org/x/net v0.25.0 // indirect
+	golang.org/x/sync v0.10.0 // indirect
 	golang.org/x/sys v0.29.0 // indirect
 	golang.org/x/text v0.15.0 // indirect
 	google.golang.org/protobuf v1.34.1 // indirect

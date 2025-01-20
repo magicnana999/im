@@ -1,0 +1,234 @@
+2025-01-19T14:23:06.876+0800 INFO c6a54fb78f99393b7766d83c68b8998e fc6b77434fb52bc6 Start im broker ...
+2025-01-19T15:38:30.104+0800 INFO 67dc172c99ec099fa2d55a92b612dad9 5e74f8480db8b2d3 context.Background.WithValue(trace.traceContextKeyType, trace.nonRecordingSpan)%!(EXTRA string=Start im broker ...)
+2025-01-19T15:38:30.104+0800 DEBUG 67dc172c99ec099fa2d55a92b612dad9 5e74f8480db8b2d3 default logging level is INFO
+2025-01-19T15:38:30.104+0800 ERROR 67dc172c99ec099fa2d55a92b612dad9 5e74f8480db8b2d3 too many event-loops under LockOSThread mode, should be less than 10,000 while you are trying to set up 65536
+
+2025-01-19T15:39:36.533+0800 INFO d020f9e8ad3bc2be8aec2b9d1d087f69 a1add81ee94a9d6c context.Background.WithValue(trace.traceContextKeyType, trace.nonRecordingSpan)%!(EXTRA string=Start im broker ...)
+2025-01-19T15:39:36.534+0800 DEBUG d020f9e8ad3bc2be8aec2b9d1d087f69 a1add81ee94a9d6c default logging level is INFO
+2025-01-19T15:39:36.534+0800 INFO d020f9e8ad3bc2be8aec2b9d1d087f69 a1add81ee94a9d6c Launching gnet with 256 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-19T22:48:20.785+0800 INFO 8cfbb467c8cd72b19e3501c4cc3f72cb a694c75ad8c66683 context.Background.WithValue(trace.traceContextKeyType, trace.nonRecordingSpan)%!(EXTRA string=Start im broker ...)
+2025-01-19T22:48:20.787+0800 DEBUG 8cfbb467c8cd72b19e3501c4cc3f72cb a694c75ad8c66683 default logging level is INFO
+2025-01-19T22:48:20.787+0800 INFO 8cfbb467c8cd72b19e3501c4cc3f72cb a694c75ad8c66683 Launching gnet with 256 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-19T22:48:43.063+0800 INFO c53edb89bba102aa6c5571870a8ffe63 d488e682c1cd79fe context.Background.WithValue(trace.traceContextKeyType, trace.nonRecordingSpan)%!(EXTRA string=Start im broker ...)
+2025-01-19T22:48:43.064+0800 DEBUG c53edb89bba102aa6c5571870a8ffe63 d488e682c1cd79fe default logging level is INFO
+2025-01-19T22:48:43.064+0800 INFO c53edb89bba102aa6c5571870a8ffe63 d488e682c1cd79fe Launching gnet with 256 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-19T22:51:56.833+0800 INFO 870e890d61f40e235c5e8837ce36505a 5e709d4f74d471a3 context.Background.WithValue(trace.traceContextKeyType, trace.nonRecordingSpan)%!(EXTRA string=Start im broker ...)
+2025-01-19T22:51:56.833+0800 DEBUG 870e890d61f40e235c5e8837ce36505a 5e709d4f74d471a3 default logging level is INFO
+2025-01-19T22:51:56.833+0800 INFO 870e890d61f40e235c5e8837ce36505a 5e709d4f74d471a3 Launching gnet with 256 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-19T22:56:18.775+0800 INFO 2ea14788a9b1d9c29291a7b7776a7698 d9ddb26a9839ba39 context.Background.WithValue(trace.traceContextKeyType, trace.nonRecordingSpan)%!(EXTRA string=Start im broker ...)
+2025-01-19T22:56:18.776+0800 DEBUG 2ea14788a9b1d9c29291a7b7776a7698 d9ddb26a9839ba39 default logging level is INFO
+2025-01-19T22:57:25.484+0800 INFO 9cd269ab25897ae59c186c3df97e2c42 76b5bbdc4bf9a3c5 context.Background.WithValue(trace.traceContextKeyType, trace.nonRecordingSpan)%!(EXTRA string=Start im broker ...)
+2025-01-19T22:57:25.484+0800 DEBUG 9cd269ab25897ae59c186c3df97e2c42 76b5bbdc4bf9a3c5 default logging level is INFO
+2025-01-19T22:57:47.638+0800 INFO 9cd269ab25897ae59c186c3df97e2c42 76b5bbdc4bf9a3c5 Launching gnet with 8 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-19T23:02:23.223+0800 INFO 49239eacb09bc937f2a0d8f139c31b34 760b6de0a0ec5fcc context.Background.WithValue(trace.traceContextKeyType, trace.nonRecordingSpan)%!(EXTRA string=Start im broker ...)
+2025-01-19T23:02:23.224+0800 DEBUG 49239eacb09bc937f2a0d8f139c31b34 760b6de0a0ec5fcc default logging level is INFO
+2025-01-19T23:02:33.264+0800 INFO 49239eacb09bc937f2a0d8f139c31b34 760b6de0a0ec5fcc Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-19T23:02:55.981+0800 INFO 68db49f67a40697d19667bf3b2ffe21b 451e754d031b0d32 context.Background.WithValue(trace.traceContextKeyType, trace.nonRecordingSpan)%!(EXTRA string=Start im broker ...)
+2025-01-19T23:04:32.094+0800 DEBUG 68db49f67a40697d19667bf3b2ffe21b 451e754d031b0d32 default logging level is INFO
+2025-01-19T23:51:23.632+0800 INFO 68db49f67a40697d19667bf3b2ffe21b 451e754d031b0d32 Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-20T00:17:42.033+0800 INFO bfca6bd75e11c118c74eb91b0a3cea74 2afe58dcb377cbc9 context.Background.WithValue(trace.traceContextKeyType, trace.nonRecordingSpan)%!(EXTRA string=Start im broker ...)
+2025-01-20T00:17:45.779+0800 DEBUG bfca6bd75e11c118c74eb91b0a3cea74 2afe58dcb377cbc9 default logging level is INFO
+2025-01-20T00:17:57.067+0800 INFO bfca6bd75e11c118c74eb91b0a3cea74 2afe58dcb377cbc9 Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-20T00:56:18.617+0800 INFO 9422ab98d6c7a09c06abc22a8ffeaba7 d1a155f8a6521c5d context.Background.WithValue(trace.traceContextKeyType, trace.nonRecordingSpan)%!(EXTRA string=Start im broker ...)
+2025-01-20T00:56:24.921+0800 DEBUG 9422ab98d6c7a09c06abc22a8ffeaba7 d1a155f8a6521c5d default logging level is INFO
+2025-01-20T00:56:24.921+0800 INFO 9422ab98d6c7a09c06abc22a8ffeaba7 d1a155f8a6521c5d Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-20T00:56:27.052+0800 INFO b5cca8e79ada2465140eb756454b2190 d58498b0e2b8be55 context.Background.WithValue(trace.traceContextKeyType, trace.nonRecordingSpan)%!(EXTRA string=Start im broker ...)
+2025-01-20T00:56:29.235+0800 DEBUG b5cca8e79ada2465140eb756454b2190 d58498b0e2b8be55 default logging level is INFO
+2025-01-20T00:56:41.535+0800 INFO b5cca8e79ada2465140eb756454b2190 d58498b0e2b8be55 Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-20T00:59:03.411+0800 INFO 726765bd969b7941e6761395619a6a7d 91d38f4e4f105216 context.Background.WithValue(trace.traceContextKeyType, trace.nonRecordingSpan)%!(EXTRA string=Start im broker ...)
+2025-01-20T00:59:05.723+0800 DEBUG 726765bd969b7941e6761395619a6a7d 91d38f4e4f105216 default logging level is INFO
+2025-01-20T00:59:06.926+0800 INFO 726765bd969b7941e6761395619a6a7d 91d38f4e4f105216 Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-20T00:59:38.859+0800 INFO bf9e47c561534d28d7e1d51d9716f4ce 741b2c8ff48481ce context.Background.WithValue(trace.traceContextKeyType, trace.nonRecordingSpan)%!(EXTRA string=Start im broker ...)
+2025-01-20T00:59:41.633+0800 DEBUG bf9e47c561534d28d7e1d51d9716f4ce 741b2c8ff48481ce default logging level is INFO
+2025-01-20T00:59:42.607+0800 INFO bf9e47c561534d28d7e1d51d9716f4ce 741b2c8ff48481ce Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-20T01:02:33.488+0800 INFO c405602222dcf3c31f836a0f57241f6a 0208f145bfd4c8d4 context.Background.WithValue(trace.traceContextKeyType, trace.nonRecordingSpan)%!(EXTRA string=Start im broker ...)
+2025-01-20T01:02:37.168+0800 DEBUG c405602222dcf3c31f836a0f57241f6a 0208f145bfd4c8d4 default logging level is INFO
+2025-01-20T01:02:51.357+0800 INFO c405602222dcf3c31f836a0f57241f6a 0208f145bfd4c8d4 Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-20T01:12:17.642+0800 INFO 0cf026dd5d7338aa50d5a9fa2fa79d3f a0300ff12ad66a0a context.Background.WithValue(trace.traceContextKeyType, trace.nonRecordingSpan)%!(EXTRA string=Start im broker ...)
+2025-01-20T01:12:17.643+0800 DEBUG 0cf026dd5d7338aa50d5a9fa2fa79d3f a0300ff12ad66a0a default logging level is INFO
+2025-01-20T01:12:17.643+0800 INFO 0cf026dd5d7338aa50d5a9fa2fa79d3f a0300ff12ad66a0a Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-20T01:12:17.643+0800 INFO tick
+2025-01-20T01:12:27.644+0800 INFO tick
+2025-01-20T01:12:37.644+0800 INFO tick
+2025-01-20T01:12:47.645+0800 INFO tick
+2025-01-20T01:12:57.645+0800 INFO tick
+2025-01-20T01:13:07.646+0800 INFO tick
+2025-01-20T01:13:17.646+0800 INFO tick
+2025-01-20T01:13:27.647+0800 INFO tick
+2025-01-20T01:13:37.647+0800 INFO tick
+2025-01-20T01:13:47.648+0800 INFO tick
+2025-01-20T01:13:57.648+0800 INFO tick
+2025-01-20T01:14:07.649+0800 INFO tick
+2025-01-20T01:14:17.649+0800 INFO tick
+2025-01-20T01:14:27.649+0800 INFO tick
+2025-01-20T01:14:37.650+0800 INFO tick
+2025-01-20T01:14:47.652+0800 INFO tick
+2025-01-20T01:14:57.653+0800 INFO tick
+2025-01-20T01:15:07.654+0800 INFO tick
+2025-01-20T01:15:17.655+0800 INFO tick
+2025-01-20T01:15:27.656+0800 INFO tick
+2025-01-20T01:15:37.659+0800 INFO tick
+2025-01-20T01:15:47.659+0800 INFO tick
+2025-01-20T01:15:57.661+0800 INFO tick
+2025-01-20T01:16:07.662+0800 INFO tick
+2025-01-20T01:16:17.664+0800 INFO tick
+2025-01-20T01:16:27.665+0800 INFO tick
+2025-01-20T01:16:37.667+0800 INFO tick
+2025-01-20T01:16:47.667+0800 INFO tick
+2025-01-20T01:16:57.670+0800 INFO tick
+2025-01-20T01:17:07.672+0800 INFO tick
+2025-01-20T01:17:17.673+0800 INFO tick
+2025-01-20T01:17:27.674+0800 INFO tick
+2025-01-20T01:17:37.676+0800 INFO tick
+2025-01-20T01:17:47.677+0800 INFO tick
+2025-01-20T01:17:57.679+0800 INFO tick
+2025-01-20T01:18:07.681+0800 INFO tick
+2025-01-20T01:18:17.683+0800 INFO tick
+2025-01-20T01:18:27.684+0800 INFO tick
+2025-01-20T01:18:37.685+0800 INFO tick
+2025-01-20T01:18:47.685+0800 INFO tick
+2025-01-20T01:18:57.687+0800 INFO tick
+2025-01-20T01:19:07.689+0800 INFO tick
+2025-01-20T01:19:17.691+0800 INFO tick
+2025-01-20T01:19:27.693+0800 INFO tick
+2025-01-20T01:19:37.694+0800 INFO tick
+2025-01-20T01:19:47.695+0800 INFO tick
+2025-01-20T01:19:57.700+0800 INFO tick
+2025-01-20T01:20:07.700+0800 INFO tick
+2025-01-20T01:20:17.701+0800 INFO tick
+2025-01-20T01:20:27.704+0800 INFO tick
+2025-01-20T01:20:37.704+0800 INFO tick
+2025-01-20T01:20:47.705+0800 INFO tick
+2025-01-20T01:20:57.706+0800 INFO tick
+2025-01-20T01:21:07.707+0800 INFO tick
+2025-01-20T01:21:17.709+0800 INFO tick
+2025-01-20T01:21:27.710+0800 INFO tick
+2025-01-20T01:21:37.711+0800 INFO tick
+2025-01-20T01:21:47.637+0800 INFO tick
+2025-01-20T01:21:57.638+0800 INFO tick
+2025-01-20T01:22:07.639+0800 INFO tick
+2025-01-20T01:22:17.641+0800 INFO tick
+2025-01-20T01:22:27.641+0800 INFO tick
+2025-01-20T01:22:37.642+0800 INFO tick
+2025-01-20T01:22:47.643+0800 INFO tick
+2025-01-20T01:22:57.644+0800 INFO tick
+2025-01-20T01:23:02.183+0800 INFO 9b3daf1d429592e011e23cefb80a9e95 6edca22fad282821 context.Background.WithValue(trace.traceContextKeyType, trace.nonRecordingSpan)%!(EXTRA string=Start im broker ...)
+2025-01-20T01:23:02.183+0800 DEBUG 9b3daf1d429592e011e23cefb80a9e95 6edca22fad282821 default logging level is INFO
+2025-01-20T01:23:10.243+0800 INFO c04c73debc9ffdc3c32af71c1eb63c55 6e73f645b66a24f5 context.Background.WithValue(trace.traceContextKeyType, trace.nonRecordingSpan)%!(EXTRA string=Start im broker ...)
+2025-01-20T01:23:10.244+0800 DEBUG c04c73debc9ffdc3c32af71c1eb63c55 6e73f645b66a24f5 default logging level is INFO
+2025-01-20T01:23:40.465+0800 INFO d452ce2e661134b92c594f2a3b232966 ce2f3d5deee8579f context.Background.WithValue(trace.traceContextKeyType, trace.nonRecordingSpan)%!(EXTRA string=Start im broker ...)
+2025-01-20T01:23:40.466+0800 DEBUG d452ce2e661134b92c594f2a3b232966 ce2f3d5deee8579f default logging level is INFO
+2025-01-20T01:23:40.466+0800 INFO d452ce2e661134b92c594f2a3b232966 ce2f3d5deee8579f Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-20T01:23:40.466+0800 INFO tick
+2025-01-20T01:23:54.965+0800 INFO tick
+2025-01-20T01:24:22.533+0800 INFO tick
+2025-01-20T01:24:58.978+0800 INFO tick
+2025-01-20T01:25:31.670+0800 INFO tick
+2025-01-20T01:26:11.367+0800 INFO tick
+2025-01-20T01:27:35.817+0800 INFO tick
+2025-01-20T01:28:00.634+0800 INFO tick
+2025-01-20T01:28:11.314+0800 INFO tick
+2025-01-20T01:28:27.970+0800 INFO tick
+2025-01-20T01:28:33.332+0800 DEBUG conn=127.0.0.1:62830 done writev: <nil>
+2025-01-20T01:28:39.763+0800 INFO tick
+2025-01-20T01:28:49.765+0800 INFO tick
+2025-01-20T01:28:59.766+0800 INFO tick
+2025-01-20T01:29:09.766+0800 INFO tick
+2025-01-20T01:29:19.767+0800 INFO tick
+2025-01-20T01:29:29.769+0800 INFO tick
+2025-01-20T01:29:39.770+0800 INFO tick
+2025-01-20T01:29:49.771+0800 INFO tick
+2025-01-20T01:29:59.774+0800 INFO tick
+2025-01-20T01:30:09.777+0800 INFO tick
+2025-01-20T01:30:19.782+0800 INFO tick
+2025-01-20T01:30:29.783+0800 INFO tick
+2025-01-20T01:30:39.784+0800 INFO tick
+2025-01-20T01:30:49.786+0800 INFO tick
+2025-01-20T01:30:59.787+0800 INFO tick
+2025-01-20T01:31:09.788+0800 INFO tick
+2025-01-20T01:31:19.790+0800 INFO tick
+2025-01-20T01:31:29.792+0800 INFO tick
+2025-01-20T01:31:41.095+0800 INFO 2994249a06529fb2b97949537751a7b1 9ecd4d9055913d66 context.Background.WithValue(trace.traceContextKeyType, trace.nonRecordingSpan)%!(EXTRA string=Start im broker ...)
+2025-01-20T01:31:41.095+0800 DEBUG 2994249a06529fb2b97949537751a7b1 9ecd4d9055913d66 default logging level is INFO
+2025-01-20T01:31:44.704+0800 INFO 4d84157f9356115577ddeb20677c9c7e acb8e7b408cf82dd context.Background.WithValue(trace.traceContextKeyType, trace.nonRecordingSpan)%!(EXTRA string=Start im broker ...)
+2025-01-20T01:31:44.704+0800 DEBUG 4d84157f9356115577ddeb20677c9c7e acb8e7b408cf82dd default logging level is INFO
+2025-01-20T01:31:47.462+0800 INFO c46d20be4b569f3354c8c113a9965694 dc8bc292b2ad6581 context.Background.WithValue(trace.traceContextKeyType, trace.nonRecordingSpan)%!(EXTRA string=Start im broker ...)
+2025-01-20T01:31:47.463+0800 DEBUG c46d20be4b569f3354c8c113a9965694 dc8bc292b2ad6581 default logging level is INFO
+2025-01-20T01:32:36.116+0800 INFO de6235390cb16a0ca7cdd604b20144b0 8013ceae08c78076 context.Background.WithValue(trace.traceContextKeyType, trace.nonRecordingSpan)%!(EXTRA string=Start im broker ...)
+2025-01-20T01:32:36.116+0800 DEBUG de6235390cb16a0ca7cdd604b20144b0 8013ceae08c78076 default logging level is INFO
+2025-01-20T01:32:36.116+0800 INFO de6235390cb16a0ca7cdd604b20144b0 8013ceae08c78076 Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-20T01:32:36.116+0800 INFO de6235390cb16a0ca7cdd604b20144b0 8013ceae08c78076 Server start 7
+2025-01-20T01:32:36.117+0800 INFO tick
+2025-01-20T01:32:46.117+0800 INFO tick
+2025-01-20T01:32:46.219+0800 INFO connect ok and out
+2025-01-20T01:32:56.117+0800 INFO tick
+2025-01-20T01:32:59.085+0800 INFO read ok 0
+2025-01-20T01:32:59.085+0800 DEBUG conn=127.0.0.1:63148 done writev: <nil>
+2025-01-20T01:33:06.118+0800 INFO tick
+2025-01-20T01:33:16.118+0800 INFO tick
+2025-01-20T01:33:20.088+0800 INFO read ok 0
+2025-01-20T01:33:20.090+0800 DEBUG conn=127.0.0.1:63148 done writev: <nil>
+2025-01-20T01:33:26.118+0800 INFO tick
+2025-01-20T01:34:17.377+0800 INFO 97e0df614ef5044380b123705bff3551 4bb32b619b5606d5 context.Background.WithValue(trace.traceContextKeyType, trace.nonRecordingSpan)%!(EXTRA string=Start im broker ...)
+2025-01-20T01:34:17.377+0800 DEBUG 97e0df614ef5044380b123705bff3551 4bb32b619b5606d5 default logging level is INFO
+2025-01-20T01:34:17.378+0800 INFO 97e0df614ef5044380b123705bff3551 4bb32b619b5606d5 Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-20T01:34:17.378+0800 INFO 97e0df614ef5044380b123705bff3551 4bb32b619b5606d5 Server start 7
+2025-01-20T01:34:17.378+0800 INFO tick
+2025-01-20T01:34:27.192+0800 INFO connect ok and out
+2025-01-20T01:34:31.427+0800 INFO tick
+2025-01-20T01:34:43.128+0800 INFO read ok 0
+2025-01-20T01:34:43.128+0800 INFO tick
+2025-01-20T01:34:58.545+0800 INFO tick
+2025-01-20T01:34:58.545+0800 DEBUG conn=127.0.0.1:63231 done writev: <nil>
+2025-01-20T01:44:53.489+0800 INFO Start im broker 1
+2025-01-20T01:44:53.490+0800 DEBUG default logging level is INFO
+2025-01-20T01:44:53.490+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-20T01:44:53.490+0800 INFO broker started & listen 1%!(EXTRA int=7)
+2025-01-20T01:44:53.490+0800 INFO tick
+2025-01-20T01:44:59.263+0800 INFO new connect ok 27
+2025-01-20T01:45:01.636+0800 INFO on read ok 27
+2025-01-20T01:45:01.639+0800 INFO read ok 27 5 5
+2025-01-20T01:45:01.639+0800 INFO inbound:27 outbound:0 discard:0%!(EXTRA int=0)
+2025-01-20T01:46:09.707+0800 INFO tick
+2025-01-20T01:46:09.707+0800 DEBUG conn=127.0.0.1:63656 done writev: <nil>
+2025-01-20T01:46:24.828+0800 INFO Start im broker 1
+2025-01-20T01:46:24.828+0800 DEBUG default logging level is INFO
+2025-01-20T01:46:29.612+0800 INFO Start im broker 1
+2025-01-20T01:46:29.612+0800 DEBUG default logging level is INFO
+2025-01-20T01:46:32.922+0800 INFO Start im broker 1
+2025-01-20T01:46:32.923+0800 DEBUG default logging level is INFO
+2025-01-20T01:46:36.294+0800 INFO Start im broker 1
+2025-01-20T01:46:36.294+0800 DEBUG default logging level is INFO
+2025-01-20T01:46:40.112+0800 INFO Start im broker 1
+2025-01-20T01:46:40.113+0800 DEBUG default logging level is INFO
+2025-01-20T01:46:43.336+0800 INFO Start im broker 1
+2025-01-20T01:46:43.336+0800 DEBUG default logging level is INFO
+2025-01-20T01:46:43.336+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-20T01:46:43.336+0800 INFO broker started & listen 1%!(EXTRA int=6)
+2025-01-20T01:46:43.336+0800 INFO tick
+2025-01-20T01:46:49.004+0800 INFO new connect ok 13
+2025-01-20T01:46:54.255+0800 INFO on read ok 13
+2025-01-20T01:46:54.255+0800 INFO tick
+2025-01-20T01:47:08.260+0800 INFO read ok 13 4 4
+2025-01-20T01:47:16.234+0800 INFO tick
+2025-01-20T01:47:16.234+0800 INFO 13,inbound:0 outbound:0 discard:0
+2025-01-20T01:47:31.841+0800 INFO tick
+2025-01-20T01:47:35.314+0800 DEBUG conn=127.0.0.1:63775 done writev: <nil>
+2025-01-20T01:48:05.102+0800 INFO Start im broker 1
+2025-01-20T01:48:05.103+0800 DEBUG default logging level is INFO
+2025-01-20T01:48:08.787+0800 INFO Start im broker 1
+2025-01-20T01:48:08.787+0800 DEBUG default logging level is INFO
+2025-01-20T01:48:11.735+0800 INFO Start im broker 1
+2025-01-20T01:48:11.735+0800 DEBUG default logging level is INFO
+2025-01-20T01:48:14.617+0800 INFO Start im broker 1
+2025-01-20T01:48:14.617+0800 DEBUG default logging level is INFO
+2025-01-20T01:48:14.617+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-20T01:48:14.617+0800 INFO broker started & listen 1%!(EXTRA int=6)
+2025-01-20T01:48:14.617+0800 INFO tick
+2025-01-20T01:48:18.669+0800 INFO new connect ok 25
+2025-01-20T01:48:20.421+0800 INFO on read ok 25
+2025-01-20T01:48:20.421+0800 INFO read ok 25 4 4
+2025-01-20T01:48:20.421+0800 INFO 25,inbound:0 outbound:0 discard:0
+2025-01-20T01:48:40.291+0800 INFO tick
+2025-01-20T01:50:07.412+0800 INFO tick
+2025-01-20T01:50:09.626+0800 DEBUG conn=127.0.0.1:63883 done writev: <nil>

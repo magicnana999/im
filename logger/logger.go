@@ -5,14 +5,20 @@ import (
 	"fmt"
 	"github.com/magicnana999/im/tracer"
 	"github.com/natefinch/lumberjack"
-	//"github.com/timandy/routine"
+	"github.com/timandy/routine"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"os"
 )
 
+const (
+	TraceEnable bool = true
+)
+
 var (
-	Log *zap.SugaredLogger
+	Log    *zap.SugaredLogger
+	m      = routine.NewThreadLocal[context.Context]()
+	Logger LoggerAdapter
 )
 
 func init() {
@@ -26,17 +32,7 @@ func init() {
 			fmt.Printf("Error syncing log: %v\n", err)
 		}
 	}()
-}
-
-func demo() {
-	ctx := context.Background()
-	ctx = NewSpan(ctx, "root")
-	Info(ctx, "haha1")
-	Info(ctx, "haha2")
-
-	ctx = NewSpan(ctx, "sub")
-	Info(ctx, "haha3")
-
+	Logger = LoggerAdapter{}
 }
 
 func getEncoder() zapcore.Encoder {
@@ -70,11 +66,14 @@ func getLogWriter() zapcore.WriteSyncer {
 }
 
 func NewSpan(ctx context.Context, name string) context.Context {
-	return tracer.NewSpan(ctx, name)
+	ctx = tracer.NewSpan(ctx, name)
+	m.Set(ctx)
+	return ctx
 }
 
 func EndSpan(ctx context.Context) {
 	tracer.EndSpan(ctx)
+	m.Remove()
 }
 
 func TraceID(ctx context.Context) string {
@@ -84,51 +83,88 @@ func TraceID(ctx context.Context) string {
 func SpanID(ctx context.Context) string {
 	return tracer.SpanID(ctx)
 }
-func _log(ctx context.Context, lvl zapcore.Level, template string, args ...interface{}) {
-	tid := TraceID(ctx)
-	sid := SpanID(ctx)
-	var param []interface{}
-	param = append(param, tid, sid)
-	param = append(param, args...)
-	Log.Logf(lvl, "%s %s "+template, param...)
+func _log(lvl zapcore.Level, template string, args ...interface{}) {
+	trace := false
+
+	if m.Get() == nil {
+		trace = false
+	} else if TraceEnable && m.Get() != nil {
+		trace = true
+	}
+
+	if trace {
+		ctx := m.Get().(context.Context)
+		tid := TraceID(ctx)
+		sid := SpanID(ctx)
+		var param []interface{}
+		param = append(param, tid, sid)
+		param = append(param, args...)
+		Log.Logf(lvl, "%s %s "+template, param...)
+	} else {
+		Log.Logf(lvl, template, args...)
+	}
+
 }
 
-func InfoF(ctx context.Context, template string, args ...interface{}) {
-	_log(ctx, zapcore.InfoLevel, template, args...)
+func InfoF(template string, args ...interface{}) {
+	_log(zapcore.InfoLevel, template, args...)
 }
 
-func Info(ctx context.Context, args ...interface{}) {
-	_log(ctx, zapcore.InfoLevel, "%s", args...)
+func Info(args ...interface{}) {
+	_log(zapcore.InfoLevel, "%s", args...)
 }
 
-func DebugF(ctx context.Context, template string, args ...interface{}) {
-	_log(ctx, zapcore.DebugLevel, template, args...)
+func DebugF(template string, args ...interface{}) {
+	_log(zapcore.DebugLevel, template, args...)
 }
 
-func Debug(ctx context.Context, args ...interface{}) {
-	_log(ctx, zapcore.DebugLevel, "", args...)
+func Debug(args ...interface{}) {
+	_log(zapcore.DebugLevel, "", args...)
 }
 
-func ErrorF(ctx context.Context, template string, args ...interface{}) {
-	_log(ctx, zapcore.ErrorLevel, template, args...)
+func ErrorF(template string, args ...interface{}) {
+	_log(zapcore.ErrorLevel, template, args...)
 }
 
-func Error(ctx context.Context, args ...interface{}) {
-	_log(ctx, zapcore.ErrorLevel, "", args...)
+func Error(args ...interface{}) {
+	_log(zapcore.ErrorLevel, "", args...)
 }
 
-func WarnF(ctx context.Context, template string, args ...interface{}) {
-	_log(ctx, zapcore.ErrorLevel, template, args...)
+func WarnF(template string, args ...interface{}) {
+	_log(zapcore.ErrorLevel, template, args...)
 }
 
-func Warn(ctx context.Context, args ...interface{}) {
-	_log(ctx, zapcore.ErrorLevel, "", args...)
+func Warn(args ...interface{}) {
+	_log(zapcore.ErrorLevel, "", args...)
 }
 
-func FatalF(ctx context.Context, template string, args ...interface{}) {
-	_log(ctx, zapcore.FatalLevel, template, args...)
+func FatalF(template string, args ...interface{}) {
+	_log(zapcore.FatalLevel, template, args...)
 }
 
-func Fatal(ctx context.Context, args ...interface{}) {
-	_log(ctx, zapcore.FatalLevel, "", args...)
+func Fatal(args ...interface{}) {
+	_log(zapcore.FatalLevel, "", args...)
+}
+
+type LoggerAdapter struct {
+}
+
+func (l LoggerAdapter) Debugf(format string, args ...any) {
+	DebugF(format, args...)
+}
+
+func (l LoggerAdapter) Infof(format string, args ...any) {
+	InfoF(format, args...)
+}
+
+func (l LoggerAdapter) Warnf(format string, args ...any) {
+	WarnF(format, args...)
+}
+
+func (l LoggerAdapter) Errorf(format string, args ...any) {
+	ErrorF(format, args...)
+}
+
+func (l LoggerAdapter) Fatalf(format string, args ...any) {
+	FatalF(format, args...)
 }
