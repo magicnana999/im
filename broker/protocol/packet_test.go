@@ -10,7 +10,7 @@ import (
 func Test(t *testing.T) {
 
 	text := TextBody{
-		Content: "Hello",
+		Text: "Hello",
 	}
 
 	message := MessageBody{
@@ -26,7 +26,7 @@ func Test(t *testing.T) {
 	}
 
 	packet := &Packet{
-		ID:      util.GenerateXId(),
+		Id:      util.GenerateXId(),
 		AppId:   "STARTSPACE",
 		UserId:  "sdifejrjersdf",
 		Flow:    FlowRequest,
