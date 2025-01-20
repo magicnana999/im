@@ -3,6 +3,7 @@ package core
 import (
 	"context"
 	"fmt"
+	"github.com/magicnana999/im/broker/brokerstate"
 	"github.com/magicnana999/im/logger"
 	"github.com/panjf2000/gnet/v2"
 	"github.com/panjf2000/gnet/v2/pkg/logging"
@@ -26,17 +27,20 @@ type BrokerServer struct {
 	disconnected int32
 	clientActive int32
 	workerPool   *goPool.Pool
-
-	ctx context.Context
+	ctx          context.Context
+	tickDuration time.Duration
 }
 
-func Start() {
+func Start(ctx context.Context, option Option) {
 	ts := &BrokerServer{
-		multicore:  true,
-		async:      true,
-		writev:     true,
-		nclients:   2,
-		workerPool: goPool.Default(),
+		multicore:    true,
+		async:        true,
+		writev:       true,
+		nclients:     2,
+		workerPool:   goPool.Default(),
+		ctx:          ctx,
+		tickDuration: option.TickDuration,
+		addr:         option.Addr,
 	}
 	err := gnet.Run(ts, "tcp://0.0.0.0:7539",
 		gnet.WithMulticore(true),
@@ -69,6 +73,11 @@ func (s *BrokerServer) OnBoot(eng gnet.Engine) (action gnet.Action) {
 
 	logger.InfoF("broker started & listen %d", routine.Goid(), fd)
 
+	broker := &brokerstate.BrokerInfo{
+		Addr:    s.addr,
+		StartAt: time.Now().UnixMilli(),
+	}
+	brokerstate.SetBroker(s.ctx, broker)
 	return gnet.None
 }
 
@@ -160,5 +169,10 @@ func (s *BrokerServer) OnTraffic(c gnet.Conn) (action gnet.Action) {
 
 func (s *BrokerServer) OnTick() (delay time.Duration, action gnet.Action) {
 	logger.Info("tick")
-	return time.Second * 10, gnet.None
+	broker := &brokerstate.BrokerInfo{
+		Addr:    s.addr,
+		StartAt: time.Now().UnixMilli(),
+	}
+	brokerstate.RefreshBroker(s.ctx, broker)
+	return s.tickDuration, gnet.None
 }

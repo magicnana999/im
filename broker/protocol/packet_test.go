@@ -9,7 +9,7 @@ import (
 
 func Test(t *testing.T) {
 
-	text := TextBody{
+	text := TextContent{
 		Text: "Hello",
 	}
 

@@ -38,22 +38,22 @@ type Refer struct {
 	Content any    `json:"body"`
 }
 
-type TextBody struct {
+type TextContent struct {
 	Text string `json:"text"`
 }
 
-type ImageBody struct {
+type ImageContent struct {
 	Url    string `json:"url"`
 	Width  int32  `json:"width"`
 	Height int32  `json:"height"`
 }
 
-type AudioBody struct {
+type AudioContent struct {
 	Url    string `json:"url"`
 	Length int32  `json:"length"`
 }
 
-type VideoBody struct {
+type VideoContent struct {
 	Url    string `json:"url"`
 	Cover  string `json:"cover"`
 	Length int32  `json:"length"`

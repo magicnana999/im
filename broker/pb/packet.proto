@@ -77,22 +77,22 @@ message Refer {
   google.protobuf.Any content = 5;  // For any type body
 }
 
-message TextBody {
+message TextContent {
   string text = 1;
 }
 
-message ImageBody {
+message ImageContent {
   string url = 1;
   int32 width = 2;
   int32 height = 3;
 }
 
-message AudioBody {
+message AudioContent {
   string url = 1;
   int32 length = 2;
 }
 
-message VideoBody {
+message VideoContent {
   string url = 1;
   string cover = 2;
   int32 length = 3;

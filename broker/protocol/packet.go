@@ -8,10 +8,10 @@ const (
 
 // Type
 const (
-	TypeMessage int32 = iota + 1
+	TypeCommand int32 = iota + 1
+	TypeMessage
 	TypeNotice
 	TypeTips
-	TypeAPI
 )
 
 // NeedAck

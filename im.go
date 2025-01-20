@@ -1,20 +1,17 @@
 package main
 
 import (
-	"github.com/magicnana999/im/logger"
-	"github.com/panjf2000/gnet/v2"
-	"github.com/timandy/routine"
+	"context"
+	"github.com/magicnana999/im/broker/core"
+	"time"
 )
 
 func main() {
-
-	gnet.NewClient()
-	server := &gnet.Server{
-		// 设置自定义的Codec
-		Codec: &MyCodec{},
+	ctx := context.Background()
+	option := core.Option{
+		Addr:         "localhost:8080",
+		TickDuration: time.Second * 30,
 	}
-
-	logger.InfoF("Start im broker %d", routine.Goid())
-	server.Start()
+	core.Start(ctx, option)
 
 }

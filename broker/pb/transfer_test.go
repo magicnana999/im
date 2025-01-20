@@ -15,7 +15,7 @@ func TestAll(t *testing.T) {
 		Type:  protocol.TypeMessage,
 		Body: protocol.MessageBody{
 			MType: protocol.MText,
-			Content: protocol.TextBody{
+			Content: protocol.TextContent{
 				Text: "hello world",
 			},
 			At: []*protocol.At{{
@@ -24,7 +24,7 @@ func TestAll(t *testing.T) {
 			Refer: []*protocol.Refer{{
 				UserId: "231",
 				MType:  protocol.MText,
-				Content: protocol.TextBody{
+				Content: protocol.TextContent{
 					Text: "你好世界",
 				},
 			}},
