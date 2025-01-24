@@ -4,7 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/magicnana999/im/logger"
 	"github.com/magicnana999/im/redis"
+	"github.com/timandy/routine"
 	"time"
 )
 
@@ -26,6 +28,9 @@ func SetBroker(ctx context.Context, broker *BrokerInfo) (string, error) {
 
 	key := fmt.Sprintf("%s%s", KeyBrokerInfo, broker.Addr)
 	ret := redis.RDS.Set(ctx, key, json, ExpireBrokerInfo)
+
+	logger.InfoF("[%d] Set broker info ok %v", routine.Goid(), ret)
+
 	return ret.Val(), ret.Err()
 }
 

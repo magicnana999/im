@@ -238,3 +238,581 @@
 2025-01-20T21:21:25.400+0800 INFO tick
 2025-01-20T21:21:55.411+0800 INFO tick
 2025-01-20T21:22:25.425+0800 INFO tick
+2025-01-21T01:26:16.758+0800 INFO The name of broker instance: %s%!(EXTRA string=172.20.10.2:7539)
+2025-01-21T01:29:12.653+0800 INFO The name of broker instance: %s%!(EXTRA string=172.20.10.2:7539)
+2025-01-21T01:30:43.731+0800 INFO The name of broker instance: 172.20.10.2:7539
+2025-01-21T04:14:35.986+0800 FATAL ab8d74cae82bcdd90323a5a22fc2e2bb 340ab6801408222f Failed to get local IP address: no ip address found
+2025-01-21T04:16:12.656+0800 FATAL 3d3a3e13d645abb894bf41f29ed95af8 178317b6cf04d49b Failed to get local IP address: no ip address found
+2025-01-21T04:18:09.009+0800 FATAL Failed to get local IP address: no ip address found
+2025-01-21T04:19:55.038+0800 INFO ee2a74f134d3becbe126cc913d8a8500 0489069be6d746c6 Start broker instance: &{172.20.10.2:7539 30s}
+2025-01-21T04:20:17.812+0800 DEBUG ee2a74f134d3becbe126cc913d8a8500 0489069be6d746c6 default logging level is INFO
+2025-01-21T04:22:38.918+0800 INFO fe9a77db5851cbc600b2f83071296ebf 74554d3b5696cc4b Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-21T04:25:02.746+0800 INFO 51068d1e6f3d420c46b7083672e3408a 4f479251c038e73f Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-21T04:25:25.398+0800 DEBUG 51068d1e6f3d420c46b7083672e3408a 4f479251c038e73f default logging level is INFO
+2025-01-21T04:25:25.398+0800 INFO 51068d1e6f3d420c46b7083672e3408a 4f479251c038e73f Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-21T04:25:25.398+0800 INFO 51068d1e6f3d420c46b7083672e3408a 4f479251c038e73f broker started & listen 1%!(EXTRA int=7)
+2025-01-21T04:25:25.506+0800 INFO tick
+2025-01-21T04:25:55.527+0800 INFO tick
+2025-01-21T04:26:22.068+0800 INFO Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-21T04:26:22.948+0800 DEBUG default logging level is INFO
+2025-01-21T04:26:22.948+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-21T04:26:22.948+0800 INFO broker started & listen 1%!(EXTRA int=7)
+2025-01-21T04:26:23.076+0800 INFO tick
+2025-01-21T04:26:53.099+0800 INFO tick
+2025-01-21T04:27:23.146+0800 INFO tick
+2025-01-21T04:27:53.214+0800 INFO tick
+2025-01-21T04:28:23.293+0800 INFO tick
+2025-01-21T04:28:53.373+0800 INFO tick
+2025-01-21T04:29:23.454+0800 INFO tick
+2025-01-21T04:29:39.470+0800 INFO Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-21T04:30:11.593+0800 DEBUG default logging level is INFO
+2025-01-21T04:30:30.143+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-21T04:32:16.101+0800 INFO broker started & listen 1%!(EXTRA int=7)
+2025-01-21T04:32:24.115+0800 INFO tick
+2025-01-21T10:20:26.850+0800 INFO Start broker instance: {"Name":"172.16.0.47:7539","Interval":30000000000}
+2025-01-21T10:20:41.751+0800 DEBUG default logging level is INFO
+2025-01-21T10:20:41.753+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-21T10:20:41.753+0800 INFO broker started & listen 1%!(EXTRA int=7)
+2025-01-21T10:20:41.834+0800 INFO tick
+2025-01-21T10:21:32.187+0800 INFO Start broker instance: {"Name":"172.16.0.47:7539","Interval":30000000000}
+2025-01-21T10:21:32.187+0800 DEBUG default logging level is INFO
+2025-01-21T10:21:32.188+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-21T10:21:32.188+0800 INFO broker started & listen 7
+2025-01-21T10:21:32.219+0800 INFO tick
+2025-01-21T10:22:02.229+0800 INFO tick
+2025-01-21T10:22:32.431+0800 INFO tick
+2025-01-21T10:23:02.418+0800 INFO tick
+2025-01-21T10:23:32.413+0800 INFO tick
+2025-01-21T10:23:59.669+0800 INFO Start broker instance: {"Name":"172.16.0.47:7539","Interval":30000000000}
+2025-01-21T10:23:59.670+0800 DEBUG default logging level is INFO
+2025-01-21T10:23:59.670+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-21T10:23:59.670+0800 INFO 1 Broker instance started
+2025-01-21T10:23:59.711+0800 INFO tick
+2025-01-21T10:24:29.722+0800 INFO tick
+2025-01-21T10:26:00.719+0800 INFO Start broker instance: {"Name":"172.16.0.47:7539","Interval":30000000000}
+2025-01-21T10:26:01.281+0800 INFO 1 current goroutines
+2025-01-21T10:26:36.883+0800 DEBUG default logging level is INFO
+2025-01-21T10:26:49.628+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-21T10:28:21.671+0800 INFO 1 Broker instance started
+2025-01-21T10:28:44.529+0800 INFO tick
+2025-01-21T10:43:10.689+0800 INFO Start broker instance: {"Name":"172.16.0.47:7539","Interval":30000000000}
+2025-01-21T10:43:11.703+0800 INFO 1 current goroutines
+2025-01-21T10:43:32.802+0800 DEBUG default logging level is INFO
+2025-01-21T10:44:09.456+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-21T10:44:16.280+0800 INFO 1 Broker instance started
+2025-01-21T10:44:36.995+0800 INFO tick
+2025-01-21T10:44:45.156+0800 INFO Start broker instance: {"Name":"172.16.0.47:7539","Interval":30000000000}
+2025-01-21T10:44:46.107+0800 INFO 1 current goroutines
+2025-01-21T10:49:31.236+0800 DEBUG default logging level is INFO
+2025-01-21T10:49:38.265+0800 INFO Start broker instance: {"Name":"172.16.0.47:7539","Interval":30000000000}
+2025-01-21T10:49:38.477+0800 INFO 1 current goroutines
+2025-01-21T10:53:37.101+0800 DEBUG default logging level is INFO
+2025-01-21T10:56:57.731+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-21T10:57:21.099+0800 INFO 1 Broker instance started
+2025-01-21T20:34:59.991+0800 INFO Start broker instance: {"Name":"172.16.0.47:7539","Interval":30000000000}
+2025-01-21T20:35:00.755+0800 INFO 1 current goroutines
+2025-01-21T20:35:41.662+0800 DEBUG default logging level is INFO
+2025-01-23T21:38:23.207+0800 INFO Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-23T21:38:23.209+0800 INFO 1 current goroutines
+2025-01-23T21:38:33.711+0800 DEBUG default logging level is INFO
+2025-01-23T21:39:29.014+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-23T21:39:42.393+0800 INFO 1 Broker instance started
+2025-01-23T21:43:04.497+0800 INFO tick
+2025-01-23T21:43:37.177+0800 INFO tick
+2025-01-23T21:44:09.242+0800 INFO tick
+2025-01-23T21:45:17.251+0800 INFO tick
+2025-01-23T21:45:47.132+0800 INFO new connect ok 49
+2025-01-23T21:47:01.899+0800 INFO tick
+2025-01-24T00:49:09.503+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T00:49:09.504+0800 DEBUG default logging level is INFO
+2025-01-24T00:49:09.504+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-24T00:49:09.504+0800 INFO [1] Broker instance started
+2025-01-24T00:49:09.779+0800 INFO [1] Set broker info ok set im:broker:172.20.10.2:7539 {"addr":"172.20.10.2:7539","startAt":1737650949504} ex 60: OK
+2025-01-24T00:49:09.781+0800 INFO tick
+2025-01-24T00:49:39.808+0800 INFO tick
+2025-01-24T00:50:03.767+0800 INFO [%!s(int64=57)] Open connect
+2025-01-24T00:50:09.828+0800 INFO tick
+2025-01-24T00:50:39.853+0800 INFO tick
+2025-01-24T00:50:52.461+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T00:50:52.462+0800 DEBUG default logging level is INFO
+2025-01-24T00:50:52.462+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T00:50:56.945+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T00:50:56.945+0800 DEBUG default logging level is INFO
+2025-01-24T00:50:56.945+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T00:50:58.578+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T00:50:58.578+0800 DEBUG default logging level is INFO
+2025-01-24T00:50:58.579+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T00:51:00.832+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T00:51:00.832+0800 DEBUG default logging level is INFO
+2025-01-24T00:51:00.832+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T00:51:02.634+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T00:51:02.634+0800 DEBUG default logging level is INFO
+2025-01-24T00:51:02.634+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T00:51:03.836+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T00:51:03.836+0800 DEBUG default logging level is INFO
+2025-01-24T00:51:03.836+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T00:51:05.284+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T00:51:05.284+0800 DEBUG default logging level is INFO
+2025-01-24T00:51:05.285+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T00:51:06.499+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T00:51:06.499+0800 DEBUG default logging level is INFO
+2025-01-24T00:51:06.499+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T00:51:07.739+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T00:51:07.739+0800 DEBUG default logging level is INFO
+2025-01-24T00:51:07.740+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T00:51:09.235+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T00:51:09.235+0800 DEBUG default logging level is INFO
+2025-01-24T00:51:09.236+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T00:51:10.327+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T00:51:10.327+0800 DEBUG default logging level is INFO
+2025-01-24T00:51:10.327+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T00:51:11.835+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T00:51:11.835+0800 DEBUG default logging level is INFO
+2025-01-24T00:51:11.835+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T00:51:15.264+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T00:51:15.265+0800 DEBUG default logging level is INFO
+2025-01-24T00:51:15.265+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T00:51:17.471+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T00:51:17.471+0800 DEBUG default logging level is INFO
+2025-01-24T00:51:17.471+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T00:51:19.624+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T00:51:19.624+0800 DEBUG default logging level is INFO
+2025-01-24T00:51:19.625+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T00:51:21.305+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T00:51:21.305+0800 DEBUG default logging level is INFO
+2025-01-24T00:51:21.305+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-24T00:51:21.305+0800 INFO [1] Broker instance started
+2025-01-24T00:51:22.448+0800 INFO [1] Set broker info ok set im:broker:172.20.10.2:7539 {"addr":"172.20.10.2:7539","startAt":1737651081305} ex 60: OK
+2025-01-24T00:51:22.449+0800 INFO tick
+2025-01-24T00:51:27.849+0800 INFO [33] Open connect
+2025-01-24T00:51:32.595+0800 INFO [33] Traffic connect
+2025-01-24T00:51:32.595+0800 INFO read ok 33 5 5
+2025-01-24T00:51:32.595+0800 INFO 33,inbound:0 outbound:0 discard:0
+2025-01-24T00:51:32.596+0800 DEBUG conn=127.0.0.1:62883 done writev: <nil>
+2025-01-24T00:51:52.470+0800 INFO tick
+2025-01-24T00:52:23.328+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T00:52:23.329+0800 DEBUG default logging level is INFO
+2025-01-24T00:52:23.329+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T00:52:27.323+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T00:52:27.323+0800 DEBUG default logging level is INFO
+2025-01-24T00:52:27.323+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-24T00:52:27.323+0800 INFO [1] Broker instance started
+2025-01-24T00:52:27.441+0800 INFO [1] Set broker info ok set im:broker:172.20.10.2:7539 {"addr":"172.20.10.2:7539","startAt":1737651147323} ex 60: OK
+2025-01-24T00:52:27.441+0800 INFO [28] tick
+2025-01-24T00:52:40.847+0800 INFO [26] Open connect
+2025-01-24T00:52:47.060+0800 INFO [26] Traffic connect
+2025-01-24T00:52:47.061+0800 INFO read ok 26 5 5
+2025-01-24T00:52:47.061+0800 INFO 26,inbound:0 outbound:0 discard:0
+2025-01-24T00:52:47.061+0800 DEBUG conn=127.0.0.1:62918 done writev: <nil>
+2025-01-24T00:52:57.470+0800 INFO [28] tick
+2025-01-24T00:53:27.510+0800 INFO [28] tick
+2025-01-24T00:53:57.536+0800 INFO [28] tick
+2025-01-24T16:12:59.725+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T16:13:22.508+0800 DEBUG default logging level is INFO
+2025-01-24T16:13:33.410+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-24T16:14:46.669+0800 INFO [1] Broker instance started
+2025-01-24T16:14:47.423+0800 INFO [1] Set broker info ok set im:broker:172.20.10.2:7539 {"addr":"172.20.10.2:7539","startAt":1737706486670} ex 60: OK
+2025-01-24T16:19:50.783+0800 INFO [19] tick
+2025-01-24T16:20:24.482+0800 INFO [19] tick
+2025-01-24T16:20:54.547+0800 INFO [19] tick
+2025-01-24T16:21:24.601+0800 INFO [19] tick
+2025-01-24T16:23:13.232+0800 INFO [19] tick
+2025-01-24T16:24:45.807+0800 INFO [19] tick
+2025-01-24T16:25:15.497+0800 INFO [33] Open connect
+2025-01-24T16:26:21.262+0800 INFO [19] tick
+2025-01-24T16:26:47.385+0800 INFO [33] Traffic connect
+2025-01-24T16:26:47.386+0800 INFO read ok 33 6 6
+2025-01-24T16:26:47.386+0800 INFO 33,inbound:0 outbound:0 discard:0
+2025-01-24T16:27:12.854+0800 DEBUG conn=127.0.0.1:51800 done writev: <nil>
+2025-01-24T16:27:39.329+0800 INFO [19] tick
+2025-01-24T16:33:02.682+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T16:33:02.683+0800 DEBUG default logging level is INFO
+2025-01-24T16:33:02.683+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-24T16:33:02.683+0800 INFO [1] Broker instance started
+2025-01-24T16:33:02.787+0800 INFO [1] Set broker info ok set im:broker:172.20.10.2:7539 {"addr":"172.20.10.2:7539","startAt":1737707582683} ex 60: OK
+2025-01-24T16:35:01.869+0800 INFO [4] tick
+2025-01-24T16:35:38.054+0800 INFO [4] tick
+2025-01-24T16:38:02.593+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T16:38:02.593+0800 DEBUG default logging level is INFO
+2025-01-24T16:38:02.593+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T16:38:09.598+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T16:38:09.598+0800 DEBUG default logging level is INFO
+2025-01-24T16:38:09.598+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T16:38:11.871+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T16:38:11.871+0800 DEBUG default logging level is INFO
+2025-01-24T16:38:11.871+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T16:38:13.679+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T16:38:13.679+0800 DEBUG default logging level is INFO
+2025-01-24T16:38:13.679+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T16:38:16.013+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T16:38:16.013+0800 DEBUG default logging level is INFO
+2025-01-24T16:38:16.013+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T16:38:17.489+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T16:38:17.489+0800 DEBUG default logging level is INFO
+2025-01-24T16:38:17.489+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T16:38:18.911+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T16:38:18.911+0800 DEBUG default logging level is INFO
+2025-01-24T16:38:18.911+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T16:38:20.395+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T16:38:20.395+0800 DEBUG default logging level is INFO
+2025-01-24T16:38:20.396+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T16:38:22.621+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T16:38:22.621+0800 DEBUG default logging level is INFO
+2025-01-24T16:38:22.622+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T16:38:24.751+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T16:38:24.751+0800 DEBUG default logging level is INFO
+2025-01-24T16:38:24.751+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-24T16:38:24.751+0800 INFO [1] Broker instance started
+2025-01-24T16:38:24.864+0800 INFO [1] Set broker info ok set im:broker:172.20.10.2:7539 {"addr":"172.20.10.2:7539","startAt":1737707904751} ex 60: OK
+2025-01-24T16:45:42.575+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T16:45:42.576+0800 DEBUG default logging level is INFO
+2025-01-24T16:45:42.576+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-24T16:45:42.576+0800 INFO [1] Broker instance started
+2025-01-24T16:45:42.745+0800 INFO [1] Set broker info ok set im:broker:172.20.10.2:7539 {"addr":"172.20.10.2:7539","startAt":1737708342576} ex 60: OK
+2025-01-24T16:46:11.252+0800 INFO [67] tick
+2025-01-24T16:49:40.519+0800 INFO [67] tick
+2025-01-24T16:50:10.572+0800 INFO [67] tick
+2025-01-24T16:50:40.638+0800 INFO [67] tick
+2025-01-24T16:51:10.683+0800 INFO [67] tick
+2025-01-24T16:52:32.420+0800 INFO [67] tick
+2025-01-24T16:54:19.353+0800 INFO [67] tick
+2025-01-24T16:56:44.670+0800 INFO [65] Open connect
+2025-01-24T16:58:07.794+0800 INFO [67] tick
+2025-01-24T16:58:27.388+0800 DEBUG error occurred on closed, read: operation timed out
+
+2025-01-24T16:58:27.392+0800 INFO [65] Cloud connect
+2025-01-24T19:57:34.302+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T19:57:34.302+0800 DEBUG default logging level is INFO
+2025-01-24T19:57:34.302+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-24T19:57:34.302+0800 INFO [1] Broker instance started
+2025-01-24T19:57:34.457+0800 INFO [1] Set broker info ok set im:broker:172.20.10.2:7539 {"addr":"172.20.10.2:7539","startAt":1737719854302} ex 60: OK
+2025-01-24T19:58:27.438+0800 INFO [29] tick
+2025-01-24T19:59:04.427+0800 INFO [29] tick
+2025-01-24T19:59:34.486+0800 INFO [29] tick
+2025-01-24T20:03:42.708+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T20:03:42.709+0800 DEBUG default logging level is INFO
+2025-01-24T20:03:42.709+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-24T20:03:42.709+0800 INFO [1] Broker instance started
+2025-01-24T20:03:42.798+0800 INFO [1] Set broker info ok set im:broker:172.20.10.2:7539 {"addr":"172.20.10.2:7539","startAt":1737720222709} ex 60: OK
+2025-01-24T20:05:26.808+0800 INFO [66] tick
+2025-01-24T20:06:08.737+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T20:06:08.737+0800 DEBUG default logging level is INFO
+2025-01-24T20:06:08.737+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-24T20:06:08.737+0800 INFO [1] Broker instance started
+2025-01-24T20:06:08.843+0800 INFO [1] Set broker info ok set im:broker:172.20.10.2:7539 {"addr":"172.20.10.2:7539","startAt":1737720368737} ex 60: OK
+2025-01-24T20:08:36.886+0800 INFO [19] tick
+2025-01-24T20:13:20.206+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T20:13:20.207+0800 DEBUG default logging level is INFO
+2025-01-24T20:13:20.207+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T20:13:23.537+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T20:13:23.537+0800 DEBUG default logging level is INFO
+2025-01-24T20:13:23.537+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-24T20:13:23.538+0800 INFO [1] Broker instance started
+2025-01-24T20:13:23.687+0800 INFO [1] Set broker info ok set im:broker:172.20.10.2:7539 {"addr":"172.20.10.2:7539","startAt":1737720803538} ex 60: OK
+2025-01-24T20:14:26.663+0800 INFO [19] tick
+2025-01-24T20:15:27.382+0800 INFO [19] tick
+2025-01-24T20:15:57.648+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T20:15:57.648+0800 DEBUG default logging level is INFO
+2025-01-24T20:15:57.648+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-24T20:15:57.648+0800 INFO [1] Broker instance started
+2025-01-24T20:15:59.118+0800 INFO [1] Set broker info ok set im:broker:172.20.10.2:7539 {"addr":"172.20.10.2:7539","startAt":1737720957648} ex 60: OK
+2025-01-24T20:18:17.386+0800 INFO [20] tick
+2025-01-24T20:18:51.611+0800 INFO [20] tick
+2025-01-24T20:19:21.637+0800 INFO [20] tick
+2025-01-24T20:19:51.747+0800 INFO [20] tick
+2025-01-24T20:20:21.811+0800 INFO [20] tick
+2025-01-24T20:21:29.211+0800 INFO [20] tick
+2025-01-24T20:27:22.988+0800 INFO [18] Open connect
+2025-01-24T20:27:23.441+0800 DEBUG error occurred on closed, read: operation timed out
+
+2025-01-24T20:27:23.441+0800 INFO [18] Cloud connect
+2025-01-24T20:27:23.582+0800 ERROR received event[fd=9|ev=-2|flags=32801] of a stale connection from event-loop(0)
+2025-01-24T20:27:52.865+0800 INFO [20] tick
+2025-01-24T20:28:14.795+0800 INFO [18] Open connect
+2025-01-24T20:28:18.718+0800 INFO [18] Traffic connect
+2025-01-24T20:28:18.718+0800 INFO read ok 18 5 5
+2025-01-24T20:28:18.718+0800 INFO 18,inbound:0 outbound:0 discard:0
+2025-01-24T20:28:19.010+0800 DEBUG conn=127.0.0.1:58829 done writev: <nil>
+2025-01-24T20:28:56.494+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T20:28:56.495+0800 DEBUG default logging level is INFO
+2025-01-24T20:28:56.495+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T20:28:59.943+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T20:28:59.943+0800 DEBUG default logging level is INFO
+2025-01-24T20:28:59.943+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T20:29:01.865+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T20:29:01.865+0800 DEBUG default logging level is INFO
+2025-01-24T20:29:01.865+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T20:29:03.053+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T20:29:03.053+0800 DEBUG default logging level is INFO
+2025-01-24T20:29:03.053+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T20:29:04.305+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T20:29:04.305+0800 DEBUG default logging level is INFO
+2025-01-24T20:29:04.305+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T20:29:05.617+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T20:29:05.617+0800 DEBUG default logging level is INFO
+2025-01-24T20:29:05.617+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T20:29:06.904+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T20:29:06.904+0800 DEBUG default logging level is INFO
+2025-01-24T20:29:06.904+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T20:29:08.276+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T20:29:08.276+0800 DEBUG default logging level is INFO
+2025-01-24T20:29:08.276+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T20:29:09.485+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T20:29:09.486+0800 DEBUG default logging level is INFO
+2025-01-24T20:29:09.486+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T20:29:10.624+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T20:29:10.624+0800 DEBUG default logging level is INFO
+2025-01-24T20:29:10.624+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T20:29:11.782+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T20:29:11.782+0800 DEBUG default logging level is INFO
+2025-01-24T20:29:11.782+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T20:29:12.990+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T20:29:12.990+0800 DEBUG default logging level is INFO
+2025-01-24T20:29:12.990+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-24T20:29:12.990+0800 INFO [1] Broker instance started
+2025-01-24T20:29:13.132+0800 INFO [1] Set broker info ok set im:broker:172.20.10.2:7539 {"addr":"172.20.10.2:7539","startAt":1737721752990} ex 60: OK
+2025-01-24T20:29:13.132+0800 INFO [19] tick
+2025-01-24T20:29:19.723+0800 INFO [17] Open connect
+2025-01-24T20:31:03.888+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T20:31:03.888+0800 DEBUG default logging level is INFO
+2025-01-24T20:31:03.888+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T20:31:11.730+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T20:31:11.730+0800 DEBUG default logging level is INFO
+2025-01-24T20:31:11.730+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T20:31:13.662+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T20:31:13.662+0800 DEBUG default logging level is INFO
+2025-01-24T20:31:13.662+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T20:31:15.270+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T20:31:15.271+0800 DEBUG default logging level is INFO
+2025-01-24T20:31:15.271+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T20:31:16.614+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T20:31:16.614+0800 DEBUG default logging level is INFO
+2025-01-24T20:31:16.614+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T20:45:53.162+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T20:45:53.162+0800 DEBUG default logging level is INFO
+2025-01-24T20:45:53.162+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-24T20:45:53.162+0800 INFO [1] Broker instance started
+2025-01-24T20:45:53.333+0800 INFO [1] Set broker info ok set im:broker:172.20.10.2:7539 {"addr":"172.20.10.2:7539","startAt":1737722753162} ex 60: OK
+2025-01-24T20:45:53.333+0800 INFO [21] tick
+2025-01-24T20:46:16.023+0800 INFO [19] Open connect
+2025-01-24T20:46:43.371+0800 INFO [21] tick
+2025-01-24T20:46:45.605+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T20:46:45.605+0800 DEBUG default logging level is INFO
+2025-01-24T20:46:45.605+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T20:46:49.235+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T20:46:49.235+0800 DEBUG default logging level is INFO
+2025-01-24T20:46:49.235+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T20:46:51.357+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T20:46:51.357+0800 DEBUG default logging level is INFO
+2025-01-24T20:46:51.358+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T20:46:52.920+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T20:46:52.920+0800 DEBUG default logging level is INFO
+2025-01-24T20:46:52.920+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T20:46:54.922+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T20:46:54.922+0800 DEBUG default logging level is INFO
+2025-01-24T20:46:54.922+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T20:46:56.344+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T20:46:56.344+0800 DEBUG default logging level is INFO
+2025-01-24T20:46:56.344+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T20:46:57.544+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T20:46:57.544+0800 DEBUG default logging level is INFO
+2025-01-24T20:46:57.544+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T20:46:58.859+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T20:46:58.859+0800 DEBUG default logging level is INFO
+2025-01-24T20:46:58.859+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T20:47:00.080+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T20:47:00.080+0800 DEBUG default logging level is INFO
+2025-01-24T20:47:00.080+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T20:47:01.209+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T20:47:01.209+0800 DEBUG default logging level is INFO
+2025-01-24T20:47:01.209+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T20:47:02.470+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T20:47:02.471+0800 DEBUG default logging level is INFO
+2025-01-24T20:47:02.471+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T20:47:03.633+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T20:47:03.634+0800 DEBUG default logging level is INFO
+2025-01-24T20:47:03.634+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T20:47:04.915+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T20:47:04.915+0800 DEBUG default logging level is INFO
+2025-01-24T20:47:04.915+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T20:47:06.221+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T20:47:06.221+0800 DEBUG default logging level is INFO
+2025-01-24T20:47:06.222+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T20:47:07.811+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T20:47:07.811+0800 DEBUG default logging level is INFO
+2025-01-24T20:47:07.811+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T20:47:08.993+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T20:47:08.993+0800 DEBUG default logging level is INFO
+2025-01-24T20:47:08.993+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T20:47:10.274+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T20:47:10.275+0800 DEBUG default logging level is INFO
+2025-01-24T20:47:10.275+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T20:47:11.841+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T20:47:11.841+0800 DEBUG default logging level is INFO
+2025-01-24T20:47:11.841+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T20:47:13.192+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T20:47:13.192+0800 DEBUG default logging level is INFO
+2025-01-24T20:47:13.192+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T20:47:14.496+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T20:47:14.496+0800 DEBUG default logging level is INFO
+2025-01-24T20:47:14.496+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-24T20:47:14.496+0800 INFO [1] Broker instance started
+2025-01-24T20:47:14.671+0800 INFO [1] Set broker info ok set im:broker:172.20.10.2:7539 {"addr":"172.20.10.2:7539","startAt":1737722834496} ex 60: OK
+2025-01-24T20:47:14.671+0800 INFO [19] tick
+2025-01-24T20:48:05.730+0800 INFO [19] tick
+2025-01-24T20:48:05.731+0800 INFO [17] Open connect
+2025-01-24T21:05:51.867+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T21:05:51.867+0800 DEBUG default logging level is INFO
+2025-01-24T21:05:51.867+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-24T21:05:51.868+0800 INFO [1] Broker instance started
+2025-01-24T21:05:52.011+0800 INFO [1] Set broker info ok set im:broker:172.20.10.2:7539 {"addr":"172.20.10.2:7539","startAt":1737723951868} ex 60: OK
+2025-01-24T21:05:52.012+0800 INFO [35] tick
+2025-01-24T21:06:17.495+0800 INFO [33] Open connect
+2025-01-24T21:15:06.948+0800 INFO [35] tick
+2025-01-24T21:15:47.366+0800 INFO [35] tick
+2025-01-24T21:16:10.438+0800 INFO [33] Traffic connect
+2025-01-24T21:16:13.306+0800 INFO read ok 33 4 4
+2025-01-24T21:16:13.306+0800 INFO 33,inbound:0 outbound:0 discard:0
+2025-01-24T21:49:52.115+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T21:49:52.116+0800 DEBUG default logging level is INFO
+2025-01-24T21:49:52.116+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-24T21:49:52.116+0800 INFO [1] Broker instance started
+2025-01-24T21:49:52.241+0800 INFO [1] Set broker info ok set im:broker:172.20.10.2:7539 {"addr":"172.20.10.2:7539","startAt":1737726592116} ex 60: OK
+2025-01-24T21:49:52.241+0800 INFO [33] tick
+2025-01-24T21:52:04.890+0800 INFO [33] tick
+2025-01-24T21:52:06.068+0800 INFO [15] Open connect
+2025-01-24T21:54:10.804+0800 DEBUG error occurred on closed, read: operation timed out
+
+2025-01-24T21:54:10.805+0800 INFO [15] Cloud connect
+2025-01-24T21:54:17.910+0800 INFO [15] Open connect
+2025-01-24T21:54:53.949+0800 INFO [33] tick
+2025-01-24T21:54:59.444+0800 INFO [15] Traffic connect
+2025-01-24T21:54:59.446+0800 INFO read ok 15 5 5
+2025-01-24T21:54:59.446+0800 INFO 15,inbound:0 outbound:0 discard:0
+2025-01-24T21:54:59.446+0800 DEBUG conn=127.0.0.1:61157 done writev: <nil>
+2025-01-24T21:55:30.872+0800 INFO [33] tick
+2025-01-24T21:56:47.291+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T21:56:47.292+0800 DEBUG default logging level is INFO
+2025-01-24T21:56:47.292+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-24T21:56:47.292+0800 INFO [1] Broker instance started
+2025-01-24T21:56:47.475+0800 INFO [1] Set broker info ok set im:broker:172.20.10.2:7539 {"addr":"172.20.10.2:7539","startAt":1737727007292} ex 60: OK
+2025-01-24T21:56:47.476+0800 INFO [59] tick
+2025-01-24T21:56:51.121+0800 INFO [57] Open connect
+2025-01-24T21:56:54.068+0800 INFO [57] Traffic connect
+2025-01-24T21:57:38.047+0800 INFO [59] tick
+2025-01-24T21:57:38.047+0800 INFO read ok 57 5 5
+2025-01-24T21:58:18.445+0800 INFO 57,inbound:0 outbound:0 discard:0
+2025-01-24T21:58:18.450+0800 DEBUG conn=127.0.0.1:61251 done writev: <nil>
+2025-01-24T21:58:20.445+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T21:58:20.445+0800 DEBUG default logging level is INFO
+2025-01-24T21:58:20.445+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T21:58:23.348+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T21:58:23.348+0800 DEBUG default logging level is INFO
+2025-01-24T21:58:23.348+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T21:58:24.926+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T21:58:24.926+0800 DEBUG default logging level is INFO
+2025-01-24T21:58:24.926+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T21:58:26.126+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T21:58:26.126+0800 DEBUG default logging level is INFO
+2025-01-24T21:58:26.126+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T21:58:27.293+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T21:58:27.293+0800 DEBUG default logging level is INFO
+2025-01-24T21:58:27.294+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T21:58:28.221+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T21:58:28.222+0800 DEBUG default logging level is INFO
+2025-01-24T21:58:28.222+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T21:58:29.450+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T21:58:29.451+0800 DEBUG default logging level is INFO
+2025-01-24T21:58:29.451+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T21:58:30.552+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T21:58:30.552+0800 DEBUG default logging level is INFO
+2025-01-24T21:58:30.552+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T21:58:31.655+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T21:58:31.655+0800 DEBUG default logging level is INFO
+2025-01-24T21:58:31.655+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T21:58:32.738+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T21:58:32.738+0800 DEBUG default logging level is INFO
+2025-01-24T21:58:32.738+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T21:58:33.845+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T21:58:33.845+0800 DEBUG default logging level is INFO
+2025-01-24T21:58:33.845+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T21:58:35.026+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T21:58:35.026+0800 DEBUG default logging level is INFO
+2025-01-24T21:58:35.026+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T21:58:36.123+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T21:58:36.123+0800 DEBUG default logging level is INFO
+2025-01-24T21:58:36.123+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T21:58:37.385+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T21:58:37.385+0800 DEBUG default logging level is INFO
+2025-01-24T21:58:37.386+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T21:58:38.590+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T21:58:38.591+0800 DEBUG default logging level is INFO
+2025-01-24T21:58:38.591+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T21:58:39.807+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T21:58:39.807+0800 DEBUG default logging level is INFO
+2025-01-24T21:58:39.807+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T21:58:41.108+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T21:58:41.108+0800 DEBUG default logging level is INFO
+2025-01-24T21:58:41.109+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T21:58:42.366+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T21:58:42.366+0800 DEBUG default logging level is INFO
+2025-01-24T21:58:42.367+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T21:58:43.678+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T21:58:43.678+0800 DEBUG default logging level is INFO
+2025-01-24T21:58:43.678+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T21:58:44.868+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T21:58:44.868+0800 DEBUG default logging level is INFO
+2025-01-24T21:58:44.868+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T21:58:46.150+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T21:58:46.150+0800 DEBUG default logging level is INFO
+2025-01-24T21:58:46.150+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T21:58:47.441+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T21:58:47.441+0800 DEBUG default logging level is INFO
+2025-01-24T21:58:47.442+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T21:58:48.629+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T21:58:48.629+0800 DEBUG default logging level is INFO
+2025-01-24T21:58:48.629+0800 FATAL Start broker server error: bind: address already in use
+2025-01-24T21:58:49.872+0800 INFO [1] Start broker instance: {"Name":"172.20.10.2:7539","Interval":30000000000}
+2025-01-24T21:58:49.872+0800 DEBUG default logging level is INFO
+2025-01-24T21:58:49.873+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-24T21:58:49.873+0800 INFO [1] Broker instance started
+2025-01-24T21:58:50.047+0800 INFO [1] Set broker info ok set im:broker:172.20.10.2:7539 {"addr":"172.20.10.2:7539","startAt":1737727129873} ex 60: OK
+2025-01-24T21:58:50.047+0800 INFO [19] tick
+2025-01-24T21:58:55.031+0800 INFO [17] Open connect
+2025-01-24T21:59:03.845+0800 INFO [17] Traffic connect
+2025-01-24T21:59:08.304+0800 INFO read ok 17 5 5
+2025-01-24T21:59:42.704+0800 INFO [19] tick
+2025-01-24T22:00:18.710+0800 INFO 17,inbound:0 outbound:0 discard:0
+2025-01-24T22:00:26.965+0800 DEBUG conn=127.0.0.1:61405 done writev: <nil>
+2025-01-25T01:19:26.069+0800 INFO [1] Start broker instance: {"Name":"192.168.1.103:7539","Interval":30000000000}
+2025-01-25T01:19:26.070+0800 DEBUG default logging level is INFO
+2025-01-25T01:19:26.070+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-25T01:19:26.070+0800 INFO [1] Broker instance started
+2025-01-25T01:19:26.172+0800 INFO [1] Set broker info ok set im:broker:192.168.1.103:7539 {"addr":"192.168.1.103:7539","startAt":1737739166070} ex 60: OK
+2025-01-25T01:19:26.173+0800 INFO [33] tick
+2025-01-25T01:19:33.446+0800 INFO [15] Open connect
+2025-01-25T01:19:36.233+0800 INFO [15] Traffic connect
+2025-01-25T01:19:36.233+0800 INFO read ok 15 5 5
+2025-01-25T01:19:36.233+0800 INFO 15,inbound:0 outbound:0 discard:0
+2025-01-25T01:19:36.236+0800 DEBUG conn=127.0.0.1:61937 done writev: <nil>
+2025-01-25T01:19:42.964+0800 INFO [15] Traffic connect
+2025-01-25T01:19:42.965+0800 INFO read ok 15 5 5
+2025-01-25T01:19:42.965+0800 INFO 15,inbound:0 outbound:0 discard:0
+2025-01-25T01:19:55.318+0800 DEBUG conn=127.0.0.1:61937 done writev: <nil>
+2025-01-25T01:20:01.442+0800 INFO [1] Start broker instance: {"Name":"192.168.1.103:7539","Interval":30000000000}
+2025-01-25T01:20:01.442+0800 DEBUG default logging level is INFO
+2025-01-25T01:20:01.442+0800 FATAL Start broker server error: bind: address already in use
+2025-01-25T01:20:15.496+0800 INFO [1] Start broker instance: {"Name":"192.168.1.103:7539","Interval":30000000000}
+2025-01-25T01:20:15.496+0800 DEBUG default logging level is INFO
+2025-01-25T01:20:15.496+0800 FATAL Start broker server error: bind: address already in use
+2025-01-25T01:25:49.557+0800 INFO [1] Start broker instance: {"Name":"192.168.1.103:7539","Interval":30000000000}
+2025-01-25T01:25:49.558+0800 DEBUG default logging level is INFO
+2025-01-25T01:25:49.558+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-25T01:25:49.558+0800 INFO [1] Broker instance started
+2025-01-25T01:25:49.619+0800 INFO [1] Set broker info ok set im:broker:192.168.1.103:7539 {"addr":"192.168.1.103:7539","startAt":1737739549558} ex 60: OK
+2025-01-25T01:25:49.620+0800 INFO [29] tick
+2025-01-25T01:25:58.482+0800 INFO [27] Open connect
+2025-01-25T01:26:00.649+0800 INFO [27] Traffic connect
+2025-01-25T01:26:00.649+0800 INFO read ok 27 5 5
+2025-01-25T01:26:00.649+0800 INFO 27,inbound:0 outbound:0 discard:0
+2025-01-25T01:26:49.702+0800 INFO [29] tick

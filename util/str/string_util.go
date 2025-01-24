@@ -1,4 +1,4 @@
-package util
+package str
 
 func IsNotBlank(s *string) bool {
 	return s != nil && *s != "" && *s != "nil"

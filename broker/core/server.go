@@ -17,7 +17,7 @@ import (
 type BrokerServer struct {
 	*gnet.BuiltinEventEngine
 	eng          gnet.Engine
-	addr         string
+	name         string
 	multicore    bool
 	async        bool
 	writev       bool
@@ -28,23 +28,23 @@ type BrokerServer struct {
 	clientActive int32
 	workerPool   *goPool.Pool
 	ctx          context.Context
-	tickDuration time.Duration
+	interval     time.Duration
 }
 
-func Start(ctx context.Context, option Option) {
+func Start(ctx context.Context, option *Option) {
 	ts := &BrokerServer{
-		multicore:    true,
-		async:        true,
-		writev:       true,
-		nclients:     2,
-		workerPool:   goPool.Default(),
-		ctx:          ctx,
-		tickDuration: option.TickDuration,
-		addr:         option.Addr,
+		multicore:  true,
+		async:      true,
+		writev:     true,
+		nclients:   2,
+		workerPool: goPool.Default(),
+		ctx:        ctx,
+		interval:   option.Interval,
+		name:       option.Name,
 	}
-	err := gnet.Run(ts, "tcp://0.0.0.0:7539",
+	err := gnet.Run(ts, fmt.Sprintf("tcp://0.0.0.0:%s", DefaultPort),
 		gnet.WithMulticore(true),
-		gnet.WithLockOSThread(false),
+		gnet.WithLockOSThread(true),
 		gnet.WithReadBufferCap(4096),
 		gnet.WithWriteBufferCap(4096),
 		gnet.WithLoadBalancing(gnet.RoundRobin),
@@ -60,21 +60,17 @@ func Start(ctx context.Context, option Option) {
 		gnet.WithEdgeTriggeredIO(true),
 		gnet.WithEdgeTriggeredIOChunk(0))
 	if err != nil {
-		panic(err)
+		logger.FatalF("Start broker server error: %v", err)
 	}
 }
 
 func (s *BrokerServer) OnBoot(eng gnet.Engine) (action gnet.Action) {
-	s.eng = eng
-	fd, err := s.eng.Dup()
-	if err != nil {
-		panic(err)
-	}
+	logger.InfoF("[%d] Broker instance started", routine.Goid())
 
-	logger.InfoF("broker started & listen %d", routine.Goid(), fd)
+	s.eng = eng
 
 	broker := &brokerstate.BrokerInfo{
-		Addr:    s.addr,
+		Addr:    s.name,
 		StartAt: time.Now().UnixMilli(),
 	}
 	brokerstate.SetBroker(s.ctx, broker)
@@ -82,18 +78,21 @@ func (s *BrokerServer) OnBoot(eng gnet.Engine) (action gnet.Action) {
 }
 
 func (s *BrokerServer) OnOpen(c gnet.Conn) (out []byte, action gnet.Action) {
-	c.SetContext(c)
+	ctx := context.Background()
+	c.SetContext(ctx)
 	atomic.AddInt32(&s.connected, 1)
 	out = []byte("sweetness\r\n")
 
-	logger.InfoF("new connect ok %d", routine.Goid())
+	logger.InfoF("[%d] Open connect", routine.Goid())
 
-	return out, gnet.None
+	return nil, gnet.None
 }
 
 func (s *BrokerServer) OnShutdown(eng gnet.Engine) {
 	fd, err := s.eng.Dup()
 	fmt.Println(fd, err)
+	logger.InfoF("[%d] Broker instance shutdown", routine.Goid())
+
 }
 
 func (s *BrokerServer) OnClose(c gnet.Conn, err error) (action gnet.Action) {
@@ -101,12 +100,15 @@ func (s *BrokerServer) OnClose(c gnet.Conn, err error) (action gnet.Action) {
 		logging.Debugf("error occurred on closed, %v\n", err)
 	}
 	atomic.AddInt32(&s.disconnected, 1)
+
+	logger.InfoF("[%d] Cloud connect", routine.Goid())
+
 	return
 }
 
 func (s *BrokerServer) OnTraffic(c gnet.Conn) (action gnet.Action) {
 
-	logger.InfoF("on read ok %d", routine.Goid())
+	logger.InfoF("[%d] Traffic connect", routine.Goid())
 
 	if s.async {
 		buf := bbPool.Get()
@@ -168,11 +170,12 @@ func (s *BrokerServer) OnTraffic(c gnet.Conn) (action gnet.Action) {
 }
 
 func (s *BrokerServer) OnTick() (delay time.Duration, action gnet.Action) {
-	logger.Info("tick")
+	logger.InfoF("[%d] tick", routine.Goid())
+
 	broker := &brokerstate.BrokerInfo{
-		Addr:    s.addr,
+		Addr:    s.name,
 		StartAt: time.Now().UnixMilli(),
 	}
 	brokerstate.RefreshBroker(s.ctx, broker)
-	return s.tickDuration, gnet.None
+	return s.interval, gnet.None
 }
