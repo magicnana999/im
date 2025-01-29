@@ -61,7 +61,7 @@ func sendMessage(ctx context.Context, cancel context.CancelFunc, conn net.Conn, 
 				continue
 			}
 			message := scanner.Text()
-			if message != "exit" {
+			if message == "exit" {
 				cancel()
 			} else {
 				writeMessage(conn, message)
@@ -72,7 +72,7 @@ func sendMessage(ctx context.Context, cancel context.CancelFunc, conn net.Conn, 
 
 func writeMessage(conn net.Conn, message string) {
 	text := protocol.TextContent{
-		Text: "message",
+		Text: message,
 	}
 
 	body := protocol.MessageBody{
@@ -109,7 +109,33 @@ func writeMessage(conn net.Conn, message string) {
 		panic(e)
 	}
 
-	conn.Write(b)
+	buffer1 := make([]byte, 4)
+	buffer2 := bytes.NewBuffer(b)
+
+	binary.BigEndian.PutUint32(buffer1, uint32(len(b)))
+
+	buffer := new(bytes.Buffer)
+	buffer.Write(buffer1)
+	buffer.Write(buffer2.Bytes())
+
+	conn.Write(buffer.Bytes())
+
+	var pbp pb.Packet
+	if e4 := proto.Unmarshal(b, &pbp); e4 != nil {
+		panic(e4)
+	}
+
+	ret, e5 := pb.RevertPacket(&pbp)
+	if e5 != nil {
+		panic(e5)
+	}
+
+	js, e7 := json.Marshal(ret)
+	if e7 != nil {
+		panic(e7)
+	}
+
+	fmt.Println(string(js))
 }
 
 func sendHeartbeat(ctx context.Context, conn net.Conn, wg *sync.WaitGroup) {

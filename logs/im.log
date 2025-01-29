@@ -27655,3 +27655,753 @@
 2025-01-30T03:33:26.500+0800 INFO [127.0.0.1:63989#] HeartbeatTask done
 2025-01-30T03:33:26.500+0800 INFO [127.0.0.1:63989#] HeartbeatTask closed
 2025-01-30T03:33:26.500+0800 INFO [127.0.0.1:63989#] Connection close
+2025-01-30T03:35:55.830+0800 DEBUG HeartbeatHandler init
+2025-01-30T03:35:55.830+0800 INFO BrokerOption:{"name":"192.168.1.103:7539","tickInterval":30000000000,"heartbeatInterval":30000000000}
+2025-01-30T03:35:55.830+0800 DEBUG default logging level is INFO
+2025-01-30T03:35:55.830+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-30T03:35:55.830+0800 INFO BrokerInstance started
+2025-01-30T03:35:59.071+0800 INFO BrokerInfo set,key:im:broker:192.168.1.103:7539,result:OK,error:<nil>
+2025-01-30T03:36:21.119+0800 INFO [127.0.0.1:64075#] Connection open
+2025-01-30T03:36:21.120+0800 INFO [127.0.0.1:64075#] HeartbeatTask started
+2025-01-30T03:36:24.796+0800 INFO [127.0.0.1:64075#] Connection traffic
+2025-01-30T03:36:24.797+0800 INFO [127.0.0.1:64075#] Decode length field,buffer:8
+2025-01-30T03:36:24.797+0800 INFO [127.0.0.1:64075#] Decode length field,buffer:4,value:4
+2025-01-30T03:36:24.797+0800 INFO [127.0.0.1:64075#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:36:24.797+0800 INFO [127.0.0.1:64075#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:36:25.796+0800 INFO [127.0.0.1:64075#] Connection traffic
+2025-01-30T03:36:25.797+0800 INFO [127.0.0.1:64075#] Decode length field,buffer:8
+2025-01-30T03:36:25.797+0800 INFO [127.0.0.1:64075#] Decode length field,buffer:4,value:4
+2025-01-30T03:36:25.797+0800 INFO [127.0.0.1:64075#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:36:25.797+0800 INFO [127.0.0.1:64075#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:36:26.796+0800 INFO [127.0.0.1:64075#] Connection traffic
+2025-01-30T03:36:26.796+0800 INFO [127.0.0.1:64075#] Decode length field,buffer:8
+2025-01-30T03:36:26.796+0800 INFO [127.0.0.1:64075#] Decode length field,buffer:4,value:4
+2025-01-30T03:36:26.797+0800 INFO [127.0.0.1:64075#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:36:26.797+0800 INFO [127.0.0.1:64075#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:36:27.796+0800 INFO [127.0.0.1:64075#] Connection traffic
+2025-01-30T03:36:27.796+0800 INFO [127.0.0.1:64075#] Decode length field,buffer:8
+2025-01-30T03:36:27.796+0800 INFO [127.0.0.1:64075#] Decode length field,buffer:4,value:4
+2025-01-30T03:36:27.796+0800 INFO [127.0.0.1:64075#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:36:27.796+0800 INFO [127.0.0.1:64075#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:36:28.796+0800 INFO [127.0.0.1:64075#] Connection traffic
+2025-01-30T03:36:28.797+0800 INFO [127.0.0.1:64075#] Decode length field,buffer:8
+2025-01-30T03:36:28.797+0800 INFO [127.0.0.1:64075#] Decode length field,buffer:4,value:4
+2025-01-30T03:36:28.797+0800 INFO [127.0.0.1:64075#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:36:28.797+0800 INFO [127.0.0.1:64075#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:36:32.296+0800 INFO [127.0.0.1:64075#] Connection traffic
+2025-01-30T03:36:32.296+0800 INFO [127.0.0.1:64075#] Decode length field,buffer:8
+2025-01-30T03:36:32.296+0800 INFO [127.0.0.1:64075#] Decode length field,buffer:4,value:4
+2025-01-30T03:36:32.296+0800 INFO [127.0.0.1:64075#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:36:32.296+0800 INFO [127.0.0.1:64075#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:36:46.827+0800 DEBUG HeartbeatHandler init
+2025-01-30T03:36:46.828+0800 INFO BrokerOption:{"name":"192.168.1.103:7539","tickInterval":30000000000,"heartbeatInterval":30000000000}
+2025-01-30T03:36:46.828+0800 DEBUG default logging level is INFO
+2025-01-30T03:36:46.828+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-30T03:36:46.828+0800 INFO BrokerInstance started
+2025-01-30T03:36:46.888+0800 INFO BrokerInfo set,key:im:broker:192.168.1.103:7539,result:OK,error:<nil>
+2025-01-30T03:36:50.300+0800 INFO [127.0.0.1:64089#] Connection open
+2025-01-30T03:36:50.300+0800 INFO [127.0.0.1:64089#] HeartbeatTask started
+2025-01-30T03:36:53.271+0800 INFO [127.0.0.1:64089#] Connection traffic
+2025-01-30T03:36:53.271+0800 INFO [127.0.0.1:64089#] Decode length field,buffer:8
+2025-01-30T03:36:53.271+0800 INFO [127.0.0.1:64089#] Decode length field,buffer:4,value:4
+2025-01-30T03:36:53.271+0800 INFO [127.0.0.1:64089#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:36:53.271+0800 INFO [127.0.0.1:64089#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:36:54.272+0800 INFO [127.0.0.1:64089#] Connection traffic
+2025-01-30T03:36:54.272+0800 INFO [127.0.0.1:64089#] Decode length field,buffer:8
+2025-01-30T03:36:54.272+0800 INFO [127.0.0.1:64089#] Decode length field,buffer:4,value:4
+2025-01-30T03:36:54.272+0800 INFO [127.0.0.1:64089#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:36:54.272+0800 INFO [127.0.0.1:64089#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:36:54.867+0800 INFO [127.0.0.1:64089#] Connection traffic
+2025-01-30T03:36:54.867+0800 INFO [127.0.0.1:64089#] Decode length field,buffer:180
+2025-01-30T03:36:54.867+0800 INFO [127.0.0.1:64089#] Decode length field,buffer:176,value:169108341
+2025-01-30T03:36:54.867+0800 INFO [127.0.0.1:64089#] Decode length field,buffer:172,value:1681405548
+2025-01-30T03:36:54.867+0800 INFO [127.0.0.1:64089#] Decode length field,buffer:168,value:1831952691
+2025-01-30T03:36:54.867+0800 INFO [127.0.0.1:64089#] Decode length field,buffer:164,value:929708397
+2025-01-30T03:36:54.867+0800 INFO [127.0.0.1:64089#] Decode length field,buffer:160,value:1832020326
+2025-01-30T03:36:54.867+0800 INFO [127.0.0.1:64089#] Decode length field,buffer:156,value:1718030858
+2025-01-30T03:36:54.867+0800 INFO [127.0.0.1:64089#] Decode length field,buffer:152,value:1398030674
+2025-01-30T03:36:54.867+0800 INFO [127.0.0.1:64089#] Decode length field,buffer:148,value:1414746177
+2025-01-30T03:36:54.867+0800 INFO [127.0.0.1:64089#] Decode length field,buffer:144,value:1128602125
+2025-01-30T03:36:54.867+0800 INFO [127.0.0.1:64089#] Decode length field,buffer:140,value:1935960422
+2025-01-30T03:36:54.867+0800 INFO [127.0.0.1:64089#] Decode length field,buffer:136,value:1701474922
+2025-01-30T03:36:54.867+0800 INFO [127.0.0.1:64089#] Decode length field,buffer:132,value:1701999460
+2025-01-30T03:36:54.867+0800 INFO [127.0.0.1:64089#] Decode length field,buffer:128,value:1713373480
+2025-01-30T03:36:54.867+0800 INFO [127.0.0.1:64089#] Decode length field,buffer:124,value:19923768
+2025-01-30T03:36:54.867+0800 INFO [127.0.0.1:64089#] Decode length field,buffer:120,value:4093108997
+2025-01-30T03:36:54.867+0800 ERROR [127.0.0.1:64089#] Decode length field,buffer:120,error:invalid decode length
+2025-01-30T03:36:54.867+0800 FATAL [127.0.0.1:64089#] Connection traffic error:invalid decode length
+2025-01-30T03:37:18.413+0800 DEBUG HeartbeatHandler init
+2025-01-30T03:37:18.413+0800 INFO BrokerOption:{"name":"192.168.1.103:7539","tickInterval":30000000000,"heartbeatInterval":30000000000}
+2025-01-30T03:37:18.413+0800 DEBUG default logging level is INFO
+2025-01-30T03:37:18.413+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-30T03:37:18.413+0800 INFO BrokerInstance started
+2025-01-30T03:37:18.477+0800 INFO BrokerInfo set,key:im:broker:192.168.1.103:7539,result:OK,error:<nil>
+2025-01-30T03:37:24.568+0800 INFO [127.0.0.1:64133#] Connection open
+2025-01-30T03:37:24.568+0800 INFO [127.0.0.1:64133#] HeartbeatTask started
+2025-01-30T03:37:28.295+0800 INFO [127.0.0.1:64133#] Connection traffic
+2025-01-30T03:37:28.296+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:8
+2025-01-30T03:37:28.296+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:4,value:4
+2025-01-30T03:37:28.296+0800 INFO [127.0.0.1:64133#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:37:28.296+0800 INFO [127.0.0.1:64133#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:37:29.294+0800 INFO [127.0.0.1:64133#] Connection traffic
+2025-01-30T03:37:29.295+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:8
+2025-01-30T03:37:29.295+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:4,value:4
+2025-01-30T03:37:29.295+0800 INFO [127.0.0.1:64133#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:37:29.295+0800 INFO [127.0.0.1:64133#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:37:30.295+0800 INFO [127.0.0.1:64133#] Connection traffic
+2025-01-30T03:37:30.295+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:8
+2025-01-30T03:37:30.295+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:4,value:4
+2025-01-30T03:37:30.295+0800 INFO [127.0.0.1:64133#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:37:30.295+0800 INFO [127.0.0.1:64133#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:37:31.296+0800 INFO [127.0.0.1:64133#] Connection traffic
+2025-01-30T03:37:31.296+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:8
+2025-01-30T03:37:31.296+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:4,value:4
+2025-01-30T03:37:31.296+0800 INFO [127.0.0.1:64133#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:37:31.296+0800 INFO [127.0.0.1:64133#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:37:32.295+0800 INFO [127.0.0.1:64133#] Connection traffic
+2025-01-30T03:37:32.295+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:8
+2025-01-30T03:37:32.295+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:4,value:4
+2025-01-30T03:37:32.295+0800 INFO [127.0.0.1:64133#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:37:32.295+0800 INFO [127.0.0.1:64133#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:37:33.295+0800 INFO [127.0.0.1:64133#] Connection traffic
+2025-01-30T03:37:33.295+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:8
+2025-01-30T03:37:33.295+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:4,value:4
+2025-01-30T03:37:33.295+0800 INFO [127.0.0.1:64133#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:37:33.295+0800 INFO [127.0.0.1:64133#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:37:34.295+0800 INFO [127.0.0.1:64133#] Connection traffic
+2025-01-30T03:37:34.296+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:8
+2025-01-30T03:37:34.296+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:4,value:4
+2025-01-30T03:37:34.296+0800 INFO [127.0.0.1:64133#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:37:34.296+0800 INFO [127.0.0.1:64133#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:37:35.295+0800 INFO [127.0.0.1:64133#] Connection traffic
+2025-01-30T03:37:35.295+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:8
+2025-01-30T03:37:35.295+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:4,value:4
+2025-01-30T03:37:35.295+0800 INFO [127.0.0.1:64133#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:37:35.295+0800 INFO [127.0.0.1:64133#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:37:36.295+0800 INFO [127.0.0.1:64133#] Connection traffic
+2025-01-30T03:37:36.295+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:8
+2025-01-30T03:37:36.295+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:4,value:4
+2025-01-30T03:37:36.295+0800 INFO [127.0.0.1:64133#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:37:36.295+0800 INFO [127.0.0.1:64133#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:37:37.295+0800 INFO [127.0.0.1:64133#] Connection traffic
+2025-01-30T03:37:37.295+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:8
+2025-01-30T03:37:37.295+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:4,value:4
+2025-01-30T03:37:37.295+0800 INFO [127.0.0.1:64133#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:37:37.295+0800 INFO [127.0.0.1:64133#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:37:38.295+0800 INFO [127.0.0.1:64133#] Connection traffic
+2025-01-30T03:37:38.295+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:8
+2025-01-30T03:37:38.295+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:4,value:4
+2025-01-30T03:37:38.295+0800 INFO [127.0.0.1:64133#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:37:38.295+0800 INFO [127.0.0.1:64133#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:37:39.296+0800 INFO [127.0.0.1:64133#] Connection traffic
+2025-01-30T03:37:39.296+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:8
+2025-01-30T03:37:39.296+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:4,value:4
+2025-01-30T03:37:39.296+0800 INFO [127.0.0.1:64133#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:37:39.296+0800 INFO [127.0.0.1:64133#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:37:40.295+0800 INFO [127.0.0.1:64133#] Connection traffic
+2025-01-30T03:37:40.295+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:8
+2025-01-30T03:37:40.295+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:4,value:4
+2025-01-30T03:37:40.295+0800 INFO [127.0.0.1:64133#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:37:40.295+0800 INFO [127.0.0.1:64133#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:37:41.296+0800 INFO [127.0.0.1:64133#] Connection traffic
+2025-01-30T03:37:41.296+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:8
+2025-01-30T03:37:41.296+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:4,value:4
+2025-01-30T03:37:41.296+0800 INFO [127.0.0.1:64133#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:37:41.296+0800 INFO [127.0.0.1:64133#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:37:42.295+0800 INFO [127.0.0.1:64133#] Connection traffic
+2025-01-30T03:37:42.295+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:8
+2025-01-30T03:37:42.295+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:4,value:4
+2025-01-30T03:37:42.295+0800 INFO [127.0.0.1:64133#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:37:42.295+0800 INFO [127.0.0.1:64133#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:37:43.295+0800 INFO [127.0.0.1:64133#] Connection traffic
+2025-01-30T03:37:43.296+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:8
+2025-01-30T03:37:43.296+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:4,value:4
+2025-01-30T03:37:43.296+0800 INFO [127.0.0.1:64133#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:37:43.296+0800 INFO [127.0.0.1:64133#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:37:44.295+0800 INFO [127.0.0.1:64133#] Connection traffic
+2025-01-30T03:37:44.296+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:8
+2025-01-30T03:37:44.296+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:4,value:4
+2025-01-30T03:37:44.296+0800 INFO [127.0.0.1:64133#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:37:44.296+0800 INFO [127.0.0.1:64133#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:37:45.295+0800 INFO [127.0.0.1:64133#] Connection traffic
+2025-01-30T03:37:45.296+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:8
+2025-01-30T03:37:45.296+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:4,value:4
+2025-01-30T03:37:45.296+0800 INFO [127.0.0.1:64133#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:37:45.296+0800 INFO [127.0.0.1:64133#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:37:46.295+0800 INFO [127.0.0.1:64133#] Connection traffic
+2025-01-30T03:37:46.296+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:8
+2025-01-30T03:37:46.296+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:4,value:4
+2025-01-30T03:37:46.296+0800 INFO [127.0.0.1:64133#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:37:46.296+0800 INFO [127.0.0.1:64133#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:37:47.295+0800 INFO [127.0.0.1:64133#] Connection traffic
+2025-01-30T03:37:47.295+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:8
+2025-01-30T03:37:47.296+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:4,value:4
+2025-01-30T03:37:47.296+0800 INFO [127.0.0.1:64133#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:37:47.296+0800 INFO [127.0.0.1:64133#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:37:48.294+0800 INFO [127.0.0.1:64133#] Connection traffic
+2025-01-30T03:37:48.295+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:8
+2025-01-30T03:37:48.295+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:4,value:4
+2025-01-30T03:37:48.295+0800 INFO [127.0.0.1:64133#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:37:48.295+0800 INFO [127.0.0.1:64133#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:37:49.295+0800 INFO [127.0.0.1:64133#] Connection traffic
+2025-01-30T03:37:49.296+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:8
+2025-01-30T03:37:49.296+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:4,value:4
+2025-01-30T03:37:49.296+0800 INFO [127.0.0.1:64133#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:37:49.296+0800 INFO [127.0.0.1:64133#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:37:50.296+0800 INFO [127.0.0.1:64133#] Connection traffic
+2025-01-30T03:37:50.296+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:8
+2025-01-30T03:37:50.296+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:4,value:4
+2025-01-30T03:37:50.296+0800 INFO [127.0.0.1:64133#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:37:50.296+0800 INFO [127.0.0.1:64133#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:37:51.295+0800 INFO [127.0.0.1:64133#] Connection traffic
+2025-01-30T03:37:51.295+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:8
+2025-01-30T03:37:51.295+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:4,value:4
+2025-01-30T03:37:51.295+0800 INFO [127.0.0.1:64133#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:37:51.295+0800 INFO [127.0.0.1:64133#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:37:52.295+0800 INFO [127.0.0.1:64133#] Connection traffic
+2025-01-30T03:37:52.295+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:8
+2025-01-30T03:37:52.295+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:4,value:4
+2025-01-30T03:37:52.295+0800 INFO [127.0.0.1:64133#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:37:52.295+0800 INFO [127.0.0.1:64133#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:37:53.295+0800 INFO [127.0.0.1:64133#] Connection traffic
+2025-01-30T03:37:53.295+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:8
+2025-01-30T03:37:53.295+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:4,value:4
+2025-01-30T03:37:53.295+0800 INFO [127.0.0.1:64133#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:37:53.295+0800 INFO [127.0.0.1:64133#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:37:54.295+0800 INFO [127.0.0.1:64133#] Connection traffic
+2025-01-30T03:37:54.295+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:8
+2025-01-30T03:37:54.295+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:4,value:4
+2025-01-30T03:37:54.295+0800 INFO [127.0.0.1:64133#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:37:54.295+0800 INFO [127.0.0.1:64133#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:37:57.630+0800 INFO [127.0.0.1:64133#] Connection traffic
+2025-01-30T03:37:57.630+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:8
+2025-01-30T03:37:57.630+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:4,value:4
+2025-01-30T03:37:57.630+0800 INFO [127.0.0.1:64133#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:37:57.630+0800 INFO [127.0.0.1:64133#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:37:59.766+0800 INFO [127.0.0.1:64133#] Connection traffic
+2025-01-30T03:37:59.767+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:8
+2025-01-30T03:37:59.767+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:4,value:4
+2025-01-30T03:37:59.767+0800 INFO [127.0.0.1:64133#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:37:59.767+0800 INFO [127.0.0.1:64133#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:38:01.449+0800 INFO [127.0.0.1:64133#] Connection traffic
+2025-01-30T03:38:01.449+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:16
+2025-01-30T03:38:01.449+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:12,value:4
+2025-01-30T03:38:01.449+0800 INFO [127.0.0.1:64133#] Decode heartbeat body,buffer:8,value:12
+2025-01-30T03:38:01.449+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:4,value:4
+2025-01-30T03:38:01.449+0800 INFO [127.0.0.1:64133#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:38:01.449+0800 INFO [127.0.0.1:64133#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:38:01.449+0800 INFO [127.0.0.1:64133#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:38:02.484+0800 INFO [127.0.0.1:64133#] Connection traffic
+2025-01-30T03:38:02.484+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:8
+2025-01-30T03:38:02.484+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:4,value:4
+2025-01-30T03:38:02.484+0800 INFO [127.0.0.1:64133#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:38:02.484+0800 INFO [127.0.0.1:64133#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:38:03.424+0800 INFO [127.0.0.1:64133#] Connection traffic
+2025-01-30T03:38:03.424+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:8
+2025-01-30T03:38:03.424+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:4,value:4
+2025-01-30T03:38:03.425+0800 INFO [127.0.0.1:64133#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:38:03.425+0800 INFO [127.0.0.1:64133#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:38:04.600+0800 INFO [127.0.0.1:64133#] Connection traffic
+2025-01-30T03:38:04.600+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:8
+2025-01-30T03:38:04.600+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:4,value:4
+2025-01-30T03:38:04.600+0800 INFO [127.0.0.1:64133#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:38:04.600+0800 INFO [127.0.0.1:64133#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:38:05.437+0800 INFO [127.0.0.1:64133#] Connection traffic
+2025-01-30T03:38:05.437+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:8
+2025-01-30T03:38:05.437+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:4,value:4
+2025-01-30T03:38:05.437+0800 INFO [127.0.0.1:64133#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:38:05.437+0800 INFO [127.0.0.1:64133#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:38:06.488+0800 INFO [127.0.0.1:64133#] Connection traffic
+2025-01-30T03:38:06.489+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:8
+2025-01-30T03:38:06.489+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:4,value:4
+2025-01-30T03:38:06.489+0800 INFO [127.0.0.1:64133#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:38:06.489+0800 INFO [127.0.0.1:64133#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:38:07.443+0800 INFO [127.0.0.1:64133#] Connection traffic
+2025-01-30T03:38:07.443+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:8
+2025-01-30T03:38:07.444+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:4,value:4
+2025-01-30T03:38:07.444+0800 INFO [127.0.0.1:64133#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:38:07.444+0800 INFO [127.0.0.1:64133#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:38:08.717+0800 INFO [127.0.0.1:64133#] Connection traffic
+2025-01-30T03:38:08.717+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:8
+2025-01-30T03:38:08.717+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:4,value:4
+2025-01-30T03:38:08.717+0800 INFO [127.0.0.1:64133#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:38:08.717+0800 INFO [127.0.0.1:64133#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:38:09.528+0800 INFO [127.0.0.1:64133#] Connection traffic
+2025-01-30T03:38:09.528+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:8
+2025-01-30T03:38:09.528+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:4,value:4
+2025-01-30T03:38:09.528+0800 INFO [127.0.0.1:64133#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:38:09.528+0800 INFO [127.0.0.1:64133#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:38:10.993+0800 INFO [127.0.0.1:64133#] Connection traffic
+2025-01-30T03:38:10.993+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:8
+2025-01-30T03:38:10.993+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:4,value:4
+2025-01-30T03:38:10.993+0800 INFO [127.0.0.1:64133#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:38:10.993+0800 INFO [127.0.0.1:64133#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:38:11.354+0800 INFO [127.0.0.1:64133#] Connection traffic
+2025-01-30T03:38:11.354+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:8
+2025-01-30T03:38:11.354+0800 INFO [127.0.0.1:64133#] Decode length field,buffer:4,value:4
+2025-01-30T03:38:11.354+0800 INFO [127.0.0.1:64133#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:38:11.354+0800 INFO [127.0.0.1:64133#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:38:24.569+0800 INFO [127.0.0.1:64133#] HeartbeatTask ticking,now:1738179504569,last:1738179491354,interval:10000
+2025-01-30T03:38:24.569+0800 INFO [127.0.0.1:64133#] HeartbeatTask closed
+2025-01-30T03:38:24.570+0800 INFO [127.0.0.1:64133#] HeartbeatTask done
+2025-01-30T03:38:24.570+0800 INFO [127.0.0.1:64133#] Connection close
+2025-01-30T03:39:38.583+0800 DEBUG HeartbeatHandler init
+2025-01-30T03:39:38.583+0800 INFO BrokerOption:{"name":"192.168.1.103:7539","tickInterval":30000000000,"heartbeatInterval":30000000000}
+2025-01-30T03:39:38.583+0800 DEBUG default logging level is INFO
+2025-01-30T03:39:38.584+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-30T03:39:38.584+0800 INFO BrokerInstance started
+2025-01-30T03:39:38.648+0800 INFO BrokerInfo set,key:im:broker:192.168.1.103:7539,result:OK,error:<nil>
+2025-01-30T03:39:43.120+0800 INFO [127.0.0.1:64244#] Connection open
+2025-01-30T03:39:43.120+0800 INFO [127.0.0.1:64244#] HeartbeatTask started
+2025-01-30T03:39:44.121+0800 INFO [127.0.0.1:64244#] Connection traffic
+2025-01-30T03:39:44.121+0800 INFO [127.0.0.1:64244#] Decode length field,buffer:8
+2025-01-30T03:39:44.121+0800 INFO [127.0.0.1:64244#] Decode length field,buffer:4,value:4
+2025-01-30T03:39:44.121+0800 INFO [127.0.0.1:64244#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:39:44.121+0800 INFO [127.0.0.1:64244#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:39:45.121+0800 INFO [127.0.0.1:64244#] Connection traffic
+2025-01-30T03:39:45.121+0800 INFO [127.0.0.1:64244#] Decode length field,buffer:8
+2025-01-30T03:39:45.121+0800 INFO [127.0.0.1:64244#] Decode length field,buffer:4,value:4
+2025-01-30T03:39:45.121+0800 INFO [127.0.0.1:64244#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:39:45.121+0800 INFO [127.0.0.1:64244#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:39:46.038+0800 INFO [127.0.0.1:64244#] Connection traffic
+2025-01-30T03:39:46.039+0800 INFO [127.0.0.1:64244#] Decode length field,buffer:177
+2025-01-30T03:39:46.039+0800 INFO [127.0.0.1:64244#] Decode length field,buffer:173,value:169108341
+2025-01-30T03:39:46.039+0800 INFO [127.0.0.1:64244#] Decode length field,buffer:169,value:1681406000
+2025-01-30T03:39:46.039+0800 INFO [127.0.0.1:64244#] Decode length field,buffer:165,value:1831952691
+2025-01-30T03:39:46.039+0800 INFO [127.0.0.1:64244#] Decode length field,buffer:161,value:929718629
+2025-01-30T03:39:46.039+0800 INFO [127.0.0.1:64244#] Decode length field,buffer:157,value:1970234473
+2025-01-30T03:39:46.039+0800 INFO [127.0.0.1:64244#] Decode length field,buffer:153,value:925897226
+2025-01-30T03:39:46.039+0800 INFO [127.0.0.1:64244#] Decode length field,buffer:149,value:1398030674
+2025-01-30T03:39:46.039+0800 INFO [127.0.0.1:64244#] Decode length field,buffer:145,value:1414746177
+2025-01-30T03:39:46.039+0800 INFO [127.0.0.1:64244#] Decode length field,buffer:141,value:1128602125
+2025-01-30T03:39:46.039+0800 INFO [127.0.0.1:64244#] Decode length field,buffer:137,value:1935960422
+2025-01-30T03:39:46.039+0800 INFO [127.0.0.1:64244#] Decode length field,buffer:133,value:1701474922
+2025-01-30T03:39:46.039+0800 INFO [127.0.0.1:64244#] Decode length field,buffer:129,value:1701999460
+2025-01-30T03:39:46.039+0800 INFO [127.0.0.1:64244#] Decode length field,buffer:125,value:1713373480
+2025-01-30T03:39:46.039+0800 INFO [127.0.0.1:64244#] Decode length field,buffer:121,value:19923768
+2025-01-30T03:39:46.039+0800 INFO [127.0.0.1:64244#] Decode length field,buffer:117,value:4093108997
+2025-01-30T03:39:46.039+0800 ERROR [127.0.0.1:64244#] Decode length field,buffer:117,error:invalid decode length
+2025-01-30T03:39:46.039+0800 FATAL [127.0.0.1:64244#] Connection traffic error:invalid decode length
+2025-01-30T03:47:47.136+0800 DEBUG HeartbeatHandler init
+2025-01-30T03:47:47.136+0800 INFO BrokerOption:{"name":"192.168.1.103:7539","tickInterval":30000000000,"heartbeatInterval":30000000000}
+2025-01-30T03:47:47.136+0800 DEBUG default logging level is INFO
+2025-01-30T03:47:47.136+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-30T03:47:47.136+0800 INFO BrokerInstance started
+2025-01-30T03:47:47.210+0800 INFO BrokerInfo set,key:im:broker:192.168.1.103:7539,result:OK,error:<nil>
+2025-01-30T03:47:52.143+0800 INFO [127.0.0.1:64522#] Connection open
+2025-01-30T03:47:52.143+0800 INFO [127.0.0.1:64522#] HeartbeatTask started
+2025-01-30T03:47:53.144+0800 INFO [127.0.0.1:64522#] Connection traffic
+2025-01-30T03:47:53.145+0800 INFO [127.0.0.1:64522#] Decode length field,buffer:8
+2025-01-30T03:47:53.145+0800 INFO [127.0.0.1:64522#] Decode length field,buffer:4,value:4
+2025-01-30T03:47:53.145+0800 INFO [127.0.0.1:64522#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:47:53.145+0800 INFO [127.0.0.1:64522#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:47:54.144+0800 INFO [127.0.0.1:64522#] Connection traffic
+2025-01-30T03:47:54.144+0800 INFO [127.0.0.1:64522#] Decode length field,buffer:8
+2025-01-30T03:47:54.144+0800 INFO [127.0.0.1:64522#] Decode length field,buffer:4,value:4
+2025-01-30T03:47:54.144+0800 INFO [127.0.0.1:64522#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:47:54.144+0800 INFO [127.0.0.1:64522#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:47:55.144+0800 INFO [127.0.0.1:64522#] Connection traffic
+2025-01-30T03:47:55.145+0800 INFO [127.0.0.1:64522#] Decode length field,buffer:8
+2025-01-30T03:47:55.145+0800 INFO [127.0.0.1:64522#] Decode length field,buffer:4,value:4
+2025-01-30T03:47:55.145+0800 INFO [127.0.0.1:64522#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:47:55.145+0800 INFO [127.0.0.1:64522#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:47:55.166+0800 INFO [127.0.0.1:64522#] Connection traffic
+2025-01-30T03:47:55.166+0800 INFO [127.0.0.1:64522#] Decode length field,buffer:362
+2025-01-30T03:47:55.166+0800 INFO [127.0.0.1:64522#] Decode length field,buffer:358,value:179
+2025-01-30T03:48:08.356+0800 INFO [127.0.0.1:64522#] HeartbeatTask ticking,now:1738180088356,last:1738180075145,interval:10000
+2025-01-30T03:48:13.483+0800 INFO [127.0.0.1:64522#] HeartbeatTask closed
+2025-01-30T03:48:13.483+0800 INFO [127.0.0.1:64522#] HeartbeatTask ticking,now:1738180093483,last:1738180075145,interval:10000
+2025-01-30T03:48:13.483+0800 INFO [127.0.0.1:64522#] HeartbeatTask done
+2025-01-30T03:48:35.712+0800 ERROR [127.0.0.1:64522#] Decode packet body,revert packet,buffer:179,error:unsupported packet type: 0
+2025-01-30T03:48:35.712+0800 FATAL [127.0.0.1:64522#] Connection traffic error:unsupported packet type: 0
+2025-01-30T03:49:39.660+0800 DEBUG HeartbeatHandler init
+2025-01-30T03:49:39.660+0800 INFO BrokerOption:{"name":"192.168.1.103:7539","tickInterval":30000000000,"heartbeatInterval":30000000000}
+2025-01-30T03:49:39.660+0800 DEBUG default logging level is INFO
+2025-01-30T03:49:39.660+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-30T03:49:39.660+0800 INFO BrokerInstance started
+2025-01-30T03:49:39.764+0800 INFO BrokerInfo set,key:im:broker:192.168.1.103:7539,result:OK,error:<nil>
+2025-01-30T03:49:43.062+0800 INFO [127.0.0.1:64708#] Connection open
+2025-01-30T03:49:43.063+0800 INFO [127.0.0.1:64708#] HeartbeatTask started
+2025-01-30T03:49:44.066+0800 INFO [127.0.0.1:64708#] Connection traffic
+2025-01-30T03:49:44.066+0800 INFO [127.0.0.1:64708#] Decode length field,buffer:8
+2025-01-30T03:49:44.066+0800 INFO [127.0.0.1:64708#] Decode length field,buffer:4,value:4
+2025-01-30T03:49:44.066+0800 INFO [127.0.0.1:64708#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:49:44.066+0800 INFO [127.0.0.1:64708#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:49:45.063+0800 INFO [127.0.0.1:64708#] Connection traffic
+2025-01-30T03:49:45.063+0800 INFO [127.0.0.1:64708#] Decode length field,buffer:8
+2025-01-30T03:49:45.063+0800 INFO [127.0.0.1:64708#] Decode length field,buffer:4,value:4
+2025-01-30T03:49:45.063+0800 INFO [127.0.0.1:64708#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:49:45.064+0800 INFO [127.0.0.1:64708#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:49:45.391+0800 INFO [127.0.0.1:64708#] Connection traffic
+2025-01-30T03:49:45.391+0800 INFO [127.0.0.1:64708#] Decode length field,buffer:360
+2025-01-30T03:49:45.391+0800 INFO [127.0.0.1:64708#] Decode length field,buffer:356,value:178
+2025-01-30T03:49:58.228+0800 INFO [127.0.0.1:64708#] HeartbeatTask ticking,now:1738180196349,last:1738180185063,interval:10000
+2025-01-30T03:50:21.304+0800 INFO [127.0.0.1:64708#] HeartbeatTask closed
+2025-01-30T03:50:21.304+0800 INFO [127.0.0.1:64708#] HeartbeatTask done
+2025-01-30T03:50:21.304+0800 ERROR [127.0.0.1:64708#] Decode packet body,revert packet,buffer:178,error:unsupported packet type: 0
+2025-01-30T03:50:21.309+0800 FATAL [127.0.0.1:64708#] Connection traffic error:unsupported packet type: 0
+2025-01-30T03:51:02.470+0800 DEBUG HeartbeatHandler init
+2025-01-30T03:51:02.471+0800 INFO BrokerOption:{"name":"192.168.1.103:7539","tickInterval":30000000000,"heartbeatInterval":30000000000}
+2025-01-30T03:51:02.471+0800 DEBUG default logging level is INFO
+2025-01-30T03:51:02.471+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-30T03:51:02.471+0800 INFO BrokerInstance started
+2025-01-30T03:51:02.547+0800 INFO BrokerInfo set,key:im:broker:192.168.1.103:7539,result:OK,error:<nil>
+2025-01-30T03:51:05.691+0800 INFO [127.0.0.1:64771#] Connection open
+2025-01-30T03:51:05.692+0800 INFO [127.0.0.1:64771#] HeartbeatTask started
+2025-01-30T03:51:06.693+0800 INFO [127.0.0.1:64771#] Connection traffic
+2025-01-30T03:51:06.693+0800 INFO [127.0.0.1:64771#] Decode length field,buffer:8
+2025-01-30T03:51:06.693+0800 INFO [127.0.0.1:64771#] Decode length field,buffer:4,value:4
+2025-01-30T03:51:06.693+0800 INFO [127.0.0.1:64771#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:51:06.693+0800 INFO [127.0.0.1:64771#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:51:07.692+0800 INFO [127.0.0.1:64771#] Connection traffic
+2025-01-30T03:51:07.692+0800 INFO [127.0.0.1:64771#] Decode length field,buffer:8
+2025-01-30T03:51:07.692+0800 INFO [127.0.0.1:64771#] Decode length field,buffer:4,value:4
+2025-01-30T03:51:07.692+0800 INFO [127.0.0.1:64771#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:51:07.692+0800 INFO [127.0.0.1:64771#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:51:08.692+0800 INFO [127.0.0.1:64771#] Connection traffic
+2025-01-30T03:51:08.692+0800 INFO [127.0.0.1:64771#] Decode length field,buffer:8
+2025-01-30T03:51:08.692+0800 INFO [127.0.0.1:64771#] Decode length field,buffer:4,value:4
+2025-01-30T03:51:08.692+0800 INFO [127.0.0.1:64771#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:51:08.692+0800 INFO [127.0.0.1:64771#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:51:08.704+0800 INFO [127.0.0.1:64771#] Connection traffic
+2025-01-30T03:51:08.704+0800 INFO [127.0.0.1:64771#] Decode length field,buffer:358
+2025-01-30T03:51:08.704+0800 INFO [127.0.0.1:64771#] Decode length field,buffer:354,value:177
+2025-01-30T03:51:38.356+0800 INFO [127.0.0.1:64771#] HeartbeatTask ticking,now:1738180294511,last:1738180268692,interval:10000
+2025-01-30T03:51:46.375+0800 INFO [127.0.0.1:64771#] HeartbeatTask closed
+2025-01-30T03:51:46.375+0800 INFO [127.0.0.1:64771#] HeartbeatTask ticking,now:1738180306375,last:1738180268692,interval:10000
+2025-01-30T03:51:46.375+0800 INFO [127.0.0.1:64771#] HeartbeatTask done
+2025-01-30T03:52:28.702+0800 ERROR [127.0.0.1:64771#] Decode packet body,revert packet,buffer:177,error:unsupported packet type: 0
+2025-01-30T03:52:28.702+0800 FATAL [127.0.0.1:64771#] Connection traffic error:unsupported packet type: 0
+2025-01-30T03:55:29.430+0800 DEBUG HeartbeatHandler init
+2025-01-30T03:55:29.430+0800 INFO BrokerOption:{"name":"192.168.1.103:7539","tickInterval":30000000000,"heartbeatInterval":30000000000}
+2025-01-30T03:55:29.430+0800 DEBUG default logging level is INFO
+2025-01-30T03:55:29.431+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-30T03:55:29.431+0800 INFO BrokerInstance started
+2025-01-30T03:55:29.489+0800 INFO BrokerInfo set,key:im:broker:192.168.1.103:7539,result:OK,error:<nil>
+2025-01-30T03:55:32.610+0800 INFO [127.0.0.1:64925#] Connection open
+2025-01-30T03:55:32.610+0800 INFO [127.0.0.1:64925#] HeartbeatTask started
+2025-01-30T03:55:33.611+0800 INFO [127.0.0.1:64925#] Connection traffic
+2025-01-30T03:55:33.612+0800 INFO [127.0.0.1:64925#] Decode length field,buffer:8
+2025-01-30T03:55:33.612+0800 INFO [127.0.0.1:64925#] Decode length field,buffer:4,value:4
+2025-01-30T03:55:33.612+0800 INFO [127.0.0.1:64925#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:55:33.612+0800 INFO [127.0.0.1:64925#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:55:34.611+0800 INFO [127.0.0.1:64925#] Connection traffic
+2025-01-30T03:55:34.611+0800 INFO [127.0.0.1:64925#] Decode length field,buffer:8
+2025-01-30T03:55:34.611+0800 INFO [127.0.0.1:64925#] Decode length field,buffer:4,value:4
+2025-01-30T03:55:34.611+0800 INFO [127.0.0.1:64925#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:55:34.611+0800 INFO [127.0.0.1:64925#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:55:34.825+0800 INFO [127.0.0.1:64925#] Connection traffic
+2025-01-30T03:55:34.825+0800 INFO [127.0.0.1:64925#] Decode length field,buffer:358
+2025-01-30T03:55:34.825+0800 INFO [127.0.0.1:64925#] Decode length field,buffer:354,value:177
+2025-01-30T03:55:34.825+0800 ERROR [127.0.0.1:64925#] Decode packet body,unmarshal packet,buffer:177,error:proto: cannot parse invalid wire-format data
+2025-01-30T03:55:34.825+0800 FATAL [127.0.0.1:64925#] Connection traffic error:proto: cannot parse invalid wire-format data
+2025-01-30T03:56:14.157+0800 DEBUG HeartbeatHandler init
+2025-01-30T03:56:14.157+0800 INFO BrokerOption:{"name":"192.168.1.103:7539","tickInterval":30000000000,"heartbeatInterval":30000000000}
+2025-01-30T03:56:14.157+0800 DEBUG default logging level is INFO
+2025-01-30T03:56:14.157+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-30T03:56:14.157+0800 INFO BrokerInstance started
+2025-01-30T03:56:14.228+0800 INFO BrokerInfo set,key:im:broker:192.168.1.103:7539,result:OK,error:<nil>
+2025-01-30T03:56:18.740+0800 INFO [127.0.0.1:64955#] Connection open
+2025-01-30T03:56:18.740+0800 INFO [127.0.0.1:64955#] HeartbeatTask started
+2025-01-30T03:56:19.741+0800 INFO [127.0.0.1:64955#] Connection traffic
+2025-01-30T03:56:19.743+0800 INFO [127.0.0.1:64955#] Decode length field,buffer:8
+2025-01-30T03:56:19.743+0800 INFO [127.0.0.1:64955#] Decode length field,buffer:4,value:4
+2025-01-30T03:56:19.743+0800 INFO [127.0.0.1:64955#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:56:19.743+0800 INFO [127.0.0.1:64955#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:56:20.741+0800 INFO [127.0.0.1:64955#] Connection traffic
+2025-01-30T03:56:20.741+0800 INFO [127.0.0.1:64955#] Decode length field,buffer:8
+2025-01-30T03:56:20.741+0800 INFO [127.0.0.1:64955#] Decode length field,buffer:4,value:4
+2025-01-30T03:56:20.741+0800 INFO [127.0.0.1:64955#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T03:56:20.741+0800 INFO [127.0.0.1:64955#] HeartbeatTask setLastHeartbeat
+2025-01-30T03:56:21.065+0800 INFO [127.0.0.1:64955#] Connection traffic
+2025-01-30T03:56:21.066+0800 INFO [127.0.0.1:64955#] Decode length field,buffer:358
+2025-01-30T03:56:21.066+0800 INFO [127.0.0.1:64955#] Decode length field,buffer:354,value:177
+2025-01-30T03:56:39.755+0800 INFO [127.0.0.1:64955#] HeartbeatTask ticking,now:1738180599290,last:1738180580741,interval:10000
+2025-01-30T03:56:43.657+0800 INFO [127.0.0.1:64955#] HeartbeatTask closed
+2025-01-30T03:56:43.657+0800 INFO [127.0.0.1:64955#] HeartbeatTask done
+2025-01-30T03:56:43.657+0800 ERROR [127.0.0.1:64955#] Decode packet body,unmarshal packet,buffer:177,error:proto: cannot parse invalid wire-format data
+2025-01-30T03:57:03.443+0800 FATAL [127.0.0.1:64955#] Connection traffic error:proto: cannot parse invalid wire-format data
+2025-01-30T04:02:22.736+0800 DEBUG HeartbeatHandler init
+2025-01-30T04:02:22.737+0800 INFO BrokerOption:{"name":"192.168.1.103:7539","tickInterval":30000000000,"heartbeatInterval":30000000000}
+2025-01-30T04:02:22.737+0800 DEBUG default logging level is INFO
+2025-01-30T04:02:22.737+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-30T04:02:22.737+0800 INFO BrokerInstance started
+2025-01-30T04:02:22.858+0800 INFO BrokerInfo set,key:im:broker:192.168.1.103:7539,result:OK,error:<nil>
+2025-01-30T04:02:26.748+0800 INFO [127.0.0.1:49158#] Connection open
+2025-01-30T04:02:26.748+0800 INFO [127.0.0.1:49158#] HeartbeatTask started
+2025-01-30T04:02:27.749+0800 INFO [127.0.0.1:49158#] Connection traffic
+2025-01-30T04:02:27.750+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:8
+2025-01-30T04:02:27.750+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:4,value:4
+2025-01-30T04:02:27.750+0800 INFO [127.0.0.1:49158#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T04:02:27.750+0800 INFO [127.0.0.1:49158#] HeartbeatTask setLastHeartbeat
+2025-01-30T04:02:28.749+0800 INFO [127.0.0.1:49158#] Connection traffic
+2025-01-30T04:02:28.749+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:8
+2025-01-30T04:02:28.749+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:4,value:4
+2025-01-30T04:02:28.749+0800 INFO [127.0.0.1:49158#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T04:02:28.749+0800 INFO [127.0.0.1:49158#] HeartbeatTask setLastHeartbeat
+2025-01-30T04:02:28.958+0800 INFO [127.0.0.1:49158#] Connection traffic
+2025-01-30T04:02:28.958+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:181
+2025-01-30T04:02:28.958+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:177,value:177
+2025-01-30T04:02:38.858+0800 INFO [127.0.0.1:49158#] Decode packet body,buffer:0,length:[123 34 105 100 34 58 34 99 117 100 56 105 108 54 49 97 51 55 106 101 54 105 110 109 97 48 48 34 44 34 97 112 112 73 100 34 58 34 83 84 65 82 84 83 80 65 67 69 34 44 34 117 115 101 114 73 100 34 58 34 115 100 105 102 101 106 114 106 101 114 115 100 102 34 44 34 102 108 111 119 34 58 49 44 34 110 101 101 100 65 99 107 34 58 49 44 34 116 121 112 101 34 58 51 44 34 99 84 105 109 101 34 58 49 50 49 50 51 49 50 51 44 34 115 84 105 109 101 34 58 49 50 49 50 51 49 50 51 44 34 98 111 100 121 34 58 123 34 109 84 121 112 101 34 58 34 116 101 120 116 34 44 34 99 73 100 34 58 34 115 100 102 115 100 102 34 44 34 116 111 34 58 34 115 100 102 115 100 102 34 44 34 103 114 111 117 112 73 100 34 58 34 34 44 34 116 84 121 112 101 34 58 49 44 34 115 101 113 117 101 110 99 101 34 58 49 48 48 44 34 99 111 110 116 101 110 116 34 58 123 34 116 101 120 116 34 58 34 49 50 49 50 34 125 44 34 97 116 34 58 110 117 108 108 44 34 114 101 102 101 114 34 58 110 117 108 108 125 125]
+2025-01-30T04:02:38.858+0800 INFO [127.0.0.1:49158#] Connection traffic
+2025-01-30T04:02:38.858+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:80
+2025-01-30T04:02:38.858+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:76,value:4
+2025-01-30T04:02:38.858+0800 INFO [127.0.0.1:49158#] Decode heartbeat body,buffer:72,value:12
+2025-01-30T04:02:38.858+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:68,value:4
+2025-01-30T04:02:38.858+0800 INFO [127.0.0.1:49158#] Decode heartbeat body,buffer:64,value:12
+2025-01-30T04:02:38.858+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:60,value:4
+2025-01-30T04:02:38.858+0800 INFO [127.0.0.1:49158#] Decode heartbeat body,buffer:56,value:12
+2025-01-30T04:02:38.858+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:52,value:4
+2025-01-30T04:02:38.858+0800 INFO [127.0.0.1:49158#] Decode heartbeat body,buffer:48,value:12
+2025-01-30T04:02:38.858+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:44,value:4
+2025-01-30T04:02:38.858+0800 INFO [127.0.0.1:49158#] Decode heartbeat body,buffer:40,value:12
+2025-01-30T04:02:38.858+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:36,value:4
+2025-01-30T04:02:38.858+0800 INFO [127.0.0.1:49158#] Decode heartbeat body,buffer:32,value:12
+2025-01-30T04:02:38.858+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:28,value:4
+2025-01-30T04:02:38.858+0800 INFO [127.0.0.1:49158#] Decode heartbeat body,buffer:24,value:12
+2025-01-30T04:02:38.858+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:20,value:4
+2025-01-30T04:02:38.858+0800 INFO [127.0.0.1:49158#] Decode heartbeat body,buffer:16,value:12
+2025-01-30T04:02:38.858+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:12,value:4
+2025-01-30T04:02:38.858+0800 INFO [127.0.0.1:49158#] Decode heartbeat body,buffer:8,value:12
+2025-01-30T04:02:38.858+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:4,value:4
+2025-01-30T04:02:38.858+0800 INFO [127.0.0.1:49158#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T04:02:38.858+0800 INFO [127.0.0.1:49158#] HeartbeatTask setLastHeartbeat
+2025-01-30T04:02:38.858+0800 INFO [127.0.0.1:49158#] HeartbeatTask setLastHeartbeat
+2025-01-30T04:02:38.858+0800 INFO [127.0.0.1:49158#] HeartbeatTask setLastHeartbeat
+2025-01-30T04:02:38.858+0800 INFO [127.0.0.1:49158#] HeartbeatTask setLastHeartbeat
+2025-01-30T04:02:38.858+0800 INFO [127.0.0.1:49158#] HeartbeatTask setLastHeartbeat
+2025-01-30T04:02:38.858+0800 INFO [127.0.0.1:49158#] HeartbeatTask setLastHeartbeat
+2025-01-30T04:02:38.858+0800 INFO [127.0.0.1:49158#] HeartbeatTask setLastHeartbeat
+2025-01-30T04:02:38.858+0800 INFO [127.0.0.1:49158#] HeartbeatTask setLastHeartbeat
+2025-01-30T04:02:38.858+0800 INFO [127.0.0.1:49158#] HeartbeatTask setLastHeartbeat
+2025-01-30T04:02:38.858+0800 INFO [127.0.0.1:49158#] HeartbeatTask setLastHeartbeat
+2025-01-30T04:02:39.749+0800 INFO [127.0.0.1:49158#] Connection traffic
+2025-01-30T04:02:39.749+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:8
+2025-01-30T04:02:39.749+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:4,value:4
+2025-01-30T04:02:39.749+0800 INFO [127.0.0.1:49158#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T04:02:39.749+0800 INFO [127.0.0.1:49158#] HeartbeatTask setLastHeartbeat
+2025-01-30T04:02:40.749+0800 INFO [127.0.0.1:49158#] Connection traffic
+2025-01-30T04:02:40.749+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:8
+2025-01-30T04:02:40.749+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:4,value:4
+2025-01-30T04:02:40.749+0800 INFO [127.0.0.1:49158#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T04:02:40.749+0800 INFO [127.0.0.1:49158#] HeartbeatTask setLastHeartbeat
+2025-01-30T04:02:41.749+0800 INFO [127.0.0.1:49158#] Connection traffic
+2025-01-30T04:02:41.749+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:8
+2025-01-30T04:02:41.749+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:4,value:4
+2025-01-30T04:02:41.749+0800 INFO [127.0.0.1:49158#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T04:02:41.749+0800 INFO [127.0.0.1:49158#] HeartbeatTask setLastHeartbeat
+2025-01-30T04:02:42.749+0800 INFO [127.0.0.1:49158#] Connection traffic
+2025-01-30T04:02:42.749+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:8
+2025-01-30T04:02:42.749+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:4,value:4
+2025-01-30T04:02:42.749+0800 INFO [127.0.0.1:49158#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T04:02:42.749+0800 INFO [127.0.0.1:49158#] HeartbeatTask setLastHeartbeat
+2025-01-30T04:02:43.748+0800 INFO [127.0.0.1:49158#] Connection traffic
+2025-01-30T04:02:43.749+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:8
+2025-01-30T04:02:43.749+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:4,value:4
+2025-01-30T04:02:43.749+0800 INFO [127.0.0.1:49158#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T04:02:43.749+0800 INFO [127.0.0.1:49158#] HeartbeatTask setLastHeartbeat
+2025-01-30T04:02:44.749+0800 INFO [127.0.0.1:49158#] Connection traffic
+2025-01-30T04:02:44.749+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:8
+2025-01-30T04:02:44.749+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:4,value:4
+2025-01-30T04:02:44.749+0800 INFO [127.0.0.1:49158#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T04:02:44.749+0800 INFO [127.0.0.1:49158#] HeartbeatTask setLastHeartbeat
+2025-01-30T04:02:45.749+0800 INFO [127.0.0.1:49158#] Connection traffic
+2025-01-30T04:02:45.749+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:8
+2025-01-30T04:02:45.749+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:4,value:4
+2025-01-30T04:02:45.749+0800 INFO [127.0.0.1:49158#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T04:02:45.749+0800 INFO [127.0.0.1:49158#] HeartbeatTask setLastHeartbeat
+2025-01-30T04:02:46.749+0800 INFO [127.0.0.1:49158#] Connection traffic
+2025-01-30T04:02:46.749+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:8
+2025-01-30T04:02:46.749+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:4,value:4
+2025-01-30T04:02:46.749+0800 INFO [127.0.0.1:49158#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T04:02:46.749+0800 INFO [127.0.0.1:49158#] HeartbeatTask setLastHeartbeat
+2025-01-30T04:02:47.748+0800 INFO [127.0.0.1:49158#] Connection traffic
+2025-01-30T04:02:47.749+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:8
+2025-01-30T04:02:47.749+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:4,value:4
+2025-01-30T04:02:47.749+0800 INFO [127.0.0.1:49158#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T04:02:47.749+0800 INFO [127.0.0.1:49158#] HeartbeatTask setLastHeartbeat
+2025-01-30T04:02:48.748+0800 INFO [127.0.0.1:49158#] Connection traffic
+2025-01-30T04:02:48.749+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:8
+2025-01-30T04:02:48.749+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:4,value:4
+2025-01-30T04:02:48.749+0800 INFO [127.0.0.1:49158#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T04:02:48.749+0800 INFO [127.0.0.1:49158#] HeartbeatTask setLastHeartbeat
+2025-01-30T04:02:49.749+0800 INFO [127.0.0.1:49158#] Connection traffic
+2025-01-30T04:02:49.749+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:8
+2025-01-30T04:02:49.749+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:4,value:4
+2025-01-30T04:02:49.749+0800 INFO [127.0.0.1:49158#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T04:02:49.749+0800 INFO [127.0.0.1:49158#] HeartbeatTask setLastHeartbeat
+2025-01-30T04:02:50.748+0800 INFO [127.0.0.1:49158#] Connection traffic
+2025-01-30T04:02:50.748+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:8
+2025-01-30T04:02:50.748+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:4,value:4
+2025-01-30T04:02:50.748+0800 INFO [127.0.0.1:49158#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T04:02:50.748+0800 INFO [127.0.0.1:49158#] HeartbeatTask setLastHeartbeat
+2025-01-30T04:02:51.748+0800 INFO [127.0.0.1:49158#] Connection traffic
+2025-01-30T04:02:51.749+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:8
+2025-01-30T04:02:51.749+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:4,value:4
+2025-01-30T04:02:51.749+0800 INFO [127.0.0.1:49158#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T04:02:51.749+0800 INFO [127.0.0.1:49158#] HeartbeatTask setLastHeartbeat
+2025-01-30T04:02:52.748+0800 INFO [127.0.0.1:49158#] Connection traffic
+2025-01-30T04:02:52.748+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:8
+2025-01-30T04:02:52.748+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:4,value:4
+2025-01-30T04:02:52.748+0800 INFO [127.0.0.1:49158#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T04:02:52.748+0800 INFO [127.0.0.1:49158#] HeartbeatTask setLastHeartbeat
+2025-01-30T04:02:53.749+0800 INFO [127.0.0.1:49158#] Connection traffic
+2025-01-30T04:02:53.749+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:8
+2025-01-30T04:02:53.749+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:4,value:4
+2025-01-30T04:02:53.749+0800 INFO [127.0.0.1:49158#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T04:02:53.749+0800 INFO [127.0.0.1:49158#] HeartbeatTask setLastHeartbeat
+2025-01-30T04:02:54.749+0800 INFO [127.0.0.1:49158#] Connection traffic
+2025-01-30T04:02:54.749+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:8
+2025-01-30T04:02:54.749+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:4,value:4
+2025-01-30T04:02:54.749+0800 INFO [127.0.0.1:49158#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T04:02:54.749+0800 INFO [127.0.0.1:49158#] HeartbeatTask setLastHeartbeat
+2025-01-30T04:02:55.748+0800 INFO [127.0.0.1:49158#] Connection traffic
+2025-01-30T04:02:55.748+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:8
+2025-01-30T04:02:55.748+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:4,value:4
+2025-01-30T04:02:55.748+0800 INFO [127.0.0.1:49158#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T04:02:55.748+0800 INFO [127.0.0.1:49158#] HeartbeatTask setLastHeartbeat
+2025-01-30T04:02:56.748+0800 INFO [127.0.0.1:49158#] Connection traffic
+2025-01-30T04:02:56.748+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:8
+2025-01-30T04:02:56.748+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:4,value:4
+2025-01-30T04:02:56.748+0800 INFO [127.0.0.1:49158#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T04:02:56.748+0800 INFO [127.0.0.1:49158#] HeartbeatTask setLastHeartbeat
+2025-01-30T04:02:57.749+0800 INFO [127.0.0.1:49158#] Connection traffic
+2025-01-30T04:02:57.749+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:8
+2025-01-30T04:02:57.749+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:4,value:4
+2025-01-30T04:02:57.749+0800 INFO [127.0.0.1:49158#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T04:02:57.749+0800 INFO [127.0.0.1:49158#] HeartbeatTask setLastHeartbeat
+2025-01-30T04:02:58.749+0800 INFO [127.0.0.1:49158#] Connection traffic
+2025-01-30T04:02:58.749+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:8
+2025-01-30T04:02:58.749+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:4,value:4
+2025-01-30T04:02:58.749+0800 INFO [127.0.0.1:49158#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T04:02:58.749+0800 INFO [127.0.0.1:49158#] HeartbeatTask setLastHeartbeat
+2025-01-30T04:02:59.748+0800 INFO [127.0.0.1:49158#] Connection traffic
+2025-01-30T04:02:59.749+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:8
+2025-01-30T04:02:59.749+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:4,value:4
+2025-01-30T04:02:59.749+0800 INFO [127.0.0.1:49158#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T04:02:59.749+0800 INFO [127.0.0.1:49158#] HeartbeatTask setLastHeartbeat
+2025-01-30T04:03:00.750+0800 INFO [127.0.0.1:49158#] Connection traffic
+2025-01-30T04:03:00.750+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:8
+2025-01-30T04:03:00.750+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:4,value:4
+2025-01-30T04:03:00.750+0800 INFO [127.0.0.1:49158#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T04:03:00.750+0800 INFO [127.0.0.1:49158#] HeartbeatTask setLastHeartbeat
+2025-01-30T04:03:01.749+0800 INFO [127.0.0.1:49158#] Connection traffic
+2025-01-30T04:03:01.749+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:8
+2025-01-30T04:03:01.749+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:4,value:4
+2025-01-30T04:03:01.749+0800 INFO [127.0.0.1:49158#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T04:03:01.749+0800 INFO [127.0.0.1:49158#] HeartbeatTask setLastHeartbeat
+2025-01-30T04:03:02.748+0800 INFO [127.0.0.1:49158#] Connection traffic
+2025-01-30T04:03:02.748+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:8
+2025-01-30T04:03:02.748+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:4,value:4
+2025-01-30T04:03:02.748+0800 INFO [127.0.0.1:49158#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T04:03:02.748+0800 INFO [127.0.0.1:49158#] HeartbeatTask setLastHeartbeat
+2025-01-30T04:03:03.748+0800 INFO [127.0.0.1:49158#] Connection traffic
+2025-01-30T04:03:03.749+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:8
+2025-01-30T04:03:03.749+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:4,value:4
+2025-01-30T04:03:03.749+0800 INFO [127.0.0.1:49158#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T04:03:03.749+0800 INFO [127.0.0.1:49158#] HeartbeatTask setLastHeartbeat
+2025-01-30T04:03:04.748+0800 INFO [127.0.0.1:49158#] Connection traffic
+2025-01-30T04:03:04.748+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:8
+2025-01-30T04:03:04.748+0800 INFO [127.0.0.1:49158#] Decode length field,buffer:4,value:4
+2025-01-30T04:03:04.748+0800 INFO [127.0.0.1:49158#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T04:03:04.748+0800 INFO [127.0.0.1:49158#] HeartbeatTask setLastHeartbeat
+2025-01-30T04:03:05.385+0800 INFO [127.0.0.1:49158#] HeartbeatTask closed
+2025-01-30T04:03:05.385+0800 INFO [127.0.0.1:49158#] Connection close
+2025-01-30T04:03:05.385+0800 INFO [127.0.0.1:49158#] HeartbeatTask done
+2025-01-30T04:03:23.746+0800 DEBUG HeartbeatHandler init
+2025-01-30T04:03:23.747+0800 INFO BrokerOption:{"name":"192.168.1.103:7539","tickInterval":30000000000,"heartbeatInterval":30000000000}
+2025-01-30T04:03:23.747+0800 DEBUG default logging level is INFO
+2025-01-30T04:03:23.747+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-30T04:03:23.747+0800 INFO BrokerInstance started
+2025-01-30T04:03:23.806+0800 INFO BrokerInfo set,key:im:broker:192.168.1.103:7539,result:OK,error:<nil>
+2025-01-30T04:03:25.640+0800 INFO [127.0.0.1:49220#] Connection open
+2025-01-30T04:03:25.641+0800 INFO [127.0.0.1:49220#] HeartbeatTask started
+2025-01-30T04:03:26.642+0800 INFO [127.0.0.1:49220#] Connection traffic
+2025-01-30T04:03:26.643+0800 INFO [127.0.0.1:49220#] Decode length field,buffer:8
+2025-01-30T04:03:26.643+0800 INFO [127.0.0.1:49220#] Decode length field,buffer:4,value:4
+2025-01-30T04:03:26.643+0800 INFO [127.0.0.1:49220#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T04:03:26.643+0800 INFO [127.0.0.1:49220#] HeartbeatTask setLastHeartbeat
+2025-01-30T04:03:27.642+0800 INFO [127.0.0.1:49220#] Connection traffic
+2025-01-30T04:03:27.642+0800 INFO [127.0.0.1:49220#] Decode length field,buffer:8
+2025-01-30T04:03:27.642+0800 INFO [127.0.0.1:49220#] Decode length field,buffer:4,value:4
+2025-01-30T04:03:27.642+0800 INFO [127.0.0.1:49220#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T04:03:27.643+0800 INFO [127.0.0.1:49220#] HeartbeatTask setLastHeartbeat
+2025-01-30T04:03:28.424+0800 INFO [127.0.0.1:49220#] Connection traffic
+2025-01-30T04:03:28.424+0800 INFO [127.0.0.1:49220#] Decode length field,buffer:181
+2025-01-30T04:03:28.424+0800 INFO [127.0.0.1:49220#] Decode length field,buffer:177,value:177
+2025-01-30T04:03:28.425+0800 INFO [127.0.0.1:49220#] Decode packet body,buffer:0,value:{"id":"cud8j461a37jeik8mgt0","appId":"STARTSPACE","userId":"sdifejrjersdf","flow":1,"needAck":1,"type":3,"cTime":12123123,"sTime":12123123,"body":{"mType":"text","cId":"sdfsdf","to":"sdfsdf","groupId":"","tType":1,"sequence":100,"content":{"text":"1212"},"at":null,"refer":null}}
+2025-01-30T04:03:28.641+0800 INFO [127.0.0.1:49220#] Connection traffic
+2025-01-30T04:03:28.641+0800 INFO [127.0.0.1:49220#] Decode length field,buffer:8
+2025-01-30T04:03:28.641+0800 INFO [127.0.0.1:49220#] Decode length field,buffer:4,value:4
+2025-01-30T04:03:28.641+0800 INFO [127.0.0.1:49220#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T04:03:28.641+0800 INFO [127.0.0.1:49220#] HeartbeatTask setLastHeartbeat
+2025-01-30T04:03:29.642+0800 INFO [127.0.0.1:49220#] Connection traffic
+2025-01-30T04:03:29.642+0800 INFO [127.0.0.1:49220#] Decode length field,buffer:8
+2025-01-30T04:03:29.642+0800 INFO [127.0.0.1:49220#] Decode length field,buffer:4,value:4
+2025-01-30T04:03:29.642+0800 INFO [127.0.0.1:49220#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T04:03:29.642+0800 INFO [127.0.0.1:49220#] HeartbeatTask setLastHeartbeat
+2025-01-30T04:03:30.641+0800 INFO [127.0.0.1:49220#] Connection traffic
+2025-01-30T04:03:30.642+0800 INFO [127.0.0.1:49220#] Decode length field,buffer:8
+2025-01-30T04:03:30.642+0800 INFO [127.0.0.1:49220#] Decode length field,buffer:4,value:4
+2025-01-30T04:03:30.642+0800 INFO [127.0.0.1:49220#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T04:03:30.642+0800 INFO [127.0.0.1:49220#] HeartbeatTask setLastHeartbeat
+2025-01-30T04:03:31.642+0800 INFO [127.0.0.1:49220#] Connection traffic
+2025-01-30T04:03:31.642+0800 INFO [127.0.0.1:49220#] Decode length field,buffer:8
+2025-01-30T04:03:31.642+0800 INFO [127.0.0.1:49220#] Decode length field,buffer:4,value:4
+2025-01-30T04:03:31.642+0800 INFO [127.0.0.1:49220#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T04:03:31.642+0800 INFO [127.0.0.1:49220#] HeartbeatTask setLastHeartbeat
+2025-01-30T04:03:32.642+0800 INFO [127.0.0.1:49220#] Connection traffic
+2025-01-30T04:03:32.642+0800 INFO [127.0.0.1:49220#] Decode length field,buffer:8
+2025-01-30T04:03:32.642+0800 INFO [127.0.0.1:49220#] Decode length field,buffer:4,value:4
+2025-01-30T04:03:32.642+0800 INFO [127.0.0.1:49220#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T04:03:32.642+0800 INFO [127.0.0.1:49220#] HeartbeatTask setLastHeartbeat
+2025-01-30T04:03:33.642+0800 INFO [127.0.0.1:49220#] Connection traffic
+2025-01-30T04:03:33.642+0800 INFO [127.0.0.1:49220#] Decode length field,buffer:8
+2025-01-30T04:03:33.642+0800 INFO [127.0.0.1:49220#] Decode length field,buffer:4,value:4
+2025-01-30T04:03:33.642+0800 INFO [127.0.0.1:49220#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T04:03:33.642+0800 INFO [127.0.0.1:49220#] HeartbeatTask setLastHeartbeat
+2025-01-30T04:03:34.641+0800 INFO [127.0.0.1:49220#] Connection traffic
+2025-01-30T04:03:34.641+0800 INFO [127.0.0.1:49220#] Decode length field,buffer:8
+2025-01-30T04:03:34.641+0800 INFO [127.0.0.1:49220#] Decode length field,buffer:4,value:4
+2025-01-30T04:03:34.641+0800 INFO [127.0.0.1:49220#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T04:03:34.642+0800 INFO [127.0.0.1:49220#] HeartbeatTask setLastHeartbeat
+2025-01-30T04:03:35.642+0800 INFO [127.0.0.1:49220#] Connection traffic
+2025-01-30T04:03:35.642+0800 INFO [127.0.0.1:49220#] Decode length field,buffer:8
+2025-01-30T04:03:35.642+0800 INFO [127.0.0.1:49220#] Decode length field,buffer:4,value:4
+2025-01-30T04:03:35.642+0800 INFO [127.0.0.1:49220#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T04:03:35.642+0800 INFO [127.0.0.1:49220#] HeartbeatTask setLastHeartbeat
+2025-01-30T04:03:36.641+0800 INFO [127.0.0.1:49220#] Connection traffic
+2025-01-30T04:03:36.642+0800 INFO [127.0.0.1:49220#] Decode length field,buffer:8
+2025-01-30T04:03:36.642+0800 INFO [127.0.0.1:49220#] Decode length field,buffer:4,value:4
+2025-01-30T04:03:36.642+0800 INFO [127.0.0.1:49220#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T04:03:36.642+0800 INFO [127.0.0.1:49220#] HeartbeatTask setLastHeartbeat
+2025-01-30T04:03:37.642+0800 INFO [127.0.0.1:49220#] Connection traffic
+2025-01-30T04:03:37.642+0800 INFO [127.0.0.1:49220#] Decode length field,buffer:8
+2025-01-30T04:03:37.642+0800 INFO [127.0.0.1:49220#] Decode length field,buffer:4,value:4
+2025-01-30T04:03:37.643+0800 INFO [127.0.0.1:49220#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T04:03:37.643+0800 INFO [127.0.0.1:49220#] HeartbeatTask setLastHeartbeat
+2025-01-30T04:03:38.642+0800 INFO [127.0.0.1:49220#] Connection traffic
+2025-01-30T04:03:38.642+0800 INFO [127.0.0.1:49220#] Decode length field,buffer:8
+2025-01-30T04:03:38.642+0800 INFO [127.0.0.1:49220#] Decode length field,buffer:4,value:4
+2025-01-30T04:03:38.642+0800 INFO [127.0.0.1:49220#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T04:03:38.642+0800 INFO [127.0.0.1:49220#] HeartbeatTask setLastHeartbeat
+2025-01-30T04:03:39.641+0800 INFO [127.0.0.1:49220#] Connection traffic
+2025-01-30T04:03:39.642+0800 INFO [127.0.0.1:49220#] Decode length field,buffer:8
+2025-01-30T04:03:39.642+0800 INFO [127.0.0.1:49220#] Decode length field,buffer:4,value:4
+2025-01-30T04:03:39.642+0800 INFO [127.0.0.1:49220#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T04:03:39.642+0800 INFO [127.0.0.1:49220#] HeartbeatTask setLastHeartbeat
+2025-01-30T04:03:40.642+0800 INFO [127.0.0.1:49220#] Connection traffic
+2025-01-30T04:03:40.642+0800 INFO [127.0.0.1:49220#] Decode length field,buffer:8
+2025-01-30T04:03:40.642+0800 INFO [127.0.0.1:49220#] Decode length field,buffer:4,value:4
+2025-01-30T04:03:40.642+0800 INFO [127.0.0.1:49220#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T04:03:40.642+0800 INFO [127.0.0.1:49220#] HeartbeatTask setLastHeartbeat
+2025-01-30T04:03:41.642+0800 INFO [127.0.0.1:49220#] Connection traffic
+2025-01-30T04:03:41.642+0800 INFO [127.0.0.1:49220#] Decode length field,buffer:8
+2025-01-30T04:03:41.642+0800 INFO [127.0.0.1:49220#] Decode length field,buffer:4,value:4
+2025-01-30T04:03:41.642+0800 INFO [127.0.0.1:49220#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T04:03:41.642+0800 INFO [127.0.0.1:49220#] HeartbeatTask setLastHeartbeat
+2025-01-30T04:03:42.642+0800 INFO [127.0.0.1:49220#] Connection traffic
+2025-01-30T04:03:42.642+0800 INFO [127.0.0.1:49220#] Decode length field,buffer:8
+2025-01-30T04:03:42.642+0800 INFO [127.0.0.1:49220#] Decode length field,buffer:4,value:4
+2025-01-30T04:03:42.642+0800 INFO [127.0.0.1:49220#] Decode heartbeat body,buffer:0,value:12
+2025-01-30T04:03:42.642+0800 INFO [127.0.0.1:49220#] HeartbeatTask setLastHeartbeat

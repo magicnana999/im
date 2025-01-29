@@ -170,7 +170,7 @@ func (l LengthFieldBasedFrameCodec) Decode(s *BrokerServer, c gnet.Conn) ([]*pro
 			}
 
 			var p pb.Packet
-			if e4 := proto.Unmarshal(b, &p); err != nil {
+			if e4 := proto.Unmarshal(b, &p); e4 != nil {
 
 				logger.ErrorF("[%s#%s] Decode packet body,unmarshal packet,buffer:%d,error:%v",
 					c.RemoteAddr().String(),
@@ -201,7 +201,7 @@ func (l LengthFieldBasedFrameCodec) Decode(s *BrokerServer, c gnet.Conn) ([]*pro
 
 			jb, _ := json.Marshal(packet)
 
-			logger.InfoF("[%s#%s] Decode packet body,buffer:%d,length:%d",
+			logger.InfoF("[%s#%s] Decode packet body,buffer:%d,value:%s",
 				c.RemoteAddr().String(),
 				user.Label(),
 				c.InboundBuffered(),
