@@ -33,13 +33,13 @@ func main() {
 	var wg sync.WaitGroup
 	wg.Add(3)
 
-	ctx, _ := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(context.Background())
 
 	go sendHeartbeat(ctx, conn, &wg)
 
 	//go readMessages(ctx, conn, &wg)
 
-	//go sendMessage(ctx, cancel, conn, &wg)
+	go sendMessage(ctx, cancel, conn, &wg)
 
 	wg.Wait()
 	fmt.Println("OK")
@@ -132,7 +132,7 @@ func sendHeartbeat(ctx context.Context, conn net.Conn, wg *sync.WaitGroup) {
 			if err != nil {
 				fmt.Println(err)
 			}
-			fmt.Println("发送心跳 4 12")
+			//fmt.Println("发送心跳 4 12")
 		case <-ctx.Done():
 			return
 		}

@@ -105,6 +105,8 @@ func (s *BrokerServer) OnClose(c gnet.Conn, err error) (action gnet.Action) {
 		logger.Error(err)
 	}
 
+	handler.DefaultHeartbeatHandler.StopTicker(c)
+
 	logger.InfoF("[%s#%s] Connection close", c.RemoteAddr().String(), user.Label())
 	return
 }
