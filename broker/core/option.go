@@ -7,6 +7,7 @@ const (
 )
 
 type Option struct {
-	Name     string
-	Interval time.Duration
+	Name              string        `json:"name"`
+	TickInterval      time.Duration `json:"tickInterval"`
+	HeartbeatInterval time.Duration `json:"heartbeatInterval"`
 }

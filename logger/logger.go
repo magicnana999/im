@@ -149,6 +149,10 @@ func Fatal(args ...interface{}) {
 type LoggerAdapter struct {
 }
 
+func (l LoggerAdapter) Printf(format string, args ...any) {
+	InfoF(format, args)
+}
+
 func (l LoggerAdapter) Debugf(format string, args ...any) {
 	DebugF(format, args...)
 }

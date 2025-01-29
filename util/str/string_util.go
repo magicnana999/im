@@ -1,9 +1,13 @@
 package str
 
-func IsNotBlank(s *string) bool {
-	return s != nil && *s != "" && *s != "nil"
+import "strings"
+
+func IsNotBlank(s string) bool {
+	str := strings.TrimSpace(s)
+	return str != "" && str != "nil"
 }
 
-func IsBlank(s *string) bool {
-	return s == nil || *s == "" || *s == "nil"
+func IsBlank(s string) bool {
+	str := strings.TrimSpace(s)
+	return str == "" || str == "nil"
 }

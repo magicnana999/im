@@ -1,11 +1,13 @@
 package enum
 
-type OSType uint8
+import "fmt"
+
+type OSType int
 
 const (
 	OSWindows OSType = iota + 1
 	MacOS
-	Linux
+	LinuxOS
 	OSIos
 	Xiaomi
 	Huawei
@@ -15,21 +17,49 @@ const (
 	Vivo
 )
 
-func (o OSType) Name() string {
-	if o.Valid() {
-		return [...]string{"Windows", "MacOS", "Linux", "iOS", "Xiaomi", "Huawei", "Samsung", "Honor", "Oppo", "Vivo"}[o-1]
-	}
-	return ""
+var osNames = [...]string{
+	"Windows", "MacOS", "Linux", "iOS", "Xiaomi", "Huawei", "Samsung", "Honor", "Oppo", "Vivo",
 }
 
-func (o OSType) Code() uint8 {
-	return uint8(o)
+func (o OSType) Name() string {
+	if o.Valid() {
+		return osNames[o-1]
+	}
+	return "Unknown"
+}
+
+func (o OSType) Code() int {
+	return int(o)
+}
+
+func (o OSType) GetParser() (EnumParser, error) {
+	return defaultOSTypeParser, nil
 }
 
 func (o OSType) Valid() bool {
-	return o.Code() >= uint8(OSWindows) && o.Code() <= uint8(Vivo)
+	return o >= OSWindows && o <= Vivo
 }
 
-func (o OSType) PushAvailable() bool {
-	return o.Code() >= uint8(OSIos)
+func (o OSType) GetDeviceType() DeviceType {
+	switch o.Code() {
+	case int(OSWindows), int(MacOS), int(LinuxOS):
+		return Desktop
+	case int(OSIos), int(Xiaomi), int(Huawei), int(Samsung), int(Honor), int(Oppo), int(Vivo):
+		return Mobile
+	default:
+		return DeviceType(0)
+	}
+}
+
+var (
+	defaultOSTypeParser = OSTypeParser{}
+)
+
+type OSTypeParser struct{}
+
+func (p OSTypeParser) Parse(code int) (any, error) {
+	if code >= int(OSWindows) && code <= int(Vivo) {
+		return OSType(code), nil
+	}
+	return nil, fmt.Errorf("invalid OSType code: %d", code)
 }

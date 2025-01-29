@@ -2,6 +2,11 @@ package enum
 
 type Enum interface {
 	Name() string
-	Code() uint8
+	Code() int
 	Valid() bool
+	GetParser() (EnumParser, error)
+}
+
+type EnumParser interface {
+	Parse(int) (any, error)
 }

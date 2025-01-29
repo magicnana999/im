@@ -1,5 +1,10 @@
 package protocol
 
+import (
+	"math/rand"
+	"time"
+)
+
 // Flow
 const (
 	FlowRequest int32 = iota + 1
@@ -8,7 +13,8 @@ const (
 
 // Type
 const (
-	TypeCommand int32 = iota + 1
+	TypeHeartbeat int32 = iota + 1
+	TypeCommand
 	TypeMessage
 	TypeNotice
 	TypeTips
@@ -20,6 +26,19 @@ const (
 	YES
 )
 
+var (
+	r               *rand.Rand
+	HeartbeatPacket *Packet
+)
+
+func init() {
+	r = rand.New(rand.NewSource(time.Now().UnixNano()))
+	HeartbeatPacket = &Packet{
+		Type: TypeHeartbeat,
+		Body: r.Uint32(),
+	}
+}
+
 type Packet struct {
 	Id      string `json:"id"`
 	AppId   string `json:"appId"`
@@ -30,4 +49,8 @@ type Packet struct {
 	CTime   int64  `json:"cTime"`
 	STime   int64  `json:"sTime"`
 	Body    any    `json:"body"`
+}
+
+func (p *Packet) IsHeartbeat() bool {
+	return p.Type == TypeHeartbeat
 }

@@ -77,25 +77,25 @@ func ConvertMessageContent(mType string, content any) (*anypb.Any, error) {
 	switch mType {
 	case protocol.MText:
 		src := content.(protocol.TextContent)
-		ret = &TextBody{
+		ret = &TextContent{
 			Text: src.Text,
 		}
 	case protocol.MImage:
 		src := content.(protocol.ImageContent)
-		ret = &ImageBody{
+		ret = &ImageContent{
 			Url:    src.Url,
 			Width:  src.Width,
 			Height: src.Height,
 		}
 	case protocol.MAudio:
 		src := content.(protocol.AudioContent)
-		ret = &AudioBody{
+		ret = &AudioContent{
 			Url:    src.Url,
 			Length: src.Length,
 		}
 	case protocol.MVideo:
 		src := content.(protocol.VideoContent)
-		ret = &VideoBody{
+		ret = &VideoContent{
 			Url:    src.Url,
 			Cover:  src.Cover,
 			Length: src.Length,
@@ -226,7 +226,7 @@ func RevertMessageContent(mType string, content *anypb.Any) (any, error) {
 	switch mType {
 	case protocol.MText:
 
-		var src TextBody
+		var src TextContent
 		if err := content.UnmarshalTo(&src); err != nil {
 			return nil, err
 		}
@@ -235,7 +235,7 @@ func RevertMessageContent(mType string, content *anypb.Any) (any, error) {
 			Text: src.Text,
 		}
 	case protocol.MImage:
-		var src ImageBody
+		var src ImageContent
 		if err := content.UnmarshalTo(&src); err != nil {
 			return nil, err
 		}
@@ -246,7 +246,7 @@ func RevertMessageContent(mType string, content *anypb.Any) (any, error) {
 			Height: src.Height,
 		}
 	case protocol.MAudio:
-		var src AudioBody
+		var src AudioContent
 		if err := content.UnmarshalTo(&src); err != nil {
 			return nil, err
 		}
@@ -255,7 +255,7 @@ func RevertMessageContent(mType string, content *anypb.Any) (any, error) {
 			Length: src.Length,
 		}
 	case protocol.MVideo:
-		var src VideoBody
+		var src VideoContent
 		if err := content.UnmarshalTo(&src); err != nil {
 			return nil, err
 		}
