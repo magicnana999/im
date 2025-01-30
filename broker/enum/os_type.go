@@ -33,7 +33,7 @@ func (o OSType) Code() int {
 }
 
 func (o OSType) GetParser() (EnumParser, error) {
-	return defaultOSTypeParser, nil
+	return DefaultOSTypeParser, nil
 }
 
 func (o OSType) Valid() bool {
@@ -52,7 +52,7 @@ func (o OSType) GetDeviceType() DeviceType {
 }
 
 var (
-	defaultOSTypeParser = OSTypeParser{}
+	DefaultOSTypeParser = OSTypeParser{}
 )
 
 type OSTypeParser struct{}

@@ -11,7 +11,7 @@ import (
 )
 
 func Test(t *testing.T) {
-	text, _ := anypb.New(&TextBody{
+	text, _ := anypb.New(&TextContent{
 		Text: "hello",
 	})
 

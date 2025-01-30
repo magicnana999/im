@@ -1,4 +1,9 @@
 /*
+
+╰$ cd broker/pb
+╰$ protoc --go_out=. packet.proto
+
+
     message的格式说明如下:
         消息由至少一个字段组合而成，类似于Go语言中的结构体，每个字段都有一定的格式
         （字段修饰符）数据类型 字段名称 = 唯一的编号标签值;
@@ -42,7 +47,7 @@ option go_package = "../pb";
 message Packet{
   string id = 1;
   string appId = 2;
-  string userId = 3;
+  int64 userId = 3;
   int32 flow = 4;
   int32 needAck = 5;
   int32 type = 6;
@@ -74,7 +79,7 @@ message Refer {
   string name = 2;
   string avatar = 3;
   string mType = 4;
-  google.protobuf.Any content = 5;  // For any type body
+  google.protobuf.Any content = 5;
 }
 
 message TextContent {
@@ -99,3 +104,45 @@ message VideoContent {
   int32 width = 4;
   int32 height = 5;
 }
+
+
+
+
+
+message CommandBody {
+  string mType = 1;
+  string token = 2;
+  int32 code = 3;
+  string message = 4;
+  google.protobuf.Any content = 5;
+}
+
+enum OSType {
+  UNKNOWN = 0;
+  OSWindows = 1;
+  MacOS = 2;
+  LinuxOS = 3;
+  OSIos = 4;
+  Xiaomi = 5;
+  Huawei = 6;
+  Samsung = 7;
+  Honor = 8;
+  Oppo = 9;
+  Vivo = 10;
+}
+
+message LoginContent {
+  string version = 1;
+  OSType os = 2;
+  string deviceId = 3;
+  string pushDeviceId = 4;
+}
+
+message LoginReply{
+  int64 userId = 1;
+}
+
+message LogoutContent {
+}
+
+

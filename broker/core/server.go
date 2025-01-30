@@ -45,7 +45,7 @@ func Start(ctx context.Context, option *Option) {
 		workerPool:        goPool.Default(),
 		heartbeatPool:     goPool.Default(),
 		ctx:               ctx,
-		interval:          option.TickInterval,
+		interval:          option.ServerInterval,
 		heartbeatInterval: option.HeartbeatInterval,
 	}
 	err := gnet.Run(ts, fmt.Sprintf("tcp://0.0.0.0:%s", DefaultPort),
@@ -90,7 +90,7 @@ func (s *BrokerServer) OnShutdown(eng gnet.Engine) {
 
 func (s *BrokerServer) OnOpen(c gnet.Conn) (out []byte, action gnet.Action) {
 	uc := state.EmptyUserConnection(c)
-	subCtx := context.WithValue(s.ctx, CurrentUser, &uc)
+	subCtx := context.WithValue(context.Background(), CurrentUser, &uc)
 	c.SetContext(subCtx)
 
 	logger.InfoF("[%s#%s] Connection open", c.RemoteAddr().String(), uc.Label())

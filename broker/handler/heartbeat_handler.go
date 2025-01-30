@@ -21,7 +21,8 @@ var DefaultHeartbeatHandler = &HeartbeatHandler{}
 
 type HeartbeatHandler struct {
 	heartbeatPool *goPool.Pool
-	m             sync.Map
+	m             map[int]*HeartbeatTask
+	mu            sync.RWMutex
 }
 
 func (h *HeartbeatHandler) HandlePacket(c gnet.Conn, packet *protocol.Packet) error {
@@ -55,19 +56,13 @@ func (h *HeartbeatHandler) InitHandler() {
 	}
 
 	DefaultHeartbeatHandler.heartbeatPool = defaultAntsPool
-	DefaultHeartbeatHandler.m = sync.Map{}
+	DefaultHeartbeatHandler.m = make(map[int]*HeartbeatTask)
 
 	logger.DebugF("HeartbeatHandler init")
 }
 
 func (h *HeartbeatHandler) Count() int {
-	count := 0
-	h.m.Range(func(key, value any) bool {
-		count++
-		return true
-	})
-
-	return count
+	return len(h.m)
 }
 
 func (h *HeartbeatHandler) StartTicker(ctx context.Context, c gnet.Conn, uc *state.UserConnection) error {
@@ -87,7 +82,9 @@ func (h *HeartbeatHandler) StartTicker(ctx context.Context, c gnet.Conn, uc *sta
 		},
 	}
 
-	h.m.Store(task.fd, task)
+	h.mu.Lock()
+	h.m[c.Fd()] = task
+	h.mu.Unlock()
 
 	h.heartbeatPool.Submit(func() {
 
@@ -130,32 +127,36 @@ func format(time time.Time) string {
 func (h *HeartbeatHandler) StopTicker(c gnet.Conn) error {
 	c.Close()
 
-	task, flag := h.m.Load(c.Fd())
+	h.mu.RLock()
+	task, flag := h.m[c.Fd()]
+	h.mu.RUnlock()
 
 	if !flag {
 		return nil
 	}
 
-	task.(*HeartbeatTask).cancel()
-	h.m.Delete(c.Fd())
+	task.cancel()
 
-	logger.InfoF("[%s#%s] HeartbeatTask closed",
-		task.(*HeartbeatTask).remoteAddr, task.(*HeartbeatTask).uc.Label())
+	h.mu.Lock()
+	delete(h.m, c.Fd())
+	h.mu.Unlock()
+
+	logger.InfoF("[%s#%s] HeartbeatTask closed", task.remoteAddr, task.uc.Label())
 
 	return nil
 }
 
 func (h *HeartbeatHandler) SetLastHeartbeat(c gnet.Conn) error {
-	task, flag := h.m.Load(c.Fd())
-
+	h.mu.RLock()
+	task, flag := h.m[c.Fd()]
+	h.mu.RUnlock()
 	if !flag {
 		return nil
 	}
 
-	task.(*HeartbeatTask).setLastHeartbeat()
+	task.setLastHeartbeat()
 
-	logger.InfoF("[%s#%s] HeartbeatTask setLastHeartbeat",
-		task.(*HeartbeatTask).remoteAddr, task.(*HeartbeatTask).uc.Label())
+	logger.InfoF("[%s#%s] HeartbeatTask setLastHeartbeat", task.remoteAddr, task.uc.Label())
 
 	return nil
 }

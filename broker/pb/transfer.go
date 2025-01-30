@@ -2,6 +2,7 @@ package pb
 
 import (
 	"fmt"
+	"github.com/magicnana999/im/broker/enum"
 	"github.com/magicnana999/im/broker/protocol"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/anypb"
@@ -55,7 +56,23 @@ func ConvertPacketBody(pType int32, body any) (*anypb.Any, error) {
 			return nil, err
 		}
 
-		if content, err := ConvertMessageContent(src.MType, src.Content); err == nil {
+		if content, err := ConvertContent(src.MType, src.Content); err == nil {
+			dest.Content = content
+		} else {
+			return nil, err
+		}
+		ret = dest
+	case protocol.TypeCommand:
+		src := body.(protocol.CommandBody)
+
+		dest := &CommandBody{
+			MType:   src.MType,
+			Token:   src.Token,
+			Code:    src.Code,
+			Message: src.Message,
+		}
+
+		if content, err := ConvertContent(src.MType, src.Content); err == nil {
 			dest.Content = content
 		} else {
 			return nil, err
@@ -72,7 +89,7 @@ func ConvertPacketBody(pType int32, body any) (*anypb.Any, error) {
 	}
 }
 
-func ConvertMessageContent(mType string, content any) (*anypb.Any, error) {
+func ConvertContent(mType string, content any) (*anypb.Any, error) {
 	var ret any
 	switch mType {
 	case protocol.MText:
@@ -102,6 +119,23 @@ func ConvertMessageContent(mType string, content any) (*anypb.Any, error) {
 			Width:  src.Width,
 			Height: src.Height,
 		}
+	case protocol.MLogin:
+		src := content.(protocol.LoginContent)
+
+		ret = &LoginContent{
+			Version:      src.Version,
+			Os:           OSType(int32(src.OS)),
+			DeviceId:     src.DeviceId,
+			PushDeviceId: src.PushDeviceId,
+		}
+	case protocol.MLoginReply:
+		src := content.(protocol.LoginReply)
+
+		ret = &LoginReply{
+			UserId: src.UserId,
+		}
+	case protocol.MLogout:
+		ret = &LogoutContent{}
 	default:
 		return nil, fmt.Errorf("unsupported message type: %v", mType)
 	}
@@ -144,7 +178,7 @@ func ConvertMessageRefer(src []*protocol.Refer) ([]*Refer, error) {
 			Avatar: refer.Avatar,
 		}
 
-		if referContent, err := ConvertMessageContent(refer.MType, refer.Content); err == nil {
+		if referContent, err := ConvertContent(refer.MType, refer.Content); err == nil {
 			referDest.MType = refer.MType
 			referDest.Content = referContent
 		} else {
@@ -207,7 +241,26 @@ func RevertPacketBody(pType int32, body *anypb.Any) (any, error) {
 			return nil, err
 		}
 
-		if content, err := RevertMessageContent(src.MType, src.Content); err == nil {
+		if content, err := RevertContent(src.MType, src.Content); err == nil {
+			dest.Content = content
+		} else {
+			return nil, err
+		}
+		ret = dest
+	case protocol.TypeCommand:
+		var src CommandBody
+		if err := body.UnmarshalTo(&src); err != nil {
+			return nil, err
+		}
+
+		dest := &protocol.CommandBody{
+			MType:   src.MType,
+			Token:   src.Token,
+			Code:    src.Code,
+			Message: src.Message,
+		}
+
+		if content, err := RevertContent(src.MType, src.Content); err == nil {
 			dest.Content = content
 		} else {
 			return nil, err
@@ -221,7 +274,7 @@ func RevertPacketBody(pType int32, body *anypb.Any) (any, error) {
 
 }
 
-func RevertMessageContent(mType string, content *anypb.Any) (any, error) {
+func RevertContent(mType string, content *anypb.Any) (any, error) {
 	var ret any
 	switch mType {
 	case protocol.MText:
@@ -266,6 +319,30 @@ func RevertMessageContent(mType string, content *anypb.Any) (any, error) {
 			Width:  src.Width,
 			Height: src.Height,
 		}
+	case protocol.MLogin:
+		var src LoginContent
+		if err := content.UnmarshalTo(&src); err != nil {
+			return nil, err
+		}
+
+		ret = &protocol.LoginContent{
+			Version:      src.Version,
+			OS:           enum.OSType(int32(src.Os)),
+			DeviceId:     src.DeviceId,
+			PushDeviceId: src.PushDeviceId,
+		}
+	case protocol.MLoginReply:
+		var src LoginReply
+		if err := content.UnmarshalTo(&src); err != nil {
+			return nil, err
+		}
+
+		ret = &protocol.LoginReply{
+			UserId: src.UserId,
+		}
+	case protocol.MLogout:
+		ret = &protocol.LogoutContent{}
+
 	default:
 		return nil, fmt.Errorf("unsupported message type: %v", mType)
 	}
@@ -302,7 +379,7 @@ func RevertMessageRefer(src []*Refer) ([]*protocol.Refer, error) {
 			Avatar: refer.Avatar,
 		}
 
-		if referContent, err := RevertMessageContent(refer.MType, refer.Content); err == nil {
+		if referContent, err := RevertContent(refer.MType, refer.Content); err == nil {
 			referDest.MType = refer.MType
 			referDest.Content = referContent
 		} else {

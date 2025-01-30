@@ -3,12 +3,13 @@ package pb
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/magicnana999/im/broker/enum"
 	"github.com/magicnana999/im/broker/protocol"
 	"github.com/magicnana999/im/util"
 	"testing"
 )
 
-func TestAll(t *testing.T) {
+func TestMessage(t *testing.T) {
 	packet := &protocol.Packet{
 		Id:    util.GenerateXId(),
 		AppId: "appId",
@@ -38,7 +39,47 @@ func TestAll(t *testing.T) {
 		var mb MessageBody
 		p.Body.UnmarshalTo(&mb)
 
-		var tt TextBody
+		var tt TextContent
+		mb.Content.UnmarshalTo(&tt)
+
+		fmt.Println(p)
+		fmt.Println(mb)
+		fmt.Println(tt)
+
+		if pp, e := RevertPacket(p); e == nil {
+			fmt.Println(pp)
+		} else {
+			fmt.Println(e)
+		}
+	}
+
+}
+
+func TestCommand(t *testing.T) {
+	packet := &protocol.Packet{
+		Id:    util.GenerateXId(),
+		AppId: "appId",
+		Type:  protocol.TypeCommand,
+		Body: protocol.CommandBody{
+			MType: protocol.MLogin,
+			Token: util.GenerateXId(),
+			Content: protocol.LoginContent{
+				Version:      "hello world",
+				OS:           enum.MacOS,
+				DeviceId:     util.GenerateXId(),
+				PushDeviceId: util.GenerateXId(),
+			},
+		},
+	}
+	if b, e := json.Marshal(packet); e == nil {
+		fmt.Println(string(b))
+	}
+
+	if p, err := ConvertPacket(packet); err == nil {
+		var mb CommandBody
+		p.Body.UnmarshalTo(&mb)
+
+		var tt LoginContent
 		mb.Content.UnmarshalTo(&tt)
 
 		fmt.Println(p)

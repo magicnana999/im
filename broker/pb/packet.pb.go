@@ -1,4 +1,9 @@
 //
+//
+//╰$ cd broker/pb
+//╰$ protoc --go_out=. packet.proto
+//
+//
 //message的格式说明如下:
 //消息由至少一个字段组合而成，类似于Go语言中的结构体，每个字段都有一定的格式
 //（字段修饰符）数据类型 字段名称 = 唯一的编号标签值;
@@ -51,11 +56,84 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type OSType int32
+
+const (
+	OSType_UNKNOWN   OSType = 0
+	OSType_OSWindows OSType = 1
+	OSType_MacOS     OSType = 2
+	OSType_LinuxOS   OSType = 3
+	OSType_OSIos     OSType = 4
+	OSType_Xiaomi    OSType = 5
+	OSType_Huawei    OSType = 6
+	OSType_Samsung   OSType = 7
+	OSType_Honor     OSType = 8
+	OSType_Oppo      OSType = 9
+	OSType_Vivo      OSType = 10
+)
+
+// Enum value maps for OSType.
+var (
+	OSType_name = map[int32]string{
+		0:  "UNKNOWN",
+		1:  "OSWindows",
+		2:  "MacOS",
+		3:  "LinuxOS",
+		4:  "OSIos",
+		5:  "Xiaomi",
+		6:  "Huawei",
+		7:  "Samsung",
+		8:  "Honor",
+		9:  "Oppo",
+		10: "Vivo",
+	}
+	OSType_value = map[string]int32{
+		"UNKNOWN":   0,
+		"OSWindows": 1,
+		"MacOS":     2,
+		"LinuxOS":   3,
+		"OSIos":     4,
+		"Xiaomi":    5,
+		"Huawei":    6,
+		"Samsung":   7,
+		"Honor":     8,
+		"Oppo":      9,
+		"Vivo":      10,
+	}
+)
+
+func (x OSType) Enum() *OSType {
+	p := new(OSType)
+	*p = x
+	return p
+}
+
+func (x OSType) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (OSType) Descriptor() protoreflect.EnumDescriptor {
+	return file_packet_proto_enumTypes[0].Descriptor()
+}
+
+func (OSType) Type() protoreflect.EnumType {
+	return &file_packet_proto_enumTypes[0]
+}
+
+func (x OSType) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use OSType.Descriptor instead.
+func (OSType) EnumDescriptor() ([]byte, []int) {
+	return file_packet_proto_rawDescGZIP(), []int{0}
+}
+
 type Packet struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	AppId         string                 `protobuf:"bytes,2,opt,name=appId,proto3" json:"appId,omitempty"`
-	UserId        string                 `protobuf:"bytes,3,opt,name=userId,proto3" json:"userId,omitempty"`
+	UserId        int64                  `protobuf:"varint,3,opt,name=userId,proto3" json:"userId,omitempty"`
 	Flow          int32                  `protobuf:"varint,4,opt,name=flow,proto3" json:"flow,omitempty"`
 	NeedAck       int32                  `protobuf:"varint,5,opt,name=needAck,proto3" json:"needAck,omitempty"`
 	Type          int32                  `protobuf:"varint,6,opt,name=type,proto3" json:"type,omitempty"`
@@ -110,11 +188,11 @@ func (x *Packet) GetAppId() string {
 	return ""
 }
 
-func (x *Packet) GetUserId() string {
+func (x *Packet) GetUserId() int64 {
 	if x != nil {
 		return x.UserId
 	}
-	return ""
+	return 0
 }
 
 func (x *Packet) GetFlow() int32 {
@@ -333,7 +411,7 @@ type Refer struct {
 	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
 	Avatar        string                 `protobuf:"bytes,3,opt,name=avatar,proto3" json:"avatar,omitempty"`
 	MType         string                 `protobuf:"bytes,4,opt,name=mType,proto3" json:"mType,omitempty"`
-	Content       *anypb.Any             `protobuf:"bytes,5,opt,name=content,proto3" json:"content,omitempty"` // For any type body
+	Content       *anypb.Any             `protobuf:"bytes,5,opt,name=content,proto3" json:"content,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -635,6 +713,230 @@ func (x *VideoContent) GetHeight() int32 {
 	return 0
 }
 
+type CommandBody struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	MType         string                 `protobuf:"bytes,1,opt,name=mType,proto3" json:"mType,omitempty"`
+	Token         string                 `protobuf:"bytes,2,opt,name=token,proto3" json:"token,omitempty"`
+	Code          int32                  `protobuf:"varint,3,opt,name=code,proto3" json:"code,omitempty"`
+	Message       string                 `protobuf:"bytes,4,opt,name=message,proto3" json:"message,omitempty"`
+	Content       *anypb.Any             `protobuf:"bytes,5,opt,name=content,proto3" json:"content,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CommandBody) Reset() {
+	*x = CommandBody{}
+	mi := &file_packet_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CommandBody) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CommandBody) ProtoMessage() {}
+
+func (x *CommandBody) ProtoReflect() protoreflect.Message {
+	mi := &file_packet_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CommandBody.ProtoReflect.Descriptor instead.
+func (*CommandBody) Descriptor() ([]byte, []int) {
+	return file_packet_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *CommandBody) GetMType() string {
+	if x != nil {
+		return x.MType
+	}
+	return ""
+}
+
+func (x *CommandBody) GetToken() string {
+	if x != nil {
+		return x.Token
+	}
+	return ""
+}
+
+func (x *CommandBody) GetCode() int32 {
+	if x != nil {
+		return x.Code
+	}
+	return 0
+}
+
+func (x *CommandBody) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+func (x *CommandBody) GetContent() *anypb.Any {
+	if x != nil {
+		return x.Content
+	}
+	return nil
+}
+
+type LoginContent struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Version       string                 `protobuf:"bytes,1,opt,name=version,proto3" json:"version,omitempty"`
+	Os            OSType                 `protobuf:"varint,2,opt,name=os,proto3,enum=pb.OSType" json:"os,omitempty"`
+	DeviceId      string                 `protobuf:"bytes,3,opt,name=deviceId,proto3" json:"deviceId,omitempty"`
+	PushDeviceId  string                 `protobuf:"bytes,4,opt,name=pushDeviceId,proto3" json:"pushDeviceId,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *LoginContent) Reset() {
+	*x = LoginContent{}
+	mi := &file_packet_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *LoginContent) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LoginContent) ProtoMessage() {}
+
+func (x *LoginContent) ProtoReflect() protoreflect.Message {
+	mi := &file_packet_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use LoginContent.ProtoReflect.Descriptor instead.
+func (*LoginContent) Descriptor() ([]byte, []int) {
+	return file_packet_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *LoginContent) GetVersion() string {
+	if x != nil {
+		return x.Version
+	}
+	return ""
+}
+
+func (x *LoginContent) GetOs() OSType {
+	if x != nil {
+		return x.Os
+	}
+	return OSType_UNKNOWN
+}
+
+func (x *LoginContent) GetDeviceId() string {
+	if x != nil {
+		return x.DeviceId
+	}
+	return ""
+}
+
+func (x *LoginContent) GetPushDeviceId() string {
+	if x != nil {
+		return x.PushDeviceId
+	}
+	return ""
+}
+
+type LoginReply struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        int64                  `protobuf:"varint,1,opt,name=userId,proto3" json:"userId,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *LoginReply) Reset() {
+	*x = LoginReply{}
+	mi := &file_packet_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *LoginReply) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LoginReply) ProtoMessage() {}
+
+func (x *LoginReply) ProtoReflect() protoreflect.Message {
+	mi := &file_packet_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use LoginReply.ProtoReflect.Descriptor instead.
+func (*LoginReply) Descriptor() ([]byte, []int) {
+	return file_packet_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *LoginReply) GetUserId() int64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+type LogoutContent struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *LogoutContent) Reset() {
+	*x = LogoutContent{}
+	mi := &file_packet_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *LogoutContent) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LogoutContent) ProtoMessage() {}
+
+func (x *LogoutContent) ProtoReflect() protoreflect.Message {
+	mi := &file_packet_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use LogoutContent.ProtoReflect.Descriptor instead.
+func (*LogoutContent) Descriptor() ([]byte, []int) {
+	return file_packet_proto_rawDescGZIP(), []int{11}
+}
+
 var File_packet_proto protoreflect.FileDescriptor
 
 var file_packet_proto_rawDesc = []byte{
@@ -644,7 +946,7 @@ var file_packet_proto_rawDesc = []byte{
 	0x0a, 0x06, 0x50, 0x61, 0x63, 0x6b, 0x65, 0x74, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01,
 	0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x64, 0x12, 0x14, 0x0a, 0x05, 0x61, 0x70, 0x70, 0x49,
 	0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x61, 0x70, 0x70, 0x49, 0x64, 0x12, 0x16,
-	0x0a, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x64, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06,
+	0x0a, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x64, 0x18, 0x03, 0x20, 0x01, 0x28, 0x03, 0x52, 0x06,
 	0x75, 0x73, 0x65, 0x72, 0x49, 0x64, 0x12, 0x12, 0x0a, 0x04, 0x66, 0x6c, 0x6f, 0x77, 0x18, 0x04,
 	0x20, 0x01, 0x28, 0x05, 0x52, 0x04, 0x66, 0x6c, 0x6f, 0x77, 0x12, 0x18, 0x0a, 0x07, 0x6e, 0x65,
 	0x65, 0x64, 0x41, 0x63, 0x6b, 0x18, 0x05, 0x20, 0x01, 0x28, 0x05, 0x52, 0x07, 0x6e, 0x65, 0x65,
@@ -703,8 +1005,38 @@ var file_packet_proto_rawDesc = []byte{
 	0x6c, 0x65, 0x6e, 0x67, 0x74, 0x68, 0x12, 0x14, 0x0a, 0x05, 0x77, 0x69, 0x64, 0x74, 0x68, 0x18,
 	0x04, 0x20, 0x01, 0x28, 0x05, 0x52, 0x05, 0x77, 0x69, 0x64, 0x74, 0x68, 0x12, 0x16, 0x0a, 0x06,
 	0x68, 0x65, 0x69, 0x67, 0x68, 0x74, 0x18, 0x05, 0x20, 0x01, 0x28, 0x05, 0x52, 0x06, 0x68, 0x65,
-	0x69, 0x67, 0x68, 0x74, 0x42, 0x07, 0x5a, 0x05, 0x2e, 0x2e, 0x2f, 0x70, 0x62, 0x62, 0x06, 0x70,
-	0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x69, 0x67, 0x68, 0x74, 0x22, 0x97, 0x01, 0x0a, 0x0b, 0x43, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64,
+	0x42, 0x6f, 0x64, 0x79, 0x12, 0x14, 0x0a, 0x05, 0x6d, 0x54, 0x79, 0x70, 0x65, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x05, 0x6d, 0x54, 0x79, 0x70, 0x65, 0x12, 0x14, 0x0a, 0x05, 0x74, 0x6f,
+	0x6b, 0x65, 0x6e, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x74, 0x6f, 0x6b, 0x65, 0x6e,
+	0x12, 0x12, 0x0a, 0x04, 0x63, 0x6f, 0x64, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x05, 0x52, 0x04,
+	0x63, 0x6f, 0x64, 0x65, 0x12, 0x18, 0x0a, 0x07, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x18,
+	0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x12, 0x2e,
+	0x0a, 0x07, 0x63, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x18, 0x05, 0x20, 0x01, 0x28, 0x0b, 0x32,
+	0x14, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75,
+	0x66, 0x2e, 0x41, 0x6e, 0x79, 0x52, 0x07, 0x63, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x22, 0x84,
+	0x01, 0x0a, 0x0c, 0x4c, 0x6f, 0x67, 0x69, 0x6e, 0x43, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x12,
+	0x18, 0x0a, 0x07, 0x76, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09,
+	0x52, 0x07, 0x76, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x12, 0x1a, 0x0a, 0x02, 0x6f, 0x73, 0x18,
+	0x02, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x0a, 0x2e, 0x70, 0x62, 0x2e, 0x4f, 0x53, 0x54, 0x79, 0x70,
+	0x65, 0x52, 0x02, 0x6f, 0x73, 0x12, 0x1a, 0x0a, 0x08, 0x64, 0x65, 0x76, 0x69, 0x63, 0x65, 0x49,
+	0x64, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x64, 0x65, 0x76, 0x69, 0x63, 0x65, 0x49,
+	0x64, 0x12, 0x22, 0x0a, 0x0c, 0x70, 0x75, 0x73, 0x68, 0x44, 0x65, 0x76, 0x69, 0x63, 0x65, 0x49,
+	0x64, 0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0c, 0x70, 0x75, 0x73, 0x68, 0x44, 0x65, 0x76,
+	0x69, 0x63, 0x65, 0x49, 0x64, 0x22, 0x24, 0x0a, 0x0a, 0x4c, 0x6f, 0x67, 0x69, 0x6e, 0x52, 0x65,
+	0x70, 0x6c, 0x79, 0x12, 0x16, 0x0a, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x64, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x03, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x64, 0x22, 0x0f, 0x0a, 0x0d, 0x4c,
+	0x6f, 0x67, 0x6f, 0x75, 0x74, 0x43, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x2a, 0x8b, 0x01, 0x0a,
+	0x06, 0x4f, 0x53, 0x54, 0x79, 0x70, 0x65, 0x12, 0x0b, 0x0a, 0x07, 0x55, 0x4e, 0x4b, 0x4e, 0x4f,
+	0x57, 0x4e, 0x10, 0x00, 0x12, 0x0d, 0x0a, 0x09, 0x4f, 0x53, 0x57, 0x69, 0x6e, 0x64, 0x6f, 0x77,
+	0x73, 0x10, 0x01, 0x12, 0x09, 0x0a, 0x05, 0x4d, 0x61, 0x63, 0x4f, 0x53, 0x10, 0x02, 0x12, 0x0b,
+	0x0a, 0x07, 0x4c, 0x69, 0x6e, 0x75, 0x78, 0x4f, 0x53, 0x10, 0x03, 0x12, 0x09, 0x0a, 0x05, 0x4f,
+	0x53, 0x49, 0x6f, 0x73, 0x10, 0x04, 0x12, 0x0a, 0x0a, 0x06, 0x58, 0x69, 0x61, 0x6f, 0x6d, 0x69,
+	0x10, 0x05, 0x12, 0x0a, 0x0a, 0x06, 0x48, 0x75, 0x61, 0x77, 0x65, 0x69, 0x10, 0x06, 0x12, 0x0b,
+	0x0a, 0x07, 0x53, 0x61, 0x6d, 0x73, 0x75, 0x6e, 0x67, 0x10, 0x07, 0x12, 0x09, 0x0a, 0x05, 0x48,
+	0x6f, 0x6e, 0x6f, 0x72, 0x10, 0x08, 0x12, 0x08, 0x0a, 0x04, 0x4f, 0x70, 0x70, 0x6f, 0x10, 0x09,
+	0x12, 0x08, 0x0a, 0x04, 0x56, 0x69, 0x76, 0x6f, 0x10, 0x0a, 0x42, 0x07, 0x5a, 0x05, 0x2e, 0x2e,
+	0x2f, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -719,29 +1051,37 @@ func file_packet_proto_rawDescGZIP() []byte {
 	return file_packet_proto_rawDescData
 }
 
-var file_packet_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
+var file_packet_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
+var file_packet_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
 var file_packet_proto_goTypes = []any{
-	(*Packet)(nil),       // 0: pb.Packet
-	(*MessageBody)(nil),  // 1: pb.MessageBody
-	(*At)(nil),           // 2: pb.At
-	(*Refer)(nil),        // 3: pb.Refer
-	(*TextContent)(nil),  // 4: pb.TextContent
-	(*ImageContent)(nil), // 5: pb.ImageContent
-	(*AudioContent)(nil), // 6: pb.AudioContent
-	(*VideoContent)(nil), // 7: pb.VideoContent
-	(*anypb.Any)(nil),    // 8: google.protobuf.Any
+	(OSType)(0),           // 0: pb.OSType
+	(*Packet)(nil),        // 1: pb.Packet
+	(*MessageBody)(nil),   // 2: pb.MessageBody
+	(*At)(nil),            // 3: pb.At
+	(*Refer)(nil),         // 4: pb.Refer
+	(*TextContent)(nil),   // 5: pb.TextContent
+	(*ImageContent)(nil),  // 6: pb.ImageContent
+	(*AudioContent)(nil),  // 7: pb.AudioContent
+	(*VideoContent)(nil),  // 8: pb.VideoContent
+	(*CommandBody)(nil),   // 9: pb.CommandBody
+	(*LoginContent)(nil),  // 10: pb.LoginContent
+	(*LoginReply)(nil),    // 11: pb.LoginReply
+	(*LogoutContent)(nil), // 12: pb.LogoutContent
+	(*anypb.Any)(nil),     // 13: google.protobuf.Any
 }
 var file_packet_proto_depIdxs = []int32{
-	8, // 0: pb.Packet.body:type_name -> google.protobuf.Any
-	8, // 1: pb.MessageBody.content:type_name -> google.protobuf.Any
-	2, // 2: pb.MessageBody.at:type_name -> pb.At
-	3, // 3: pb.MessageBody.refer:type_name -> pb.Refer
-	8, // 4: pb.Refer.content:type_name -> google.protobuf.Any
-	5, // [5:5] is the sub-list for method output_type
-	5, // [5:5] is the sub-list for method input_type
-	5, // [5:5] is the sub-list for extension type_name
-	5, // [5:5] is the sub-list for extension extendee
-	0, // [0:5] is the sub-list for field type_name
+	13, // 0: pb.Packet.body:type_name -> google.protobuf.Any
+	13, // 1: pb.MessageBody.content:type_name -> google.protobuf.Any
+	3,  // 2: pb.MessageBody.at:type_name -> pb.At
+	4,  // 3: pb.MessageBody.refer:type_name -> pb.Refer
+	13, // 4: pb.Refer.content:type_name -> google.protobuf.Any
+	13, // 5: pb.CommandBody.content:type_name -> google.protobuf.Any
+	0,  // 6: pb.LoginContent.os:type_name -> pb.OSType
+	7,  // [7:7] is the sub-list for method output_type
+	7,  // [7:7] is the sub-list for method input_type
+	7,  // [7:7] is the sub-list for extension type_name
+	7,  // [7:7] is the sub-list for extension extendee
+	0,  // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_packet_proto_init() }
@@ -754,13 +1094,14 @@ func file_packet_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_packet_proto_rawDesc,
-			NumEnums:      0,
-			NumMessages:   8,
+			NumEnums:      1,
+			NumMessages:   12,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
 		GoTypes:           file_packet_proto_goTypes,
 		DependencyIndexes: file_packet_proto_depIdxs,
+		EnumInfos:         file_packet_proto_enumTypes,
 		MessageInfos:      file_packet_proto_msgTypes,
 	}.Build()
 	File_packet_proto = out.File

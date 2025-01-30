@@ -42,7 +42,7 @@ func init() {
 type Packet struct {
 	Id      string `json:"id"`
 	AppId   string `json:"appId"`
-	UserId  string `json:"userId"`
+	UserId  int64  `json:"userId"`
 	Flow    int32  `json:"flow"`
 	NeedAck int32  `json:"needAck"`
 	Type    int32  `json:"type"`

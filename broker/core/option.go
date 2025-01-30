@@ -8,6 +8,6 @@ const (
 
 type Option struct {
 	Name              string        `json:"name"`
-	TickInterval      time.Duration `json:"tickInterval"`
+	ServerInterval    time.Duration `json:"serverInterval"`
 	HeartbeatInterval time.Duration `json:"heartbeatInterval"`
 }

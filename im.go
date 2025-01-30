@@ -9,7 +9,6 @@ import (
 	"github.com/magicnana999/im/util/ip"
 	"github.com/magicnana999/im/util/json"
 	"github.com/magicnana999/im/util/str"
-	"strconv"
 	"time"
 )
 
@@ -25,11 +24,11 @@ func main() {
 
 func parseFlag() *core.Option {
 	var name string
-	var interval string
-	var heartbeatInterval string
+	var serverInterval int
+	var heartbeatInterval int
 	flag.StringVar(&name, "name", "", "The name of the broker instance")
-	flag.StringVar(&interval, "interval", "30", "Ticking interval of broker instance")
-	flag.StringVar(&heartbeatInterval, "heartbeatInterval", "30", "Heartbeat interval")
+	flag.IntVar(&serverInterval, "interval", 30, "Ticking interval of broker instance")
+	flag.IntVar(&heartbeatInterval, "heartbeatInterval", 30, "Heartbeat interval")
 	flag.Parse()
 
 	if str.IsBlank(name) {
@@ -40,33 +39,16 @@ func parseFlag() *core.Option {
 		name = fmt.Sprintf("%s:%s", ipAddress, core.DefaultPort)
 	}
 
-	if str.IsBlank(name) {
-		logger.Fatal("Could not found the name of broker instance")
+	if serverInterval <= 0 {
+		logger.FatalF("Invalid server interval value: %d (must be > 0)", serverInterval)
+	}
+	if heartbeatInterval <= 0 {
+		logger.FatalF("Invalid heartbeat interval value: %d (must be > 0)", heartbeatInterval)
 	}
 
-	if str.IsBlank(interval) {
-		logger.Fatal("Could not found the interval of broker instance")
-	}
-
-	i, e := strconv.Atoi(interval)
-	if e != nil {
-		logger.FatalF("Failed to parse interval of broker instance: %v", e)
-	}
-
-	if str.IsBlank(heartbeatInterval) {
-		logger.Fatal("Could not found the heartbeat interval")
-	}
-
-	ih, eh := strconv.Atoi(heartbeatInterval)
-	if eh != nil {
-		logger.FatalF("Failed to parse heartbeat interval: %v", e)
-	}
-
-	option := &core.Option{
+	return &core.Option{
 		Name:              name,
-		TickInterval:      time.Duration(i) * time.Second,
-		HeartbeatInterval: time.Duration(ih) * time.Second,
+		ServerInterval:    time.Duration(serverInterval) * time.Second,
+		HeartbeatInterval: time.Duration(heartbeatInterval) * time.Second,
 	}
-
-	return option
 }
