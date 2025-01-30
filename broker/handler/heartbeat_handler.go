@@ -106,11 +106,11 @@ func (h *HeartbeatHandler) StartTicker(ctx context.Context, c gnet.Conn, uc *sta
 
 				now := time.Now()
 				if now.UnixMilli()-task.lastHeartbeat > heartbeatInterval.Milliseconds() {
-					logger.InfoF("[%s#%s] HeartbeatTask ticking,now:%d,last:%d,interval:%d",
+					logger.InfoF("[%s#%s] HeartbeatTask timeout,now:%s,last:%s,interval:%d(ms)",
 						task.remoteAddr,
 						task.uc.Label(),
-						now.UnixMilli(),
-						task.lastHeartbeat,
+						format(now),
+						format(time.UnixMilli(task.lastHeartbeat)),
 						heartbeatInterval.Milliseconds())
 					h.StopTicker(task.c)
 				}
@@ -121,6 +121,10 @@ func (h *HeartbeatHandler) StartTicker(ctx context.Context, c gnet.Conn, uc *sta
 	logger.InfoF("[%s#%s] HeartbeatTask started", task.remoteAddr, task.uc.Label())
 
 	return nil
+}
+
+func format(time time.Time) string {
+	return time.Format("2006-01-02 15:04:05.045")
 }
 
 func (h *HeartbeatHandler) StopTicker(c gnet.Conn) error {

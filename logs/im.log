@@ -28405,3 +28405,45 @@
 2025-01-30T04:03:42.642+0800 INFO [127.0.0.1:49220#] Decode length field,buffer:4,value:4
 2025-01-30T04:03:42.642+0800 INFO [127.0.0.1:49220#] Decode heartbeat body,buffer:0,value:12
 2025-01-30T04:03:42.642+0800 INFO [127.0.0.1:49220#] HeartbeatTask setLastHeartbeat
+2025-01-31T03:01:21.332+0800 DEBUG HeartbeatHandler init
+2025-01-31T03:01:21.332+0800 INFO BrokerOption:{"name":"192.168.1.103:7539","tickInterval":30000000000,"heartbeatInterval":30000000000}
+2025-01-31T03:01:21.332+0800 DEBUG default logging level is INFO
+2025-01-31T03:01:21.333+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-31T03:01:21.333+0800 INFO BrokerInstance started
+2025-01-31T03:01:24.561+0800 INFO BrokerInfo set,key:im:broker:192.168.1.103:7539,result:OK,error:<nil>
+2025-01-31T03:01:33.044+0800 INFO [127.0.0.1:56404#] Connection open
+2025-01-31T03:01:33.044+0800 INFO [127.0.0.1:56404#] HeartbeatTask started
+2025-01-31T03:01:43.047+0800 INFO [127.0.0.1:56404#] HeartbeatTask ticking,now:1738263703047,last:1738263693044,interval:10000
+2025-01-31T03:01:43.047+0800 INFO [127.0.0.1:56404#] HeartbeatTask closed
+2025-01-31T03:01:43.048+0800 INFO [127.0.0.1:56404#] HeartbeatTask done
+2025-01-31T03:01:43.048+0800 INFO [127.0.0.1:56404#] Connection close
+2025-01-31T03:03:06.944+0800 INFO [127.0.0.1:56608#] Connection open
+2025-01-31T03:03:06.944+0800 INFO [127.0.0.1:56608#] HeartbeatTask started
+2025-01-31T03:03:16.945+0800 INFO [127.0.0.1:56608#] HeartbeatTask ticking,now:1738263796945,last:1738263786944,interval:10000
+2025-01-31T03:03:16.945+0800 INFO [127.0.0.1:56608#] HeartbeatTask closed
+2025-01-31T03:03:16.945+0800 INFO [127.0.0.1:56608#] Connection close
+2025-01-31T03:03:16.945+0800 INFO [127.0.0.1:56608#] HeartbeatTask done
+2025-01-31T03:07:31.978+0800 DEBUG HeartbeatHandler init
+2025-01-31T03:07:31.979+0800 INFO BrokerOption:{"name":"192.168.1.103:7539","tickInterval":30000000000,"heartbeatInterval":30000000000}
+2025-01-31T03:07:31.979+0800 DEBUG default logging level is INFO
+2025-01-31T03:07:31.979+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-31T03:07:31.979+0800 INFO BrokerInstance started
+2025-01-31T03:07:32.074+0800 INFO BrokerInfo set,key:im:broker:192.168.1.103:7539,result:OK,error:<nil>
+2025-01-31T03:07:34.138+0800 INFO [127.0.0.1:56920#] Connection open
+2025-01-31T03:07:34.139+0800 INFO [127.0.0.1:56920#] HeartbeatTask started
+2025-01-31T03:07:54.140+0800 INFO [127.0.0.1:56920#] HeartbeatTask ticking,now:%!d(string=2025-01-31 03:07:54.0754),last:%!d(string=2025-01-31 03:07:34.0734),interval:10000(ms)
+2025-01-31T03:07:54.140+0800 INFO [127.0.0.1:56920#] Connection close
+2025-01-31T03:07:54.140+0800 INFO [127.0.0.1:56920#] HeartbeatTask closed
+2025-01-31T03:07:54.141+0800 INFO [127.0.0.1:56920#] HeartbeatTask done
+2025-01-31T03:08:11.171+0800 DEBUG HeartbeatHandler init
+2025-01-31T03:08:11.172+0800 INFO BrokerOption:{"name":"192.168.1.103:7539","tickInterval":30000000000,"heartbeatInterval":30000000000}
+2025-01-31T03:08:11.172+0800 DEBUG default logging level is INFO
+2025-01-31T03:08:11.172+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-01-31T03:08:11.172+0800 INFO BrokerInstance started
+2025-01-31T03:08:11.244+0800 INFO BrokerInfo set,key:im:broker:192.168.1.103:7539,result:OK,error:<nil>
+2025-01-31T03:09:30.206+0800 INFO [127.0.0.1:57039#] Connection open
+2025-01-31T03:09:30.206+0800 INFO [127.0.0.1:57039#] HeartbeatTask started
+2025-01-31T03:09:40.207+0800 INFO [127.0.0.1:57039#] HeartbeatTask ticking,now:2025-01-31 03:09:40.0940,last:2025-01-31 03:09:30.0930,interval:10000(ms)
+2025-01-31T03:09:40.207+0800 INFO [127.0.0.1:57039#] HeartbeatTask closed
+2025-01-31T03:09:40.207+0800 INFO [127.0.0.1:57039#] HeartbeatTask done
+2025-01-31T03:09:40.207+0800 INFO [127.0.0.1:57039#] Connection close
