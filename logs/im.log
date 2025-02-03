@@ -29305,3 +29305,9 @@
 2025-02-03T04:22:14.476+0800 INFO [127.0.0.1:54880#] Decode length field,buffer:4,value:4
 2025-02-03T04:22:14.477+0800 INFO [127.0.0.1:54880#] Decode heartbeat body,buffer:0,value:12
 2025-02-03T04:22:14.477+0800 INFO [127.0.0.1:54880#] HeartbeatTask setLastHeartbeat
+2025-02-04T04:49:54.952+0800 DEBUG HeartbeatHandler init
+2025-02-04T04:49:54.953+0800 INFO BrokerOption:{"name":"172.20.10.2:7539","serverInterval":30000000000,"heartbeatInterval":30000000000}
+2025-02-04T04:49:54.953+0800 DEBUG default logging level is INFO
+2025-02-04T04:49:54.953+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-02-04T04:49:54.953+0800 INFO BrokerInstance started
+2025-02-04T04:49:54.957+0800 INFO BrokerInfo set,key:im:broker:172.20.10.2:7539,result:OK,error:<nil>

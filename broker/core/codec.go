@@ -6,7 +6,6 @@ import (
 	"errors"
 	"github.com/magicnana999/im/broker/state"
 	"github.com/magicnana999/im/common/pb"
-	"github.com/magicnana999/im/common/protocol"
 	"github.com/magicnana999/im/logger"
 	"github.com/panjf2000/gnet/v2"
 	"google.golang.org/protobuf/proto"
@@ -155,8 +154,8 @@ func (l LengthFieldBasedFrameCodec) Decode(s *BrokerServer, c gnet.Conn) ([]*pb.
 				}
 
 				packet := &pb.Packet{
-					Type: protocol.TypeHeartbeat,
-					Body: body,
+					BType: pb.BTypeHeartbeat,
+					Body:  body,
 				}
 
 				result = append(result, packet)

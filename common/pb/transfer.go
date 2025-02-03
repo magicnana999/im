@@ -2,6 +2,7 @@ package pb
 
 import (
 	"fmt"
+	"github.com/magicnana999/im/common/enum"
 	"github.com/magicnana999/im/common/protocol"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/anypb"
@@ -326,7 +327,7 @@ func RevertContent(mType string, content *anypb.Any) (any, error) {
 			AppId:        src.AppId,
 			UserSig:      src.UserSig,
 			Version:      src.Version,
-			OS:           OSType(int32(src.Os)),
+			OS:           enum.OSType(int32(src.Os)),
 			PushDeviceId: src.PushDeviceId,
 		}
 

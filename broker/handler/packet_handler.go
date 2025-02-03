@@ -29,7 +29,7 @@ func init() {
 
 func (p *PacketHandlerImpl) HandlePacket(ctx context.Context, packet *pb.Packet) (*pb.Packet, error) {
 	for _, handler := range p.handlers {
-		if handler.IsSupport(ctx, packet.Type) {
+		if handler.IsSupport(ctx, packet.BType) {
 			return handler.HandlePacket(ctx, packet)
 		}
 	}
