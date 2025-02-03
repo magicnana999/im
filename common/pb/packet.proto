@@ -1,0 +1,131 @@
+/*
+
+╰$ cd broker/pb
+╰$ protoc --go_out=. packet.proto
+╰$ protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative packet.proto
+*/
+
+syntax = "proto3";
+
+package pb;
+
+import "google/protobuf/any.proto";
+import "google/protobuf/empty.proto";
+
+
+option go_package = "../pb";
+
+enum OSType {
+  UNKNOWN = 0;
+  OSWindows = 1;
+  MacOS = 2;
+  LinuxOS = 3;
+  OSIos = 4;
+  Xiaomi = 5;
+  Huawei = 6;
+  Samsung = 7;
+  Honor = 8;
+  Oppo = 9;
+  Vivo = 10;
+}
+
+
+message Packet{
+  string id = 1;
+  string appId = 2;
+  int64 userId = 3;
+  int32 flow = 4;
+  int32 needAck = 5;
+  int64 cTime = 6;
+  int64 sTime = 7;
+  int32 bType = 8;
+  google.protobuf.Any body = 9;  // for the "any" type field
+}
+
+
+message MessageBody {
+  string cType = 1;
+  string cId = 2;
+  string to = 3;
+  string groupId = 4;
+  int32 targetType = 5;
+  int64 sequence = 6;
+  google.protobuf.Any content = 7;
+  repeated At at = 8;
+  repeated Refer refer = 9;
+  int32 code = 10;
+  string message = 11;
+}
+
+message At {
+  string userId = 1;
+  string name = 2;
+  string avatar = 3;
+}
+
+message Refer {
+  string userId = 1;
+  string name = 2;
+  string avatar = 3;
+  string cType = 4;
+  google.protobuf.Any content = 5;
+}
+
+message TextContent {
+  string text = 1;
+}
+
+message ImageContent {
+  string url = 1;
+  int32 width = 2;
+  int32 height = 3;
+}
+
+message AudioContent {
+  string url = 1;
+  int32 length = 2;
+}
+
+message VideoContent {
+  string url = 1;
+  string cover = 2;
+  int32 length = 3;
+  int32 width = 4;
+  int32 height = 5;
+}
+
+
+
+
+message CommandBody {
+  string cType = 1;
+  google.protobuf.Any content = 2;
+  int32 code = 3;
+  string message = 4;
+}
+
+message LoginContent {
+  string appId = 1;
+  string userSig = 2;
+  string version = 3;
+  OSType os = 4;
+  string pushDeviceId = 5;
+}
+
+message LoginReply{
+  string appId = 1;
+  int64 userId = 2;
+}
+
+message LogoutContent {
+  string appId = 1;
+  int64 userId = 2;
+}
+
+
+service UserApi {
+  rpc Login (LoginContent) returns (LoginReply) {}
+  rpc Logout (LogoutContent) returns (google.protobuf.Empty) {}
+}
+
+

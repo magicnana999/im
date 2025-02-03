@@ -2,9 +2,9 @@ package handler
 
 import (
 	"context"
-	"github.com/magicnana999/im/broker/protocol"
+	"github.com/magicnana999/im/broker/state"
+	"github.com/magicnana999/im/common/pb"
 	"github.com/magicnana999/im/logger"
-	"github.com/magicnana999/im/state"
 	"github.com/panjf2000/ants/v2"
 	"github.com/panjf2000/gnet/v2"
 	"github.com/panjf2000/gnet/v2/pkg/logging"
@@ -25,13 +25,19 @@ type HeartbeatHandler struct {
 	mu            sync.RWMutex
 }
 
-func (h *HeartbeatHandler) HandlePacket(c gnet.Conn, packet *protocol.Packet) error {
-	h.SetLastHeartbeat(c)
-	return nil
+func (h *HeartbeatHandler) HandlePacket(ctx context.Context, packet *pb.Packet) (*pb.Packet, error) {
+	uc, err := state.CurrentUserFromCtx(ctx)
+	if err != nil {
+		return nil, err
+	}
+	h.SetLastHeartbeat(uc)
+
+	//return pb.Response(packet, wrapperspb.Int32(0))
+	return nil, nil
 }
 
-func (h *HeartbeatHandler) IsSupport(packetType int32) bool {
-	return packetType == protocol.TypeHeartbeat
+func (h *HeartbeatHandler) IsSupport(ctx context.Context, packetType int32) bool {
+	return packetType == pb.BTypeHeartbeat
 }
 
 func (h *HeartbeatHandler) InitHandler() {
@@ -146,9 +152,9 @@ func (h *HeartbeatHandler) StopTicker(c gnet.Conn) error {
 	return nil
 }
 
-func (h *HeartbeatHandler) SetLastHeartbeat(c gnet.Conn) error {
+func (h *HeartbeatHandler) SetLastHeartbeat(c *state.UserConnection) error {
 	h.mu.RLock()
-	task, flag := h.m[c.Fd()]
+	task, flag := h.m[c.Fd]
 	h.mu.RUnlock()
 	if !flag {
 		return nil

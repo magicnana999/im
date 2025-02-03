@@ -4,17 +4,20 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"errors"
-	"github.com/magicnana999/im/broker/pb"
-	"github.com/magicnana999/im/broker/protocol"
+	"github.com/magicnana999/im/broker/state"
+	"github.com/magicnana999/im/common/pb"
+	"github.com/magicnana999/im/common/protocol"
 	"github.com/magicnana999/im/logger"
 	"github.com/panjf2000/gnet/v2"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/anypb"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 	"math"
 )
 
 type Codec interface {
-	Encode(p *protocol.Packet) ([][]byte, error)
-	Decode(s *BrokerServer, c gnet.Conn) ([]*protocol.Packet, error)
+	Encode(p *pb.Packet) ([][]byte, error)
+	Decode(s *BrokerServer, c gnet.Conn) ([]*pb.Packet, error)
 }
 
 var defaultCodec = &LengthFieldBasedFrameCodec{}
@@ -22,10 +25,15 @@ var defaultCodec = &LengthFieldBasedFrameCodec{}
 type LengthFieldBasedFrameCodec struct {
 }
 
-func (l LengthFieldBasedFrameCodec) Encode(p *protocol.Packet) ([][]byte, error) {
-	if p.IsHeartbeat() {
+func (l LengthFieldBasedFrameCodec) Encode(p *pb.Packet) ([][]byte, error) {
+	if pb.IsHeartbeat(p) {
 
-		if p.Body.(uint32) <= 0 || p.Body.(uint32) >= math.MaxInt32 {
+		var hb wrapperspb.UInt32Value
+		if err := p.Body.UnmarshalTo(&hb); err != nil {
+			return nil, err
+		}
+
+		if hb.Value <= 0 || hb.Value >= math.MaxInt32 {
 			return nil, errors.New("invalid heartbeat body")
 		}
 
@@ -34,17 +42,15 @@ func (l LengthFieldBasedFrameCodec) Encode(p *protocol.Packet) ([][]byte, error)
 		bs[1] = make([]byte, 4)
 
 		binary.BigEndian.PutUint32(bs[0], uint32(4))
-		binary.BigEndian.PutUint32(bs[1], p.Body.(uint32))
+		binary.BigEndian.PutUint32(bs[1], hb.Value)
 		return bs, nil
 	} else {
-		pp, err := pb.ConvertPacket(p)
-		if err != nil {
-			return nil, err
-		}
+		var err error
 
 		bs := make([][]byte, 2)
 		bs[0] = make([]byte, 4)
-		bs[1], err = proto.Marshal(pp)
+		bs[1], err = proto.Marshal(p)
+
 		if err != nil {
 			return nil, err
 		}
@@ -59,11 +65,11 @@ func (l LengthFieldBasedFrameCodec) Encode(p *protocol.Packet) ([][]byte, error)
 	}
 }
 
-func (l LengthFieldBasedFrameCodec) Decode(s *BrokerServer, c gnet.Conn) ([]*protocol.Packet, error) {
+func (l LengthFieldBasedFrameCodec) Decode(s *BrokerServer, c gnet.Conn) ([]*pb.Packet, error) {
 
-	result := make([]*protocol.Packet, 0)
+	result := make([]*pb.Packet, 0)
 
-	user, err := currentUserConnection(c)
+	user, err := state.CurrentUserFromConn(c)
 	if err != nil {
 		logger.Error(err)
 	}
@@ -141,9 +147,16 @@ func (l LengthFieldBasedFrameCodec) Decode(s *BrokerServer, c gnet.Conn) ([]*pro
 				heartbeat)
 
 			if heartbeat > 0 && heartbeat < math.MaxInt32 {
-				packet := &protocol.Packet{
+
+				val := wrapperspb.UInt32(heartbeat)
+				body, err2 := anypb.New(val)
+				if err2 != nil {
+					return nil, err2
+				}
+
+				packet := &pb.Packet{
 					Type: protocol.TypeHeartbeat,
-					Body: heartbeat,
+					Body: body,
 				}
 
 				result = append(result, packet)
@@ -184,22 +197,7 @@ func (l LengthFieldBasedFrameCodec) Decode(s *BrokerServer, c gnet.Conn) ([]*pro
 				//continue
 			}
 
-			packet, e5 := pb.RevertPacket(&p)
-			if e5 != nil {
-
-				logger.ErrorF("[%s#%s] Decode packet body,revert packet,buffer:%d,error:%v",
-					c.RemoteAddr().String(),
-					user.Label(),
-					c.InboundBuffered(),
-					e5)
-
-				c.Discard(c.InboundBuffered())
-
-				return nil, e5
-				//continue
-			}
-
-			jb, _ := json.Marshal(packet)
+			jb, _ := json.Marshal(p)
 
 			logger.InfoF("[%s#%s] Decode packet body,buffer:%d,value:%s",
 				c.RemoteAddr().String(),
@@ -207,7 +205,7 @@ func (l LengthFieldBasedFrameCodec) Decode(s *BrokerServer, c gnet.Conn) ([]*pro
 				c.InboundBuffered(),
 				jb)
 
-			result = append(result, packet)
+			result = append(result, &p)
 
 		}
 

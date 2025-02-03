@@ -2,19 +2,16 @@ package core
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"github.com/magicnana999/im/broker/handler"
+	"github.com/magicnana999/im/broker/state"
 	"github.com/magicnana999/im/logger"
-	"github.com/magicnana999/im/state"
 	"github.com/panjf2000/gnet/v2"
 	"github.com/panjf2000/gnet/v2/pkg/logging"
+	//bbPool "github.com/panjf2000/gnet/v2/pkg/pool/bytebuffer"
 	goPool "github.com/panjf2000/gnet/v2/pkg/pool/goroutine"
-	"time"
-)
 
-const (
-	CurrentUser string = `CurrentUser`
+	"time"
 )
 
 type BrokerServer struct {
@@ -90,7 +87,7 @@ func (s *BrokerServer) OnShutdown(eng gnet.Engine) {
 
 func (s *BrokerServer) OnOpen(c gnet.Conn) (out []byte, action gnet.Action) {
 	uc := state.EmptyUserConnection(c)
-	subCtx := context.WithValue(context.Background(), CurrentUser, &uc)
+	subCtx := context.WithValue(context.Background(), state.CurrentUser, &uc)
 	c.SetContext(subCtx)
 
 	logger.InfoF("[%s#%s] Connection open", c.RemoteAddr().String(), uc.Label())
@@ -100,7 +97,7 @@ func (s *BrokerServer) OnOpen(c gnet.Conn) (out []byte, action gnet.Action) {
 }
 
 func (s *BrokerServer) OnClose(c gnet.Conn, err error) (action gnet.Action) {
-	user, err := currentUserConnection(c)
+	user, err := state.CurrentUserFromConn(c)
 	if err != nil {
 		logger.Error(err)
 	}
@@ -113,7 +110,9 @@ func (s *BrokerServer) OnClose(c gnet.Conn, err error) (action gnet.Action) {
 
 func (s *BrokerServer) OnTraffic(c gnet.Conn) (action gnet.Action) {
 
-	user, err := currentUserConnection(c)
+	ctx := c.Context().(context.Context)
+
+	user, err := state.CurrentUserFromConn(c)
 	if err != nil {
 		logger.Error(err)
 	}
@@ -131,67 +130,25 @@ func (s *BrokerServer) OnTraffic(c gnet.Conn) (action gnet.Action) {
 
 	if packets != nil {
 		for _, packet := range packets {
-			handler.DefaultHandler.HandlePacket(c, packet)
+			response, err11 := handler.DefaultHandler.HandlePacket(ctx, packet)
+			if err11 != nil {
+				logger.FatalF("[%s#%s] Connection traffic error:%v", c.RemoteAddr().String(), user.Label(), err11)
+			}
+
+			bs, err12 := defaultCodec.Encode(response)
+			if err12 != nil {
+				logger.FatalF("[%s#%s] Connection traffic error:%v", c.RemoteAddr().String(), user.Label(), err12)
+			}
+
+			_ = c.AsyncWritev(bs, func(c gnet.Conn, err error) error {
+				if c.RemoteAddr() != nil {
+					logging.Debugf("[%s#%s] Connection traffic,write done", c.RemoteAddr().String(), err)
+				}
+				return nil
+			})
 		}
 	}
 
-	//if s.async {
-	//	buf := bbPool.Get()
-	//
-	//	n1, _ := c.WriteTo(buf)
-	//	logger.InfoF("read ok %d %d %d", routine.Goid(), n1, buf.Len())
-	//
-	//	if c.LocalAddr().Network() == "tcp" || c.LocalAddr().Network() == "unix" {
-	//		// just for test
-	//		n2 := c.InboundBuffered()
-	//		n3 := c.OutboundBuffered()
-	//		n4, _ := c.Discard(1)
-	//		logger.InfoF("%d,inbound:%d outbound:%d discard:%d", routine.Goid(), n2, n3, n4)
-	//
-	//		_ = s.workerPool.Submit(
-	//			func() {
-	//				if s.writev {
-	//					mid := buf.Len() / 2
-	//					bs := make([][]byte, 2)
-	//					bs[0] = buf.B[:mid]
-	//					bs[1] = buf.B[mid:]
-	//					_ = c.AsyncWritev(bs, func(c gnet.Conn, err error) error {
-	//						if c.RemoteAddr() != nil {
-	//							logging.Debugf("conn=%s done writev: %v", c.RemoteAddr().String(), err)
-	//						}
-	//						bbPool.Put(buf)
-	//						return nil
-	//					})
-	//				} else {
-	//					_ = c.AsyncWrite(buf.Bytes(), func(c gnet.Conn, err error) error {
-	//						if c.RemoteAddr() != nil {
-	//							logging.Debugf("conn=%s done write: %v", c.RemoteAddr().String(), err)
-	//						}
-	//						bbPool.Put(buf)
-	//						return nil
-	//					})
-	//				}
-	//			})
-	//		return
-	//	} else if c.LocalAddr().Network() == "udp" {
-	//		_ = s.workerPool.Submit(
-	//			func() {
-	//				_ = c.AsyncWrite(buf.Bytes(), nil)
-	//			})
-	//		return
-	//	}
-	//	return
-	//}
-	//
-	//buf, _ := c.Next(-1)
-	//if s.writev {
-	//	mid := len(buf) / 2
-	//	_, _ = c.Writev([][]byte{buf[:mid], buf[mid:]})
-	//} else {
-	//	_, _ = c.Write(buf)
-	//}
-	//
-	//return
 	return gnet.None
 }
 
@@ -204,14 +161,4 @@ func (s *BrokerServer) OnTick() (delay time.Duration, action gnet.Action) {
 	state.RefreshBroker(s.ctx, broker)
 
 	return s.interval, gnet.None
-}
-
-func currentUserConnection(c gnet.Conn) (*state.UserConnection, error) {
-	if ctx, o := c.Context().(context.Context); o {
-		if u, ok := ctx.Value(CurrentUser).(*state.UserConnection); ok {
-			return u, nil
-		}
-	}
-
-	return nil, errors.New("not found user")
 }

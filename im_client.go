@@ -7,11 +7,12 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
-	"github.com/magicnana999/im/broker/pb"
-	"github.com/magicnana999/im/broker/protocol"
+	"github.com/magicnana999/im/common/pb"
+	protocol2 "github.com/magicnana999/im/common/protocol"
 	"github.com/magicnana999/im/logger"
-	"github.com/magicnana999/im/util"
+	"github.com/magicnana999/im/util/id"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/anypb"
 	"net"
 	"os"
 	"sync"
@@ -63,6 +64,15 @@ func sendMessage(ctx context.Context, cancel context.CancelFunc, conn net.Conn, 
 			message := scanner.Text()
 			if message == "exit" {
 				cancel()
+			} else if message == "login" {
+				fmt.Print("请输入UserSig: ")
+				if !scanner.Scan() {
+					continue
+				}
+				userSig := scanner.Text()
+
+				writeLogin(conn, userSig)
+
 			} else {
 				writeMessage(conn, message)
 			}
@@ -70,30 +80,67 @@ func sendMessage(ctx context.Context, cancel context.CancelFunc, conn net.Conn, 
 	}
 }
 
+func writeLogin(conn net.Conn, userSig string) {
+	loginContent := pb.LoginContent{
+		AppId:        "19860220",
+		UserSig:      userSig,
+		Version:      "1.0.0",
+		Os:           pb.OSType_OSIos,
+		PushDeviceId: id.GenerateXId(),
+	}
+
+	c, _ := anypb.New(&loginContent)
+
+	commandBody := pb.CommandBody{
+		MType:   protocol2.MUserLogin,
+		Content: c,
+	}
+
+	b, _ := anypb.New(&commandBody)
+	packet := pb.Packet{
+		Id:    id.GenerateXId(),
+		AppId: loginContent.AppId,
+		Type:  protocol2.TypeCommand,
+		CTime: time.Now().UnixMilli(),
+		Body:  b,
+	}
+
+	body, _ := proto.Marshal(&packet)
+
+	buffer1 := make([]byte, 4)
+	binary.BigEndian.PutUint32(buffer1, uint32(len(body)))
+
+	buffer := new(bytes.Buffer)
+	buffer.Write(buffer1)
+	buffer.Write(body)
+
+	conn.Write(buffer.Bytes())
+}
+
 func writeMessage(conn net.Conn, message string) {
-	text := protocol.TextContent{
+	text := protocol2.TextContent{
 		Text: message,
 	}
 
-	body := protocol.MessageBody{
-		MType:    protocol.MText,
+	body := protocol2.MessageBody{
+		MType:    protocol2.MText,
 		CId:      "sdfsdf",
 		To:       "sdfsdf",
 		GroupId:  "",
-		TType:    protocol.TSingle,
+		TType:    protocol2.TSingle,
 		Sequence: 100,
 		Content:  text,
 		At:       nil,
 		Refer:    nil,
 	}
 
-	packet := &protocol.Packet{
-		Id:      util.GenerateXId(),
+	packet := &protocol2.Packet{
+		Id:      id.GenerateXId(),
 		AppId:   "STARTSPACE",
-		UserId:  "sdifejrjersdf",
-		Flow:    protocol.FlowRequest,
-		NeedAck: protocol.YES,
-		Type:    protocol.TypeMessage,
+		UserId:  10012,
+		Flow:    protocol2.FlowRequest,
+		NeedAck: protocol2.YES,
+		Type:    protocol2.TypeMessage,
 		CTime:   12123123,
 		STime:   12123123,
 		Body:    body,

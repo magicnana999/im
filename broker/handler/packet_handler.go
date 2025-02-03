@@ -1,14 +1,14 @@
 package handler
 
 import (
+	"context"
 	"errors"
-	"github.com/magicnana999/im/broker/protocol"
-	"github.com/panjf2000/gnet/v2"
+	"github.com/magicnana999/im/common/pb"
 )
 
 type PacketHandler interface {
-	HandlePacket(c gnet.Conn, packet *protocol.Packet) error
-	IsSupport(packetType int32) bool
+	HandlePacket(ctx context.Context, packet *pb.Packet) (*pb.Packet, error)
+	IsSupport(ctx context.Context, packetType int32) bool
 	InitHandler()
 }
 
@@ -27,18 +27,18 @@ func init() {
 	DefaultHandler.InitHandler()
 }
 
-func (p *PacketHandlerImpl) HandlePacket(c gnet.Conn, packet *protocol.Packet) error {
+func (p *PacketHandlerImpl) HandlePacket(ctx context.Context, packet *pb.Packet) (*pb.Packet, error) {
 	for _, handler := range p.handlers {
-		if handler.IsSupport(packet.Type) {
-			return handler.HandlePacket(c, packet)
+		if handler.IsSupport(ctx, packet.Type) {
+			return handler.HandlePacket(ctx, packet)
 		}
 	}
-	return errors.New("not support")
+	return nil, errors.New("not support")
 }
 
-func (p *PacketHandlerImpl) IsSupport(packetType int32) bool {
+func (p *PacketHandlerImpl) IsSupport(ctx context.Context, packetType int32) bool {
 	for _, handler := range p.handlers {
-		if handler.IsSupport(packetType) {
+		if handler.IsSupport(ctx, packetType) {
 			return true
 		}
 	}
