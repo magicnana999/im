@@ -19,7 +19,7 @@ type Codec interface {
 	Decode(s *BrokerServer, c gnet.Conn) ([]*pb.Packet, error)
 }
 
-var defaultCodec = &LengthFieldBasedFrameCodec{}
+var DefaultCodec = &LengthFieldBasedFrameCodec{}
 
 type LengthFieldBasedFrameCodec struct {
 }
@@ -32,7 +32,7 @@ func (l LengthFieldBasedFrameCodec) Encode(p *pb.Packet) ([][]byte, error) {
 			return nil, err
 		}
 
-		if hb.Value <= 0 || hb.Value >= math.MaxInt32 {
+		if hb.Value < 0 || hb.Value >= math.MaxInt32 {
 			return nil, errors.New("invalid heartbeat body")
 		}
 
@@ -73,10 +73,15 @@ func (l LengthFieldBasedFrameCodec) Decode(s *BrokerServer, c gnet.Conn) ([]*pb.
 		logger.Error(err)
 	}
 
-	logger.InfoF("[%s#%s] Decode length field,buffer:%d",
+	logger.InfoF("[%s#%s] Decode start,buffer:%d -------------------------------",
 		c.RemoteAddr().String(),
 		user.Label(),
 		c.InboundBuffered())
+
+	//logger.InfoF("[%s#%s] Decode length field,buffer:%d",
+	//	c.RemoteAddr().String(),
+	//	user.Label(),
+	//	c.InboundBuffered())
 
 	for c.InboundBuffered() >= 4 {
 

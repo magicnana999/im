@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	heartbeatInterval = 10 * time.Second
+	heartbeatInterval = 30 * time.Second
 )
 
 var DefaultHeartbeatHandler = &HeartbeatHandler{}
@@ -32,8 +32,7 @@ func (h *HeartbeatHandler) HandlePacket(ctx context.Context, packet *pb.Packet) 
 	}
 	h.SetLastHeartbeat(uc)
 
-	//return pb.Response(packet, wrapperspb.Int32(0))
-	return nil, nil
+	return pb.NewHeartbeatResponse()
 }
 
 func (h *HeartbeatHandler) IsSupport(ctx context.Context, packetType int32) bool {
@@ -162,7 +161,7 @@ func (h *HeartbeatHandler) SetLastHeartbeat(c *state.UserConnection) error {
 
 	task.setLastHeartbeat()
 
-	logger.InfoF("[%s#%s] HeartbeatTask setLastHeartbeat", task.remoteAddr, task.uc.Label())
+	//logger.InfoF("[%s#%s] HeartbeatTask setLastHeartbeat", task.remoteAddr, task.uc.Label())
 
 	return nil
 }

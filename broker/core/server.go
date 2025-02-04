@@ -119,7 +119,7 @@ func (s *BrokerServer) OnTraffic(c gnet.Conn) (action gnet.Action) {
 
 	logger.InfoF("[%s#%s] Connection traffic", c.RemoteAddr().String(), user.Label())
 
-	packets, e := defaultCodec.Decode(s, c)
+	packets, e := DefaultCodec.Decode(s, c)
 	if e != nil {
 
 		logger.FatalF("[%s#%s] Connection traffic error:%v",
@@ -135,14 +135,19 @@ func (s *BrokerServer) OnTraffic(c gnet.Conn) (action gnet.Action) {
 				logger.FatalF("[%s#%s] Connection traffic error:%v", c.RemoteAddr().String(), user.Label(), err11)
 			}
 
-			bs, err12 := defaultCodec.Encode(response)
+			if response == nil {
+				continue
+			}
+
+			bs, err12 := DefaultCodec.Encode(response)
 			if err12 != nil {
 				logger.FatalF("[%s#%s] Connection traffic error:%v", c.RemoteAddr().String(), user.Label(), err12)
 			}
 
 			_ = c.AsyncWritev(bs, func(c gnet.Conn, err error) error {
-				if c.RemoteAddr() != nil {
-					logging.Debugf("[%s#%s] Connection traffic,write done", c.RemoteAddr().String(), err)
+				if err != nil {
+					logging.Fatalf("[%s#%s] Connection traffic,write error:%v", c.RemoteAddr().String(), user.Label(), err)
+					handler.DefaultHeartbeatHandler.StopTicker(c)
 				}
 				return nil
 			})

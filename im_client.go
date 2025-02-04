@@ -7,12 +7,11 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
+	"github.com/magicnana999/im/broker/core"
 	"github.com/magicnana999/im/common/pb"
-	protocol2 "github.com/magicnana999/im/common/protocol"
 	"github.com/magicnana999/im/logger"
 	"github.com/magicnana999/im/util/id"
 	"google.golang.org/protobuf/proto"
-	"google.golang.org/protobuf/types/known/anypb"
 	"net"
 	"os"
 	"sync"
@@ -21,7 +20,7 @@ import (
 
 const (
 	serverAddress     = "127.0.0.1:7539" // IM 服务器地址和端口
-	heartbeatInterval = 1 * time.Second  // 心跳间隔
+	heartbeatInterval = 5 * time.Second  // 心跳间隔
 )
 
 func main() {
@@ -34,13 +33,13 @@ func main() {
 	var wg sync.WaitGroup
 	wg.Add(3)
 
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, _ := context.WithCancel(context.Background())
 
 	go sendHeartbeat(ctx, conn, &wg)
 
-	//go readMessages(ctx, conn, &wg)
+	go readMessages(ctx, conn, &wg)
 
-	go sendMessage(ctx, cancel, conn, &wg)
+	//go sendMessage(ctx, cancel, conn, &wg)
 
 	wg.Wait()
 	fmt.Println("OK")
@@ -73,14 +72,15 @@ func sendMessage(ctx context.Context, cancel context.CancelFunc, conn net.Conn, 
 
 				writeLogin(conn, userSig)
 
-			} else {
-				writeMessage(conn, message)
+				//} else {
+				//	writeMessage(conn, message)
 			}
 		}
 	}
 }
 
 func writeLogin(conn net.Conn, userSig string) {
+
 	loginContent := pb.LoginContent{
 		AppId:        "19860220",
 		UserSig:      userSig,
@@ -89,101 +89,90 @@ func writeLogin(conn net.Conn, userSig string) {
 		PushDeviceId: id.GenerateXId(),
 	}
 
-	c, _ := anypb.New(&loginContent)
-
-	commandBody := pb.CommandBody{
-		MType:   protocol2.MUserLogin,
-		Content: c,
+	request, err := pb.NewCommandRequest(0, pb.CTypeUserLogin, &loginContent)
+	if err != nil {
+		panic(err)
 	}
 
-	b, _ := anypb.New(&commandBody)
-	packet := pb.Packet{
-		Id:    id.GenerateXId(),
-		AppId: loginContent.AppId,
-		Type:  protocol2.TypeCommand,
-		CTime: time.Now().UnixMilli(),
-		Body:  b,
+	bs, err := core.DefaultCodec.Encode(request)
+	if err != nil {
+		panic(err)
 	}
-
-	body, _ := proto.Marshal(&packet)
-
-	buffer1 := make([]byte, 4)
-	binary.BigEndian.PutUint32(buffer1, uint32(len(body)))
 
 	buffer := new(bytes.Buffer)
-	buffer.Write(buffer1)
-	buffer.Write(body)
+	buffer.Write(bs[0])
+	buffer.Write(bs[1])
 
 	conn.Write(buffer.Bytes())
 }
 
-func writeMessage(conn net.Conn, message string) {
-	text := protocol2.TextContent{
-		Text: message,
-	}
-
-	body := protocol2.MessageBody{
-		MType:    protocol2.MText,
-		CId:      "sdfsdf",
-		To:       "sdfsdf",
-		GroupId:  "",
-		TType:    protocol2.TSingle,
-		Sequence: 100,
-		Content:  text,
-		At:       nil,
-		Refer:    nil,
-	}
-
-	packet := &protocol2.Packet{
-		Id:      id.GenerateXId(),
-		AppId:   "STARTSPACE",
-		UserId:  10012,
-		Flow:    protocol2.FlowRequest,
-		NeedAck: protocol2.YES,
-		Type:    protocol2.TypeMessage,
-		CTime:   12123123,
-		STime:   12123123,
-		Body:    body,
-	}
-
-	p, e := pb.ConvertPacket(packet)
-	if e != nil {
-		panic(e)
-	}
-
-	b, ee := proto.Marshal(p)
-	if ee != nil {
-		panic(e)
-	}
-
-	buffer1 := make([]byte, 4)
-	buffer2 := bytes.NewBuffer(b)
-
-	binary.BigEndian.PutUint32(buffer1, uint32(len(b)))
-
-	buffer := new(bytes.Buffer)
-	buffer.Write(buffer1)
-	buffer.Write(buffer2.Bytes())
-
-	conn.Write(buffer.Bytes())
-
-	var pbp pb.Packet
-	if e4 := proto.Unmarshal(b, &pbp); e4 != nil {
-		panic(e4)
-	}
-
-	ret, e5 := pb.RevertPacket(&pbp)
-	if e5 != nil {
-		panic(e5)
-	}
-
-	js, e7 := json.Marshal(ret)
-	if e7 != nil {
-		panic(e7)
-	}
-
-	fmt.Println(string(js))
-}
+//func writeMessage(conn net.Conn, message string) {
+//	text := protocol2.TextContent{
+//		Text: message,
+//	}
+//
+//	body := protocol2.MessageBody{
+//		MType:    protocol2.MText,
+//		CId:      "sdfsdf",
+//		To:       "sdfsdf",
+//		GroupId:  "",
+//		TType:    protocol2.TSingle,
+//		Sequence: 100,
+//		Content:  text,
+//		At:       nil,
+//		Refer:    nil,
+//	}
+//
+//	packet := &protocol2.Packet{
+//		Id:      id.GenerateXId(),
+//		AppId:   "STARTSPACE",
+//		UserId:  10012,
+//		Flow:    protocol2.FlowRequest,
+//		NeedAck: protocol2.YES,
+//		Type:    protocol2.TypeMessage,
+//		CTime:   12123123,
+//		STime:   12123123,
+//		Body:    body,
+//	}
+//
+//	p, e := pb.ConvertPacket(packet)
+//	if e != nil {
+//		panic(e)
+//	}
+//
+//	b, ee := proto.Marshal(p)
+//	if ee != nil {
+//		panic(e)
+//	}
+//
+//	buffer1 := make([]byte, 4)
+//	buffer2 := bytes.NewBuffer(b)
+//
+//	binary.BigEndian.PutUint32(buffer1, uint32(len(b)))
+//
+//	buffer := new(bytes.Buffer)
+//	buffer.Write(buffer1)
+//	buffer.Write(buffer2.Bytes())
+//
+//	conn.Write(buffer.Bytes())
+//
+//	var pbp pb.Packet
+//	if e4 := proto.Unmarshal(b, &pbp); e4 != nil {
+//		panic(e4)
+//	}
+//
+//	ret, e5 := pb.RevertPacket(&pbp)
+//	if e5 != nil {
+//		panic(e5)
+//	}
+//
+//	js, e7 := json.Marshal(ret)
+//	if e7 != nil {
+//		panic(e7)
+//	}
+//
+//	fmt.Println(string(js))
+//}
 
 func sendHeartbeat(ctx context.Context, conn net.Conn, wg *sync.WaitGroup) {
 	defer wg.Done()

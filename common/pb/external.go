@@ -6,6 +6,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/anypb"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 	"time"
 )
 
@@ -19,6 +20,24 @@ func IsCommand(p *Packet) bool {
 
 func isMessage(packet *Packet) bool {
 	return packet.BType == BTypeMessage
+}
+
+func NewHeartbeatRequest(v int) (*Packet, error) {
+	body, _ := anypb.New(wrapperspb.UInt32(uint32(v)))
+	packet := &Packet{
+		BType: BTypeHeartbeat,
+		Body:  body,
+	}
+	return packet, nil
+}
+
+func NewHeartbeatResponse() (*Packet, error) {
+	body, _ := anypb.New(wrapperspb.UInt32(0))
+	packet := &Packet{
+		BType: BTypeHeartbeat,
+		Body:  body,
+	}
+	return packet, nil
 }
 
 func NewCommandRequest(userId int64, ct string, content proto.Message) (*Packet, error) {
