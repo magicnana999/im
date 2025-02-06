@@ -1,4 +1,4 @@
-package grpc
+package servr
 
 import (
 	"flag"
@@ -12,7 +12,7 @@ import (
 
 func Start() {
 	flag.Parse()
-	lis, err := net.Listen("tcp", "7540")
+	lis, err := net.Listen("tcp", "0.0.0.0:7540")
 	if err != nil {
 		logger.FatalF("failed to listen: %v", err)
 	}

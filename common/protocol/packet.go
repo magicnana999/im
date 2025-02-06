@@ -69,12 +69,13 @@ type VideoContent struct {
 
 type CommandBody struct {
 	CType   string `json:"cType"`
-	Content any    `json:"content"`
+	Request any    `json:"request"`
+	Reply   any    `json:"reply"`
 	Code    int32  `json:"code"`
 	Message string `json:"message"`
 }
 
-type LoginContent struct {
+type LoginRequest struct {
 	AppId        string      `json:"appId"`
 	UserSig      string      `json:"userSig"`
 	Version      string      `json:"version"`
@@ -87,7 +88,7 @@ type LoginReply struct {
 	UserId int64  `json:"userId"`
 }
 
-type LogoutContent struct {
+type LogoutRequest struct {
 	AppId  string `json:"appId"`
 	UserId int64  `json:"userId"`
 }

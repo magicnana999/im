@@ -99,12 +99,13 @@ message VideoContent {
 
 message CommandBody {
   string cType = 1;
-  google.protobuf.Any content = 2;
-  int32 code = 3;
-  string message = 4;
+  google.protobuf.Any Request = 2;
+  google.protobuf.Any Reply = 3;
+  int32 code = 4;
+  string message = 5;
 }
 
-message LoginContent {
+message LoginRequest {
   string appId = 1;
   string userSig = 2;
   string version = 3;
@@ -117,15 +118,15 @@ message LoginReply{
   int64 userId = 2;
 }
 
-message LogoutContent {
+message LogoutRequest {
   string appId = 1;
   int64 userId = 2;
 }
 
 
 service UserApi {
-  rpc Login (LoginContent) returns (LoginReply) {}
-  rpc Logout (LogoutContent) returns (google.protobuf.Empty) {}
+  rpc Login (LoginRequest) returns (LoginReply) {}
+  rpc Logout (LogoutRequest) returns (google.protobuf.Empty) {}
 }
 
 

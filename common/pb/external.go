@@ -49,7 +49,7 @@ func NewCommandRequest(userId int64, ct string, content proto.Message) (*Packet,
 
 	b, e := anypb.New(&CommandBody{
 		CType:   ct,
-		Content: c,
+		Request: c,
 	})
 	if e != nil {
 		return nil, e
@@ -103,8 +103,8 @@ func NewCommandResponse(packet *Packet, ct string, content proto.Message, err er
 		}
 
 		body, e = anypb.New(&CommandBody{
-			CType:   ct,
-			Content: c,
+			CType: ct,
+			Reply: c,
 		})
 		if e != nil {
 			return nil, e

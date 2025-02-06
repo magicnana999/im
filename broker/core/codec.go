@@ -201,7 +201,9 @@ func (l LengthFieldBasedFrameCodec) Decode(s *BrokerServer, c gnet.Conn) ([]*pb.
 				//continue
 			}
 
-			jb, _ := json.Marshal(p)
+			pp, _ := pb.RevertPacket(&p)
+
+			jb, _ := json.Marshal(pp)
 
 			logger.InfoF("[%s#%s] Decode packet body,buffer:%d,value:%s",
 				c.RemoteAddr().String(),

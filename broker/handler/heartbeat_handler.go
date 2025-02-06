@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/magicnana999/im/broker/state"
 	"github.com/magicnana999/im/common/pb"
+	"github.com/magicnana999/im/errors"
 	"github.com/magicnana999/im/logger"
 	"github.com/panjf2000/ants/v2"
 	"github.com/panjf2000/gnet/v2"
@@ -82,16 +83,16 @@ func (h *HeartbeatHandler) StartTicker(ctx context.Context, c gnet.Conn, uc *sta
 		cancel:        cancel,
 		ticker:        time.NewTicker(heartbeatInterval),
 		c:             c,
-		callback: func(c gnet.Conn) error {
-			return c.Close()
-		},
+		//closeFunc: func(c gnet.Conn) error {
+		//	return c.Close()
+		//},
 	}
 
 	h.mu.Lock()
+	defer h.mu.Unlock()
 	h.m[c.Fd()] = task
-	h.mu.Unlock()
 
-	h.heartbeatPool.Submit(func() {
+	err := h.heartbeatPool.Submit(func() {
 
 		defer task.ticker.Stop()
 
@@ -120,6 +121,10 @@ func (h *HeartbeatHandler) StartTicker(ctx context.Context, c gnet.Conn, uc *sta
 		}
 	})
 
+	if err != nil {
+		return errors.ConnectionHeartbeatInitError.Fill(err.Error())
+	}
+
 	logger.InfoF("[%s#%s] HeartbeatTask started", task.remoteAddr, task.uc.Label())
 
 	return nil
@@ -130,7 +135,11 @@ func format(time time.Time) string {
 }
 
 func (h *HeartbeatHandler) StopTicker(c gnet.Conn) error {
-	c.Close()
+	defer func() {
+		if c != nil {
+			c.Close()
+		}
+	}()
 
 	h.mu.RLock()
 	task, flag := h.m[c.Fd()]
@@ -175,7 +184,7 @@ type HeartbeatTask struct {
 	cancel        context.CancelFunc
 	ticker        *time.Ticker
 	c             gnet.Conn
-	callback      func(c gnet.Conn) error
+	//closeFunc     func(c gnet.Conn) error
 }
 
 func (t *HeartbeatTask) setLastHeartbeat() {

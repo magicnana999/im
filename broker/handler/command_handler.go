@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 	"github.com/magicnana999/im/common/pb"
+	"github.com/magicnana999/im/logger"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/anypb"
-	"log"
 )
 
 var DefaultCommandHandler = &CommandHandler{}
@@ -25,7 +25,7 @@ func (c2 *CommandHandler) HandlePacket(ctx context.Context, packet *pb.Packet) (
 		return nil, err
 	}
 
-	reply, err := c2.HandleCommand(ctx, body.CType, body.Content)
+	reply, err := c2.HandleCommand(ctx, body.CType, body.Request)
 
 	return pb.NewCommandResponse(packet, body.CType, reply, err)
 
@@ -38,7 +38,7 @@ func (c2 *CommandHandler) IsSupport(ctx context.Context, packetType int32) bool 
 func (c2 *CommandHandler) InitHandler() {
 	conn, err := grpc.NewClient("localhost:7540", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		logger.FatalF("did not connect: %v", err)
 	}
 	c2.conn = conn
 	c2.userApiClient = pb.NewUserApiClient(conn)
@@ -48,7 +48,7 @@ func (c2 *CommandHandler) HandleCommand(ctx context.Context, cType string, conte
 
 	switch cType {
 	case pb.CTypeUserLogin:
-		var src pb.LoginContent
+		var src pb.LoginRequest
 		if err := content.UnmarshalTo(&src); err != nil {
 			break
 		}

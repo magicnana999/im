@@ -3,13 +3,15 @@ package state
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/magicnana999/im/common/enum"
+	"github.com/magicnana999/im/errors"
 	"github.com/magicnana999/im/logger"
 	"github.com/magicnana999/im/redis"
 	"github.com/magicnana999/im/util/str"
 	"github.com/panjf2000/gnet/v2"
+	"strconv"
+	"sync"
 	"time"
 )
 
@@ -29,30 +31,48 @@ type BrokerInfo struct {
 	StartAt int64  `json:"startAt"`
 }
 
+func NewBrokerInfo(addr string) BrokerInfo {
+	return BrokerInfo{
+		Addr:    addr,
+		StartAt: time.Now().Unix(),
+	}
+}
+
+var (
+	m  map[string]*UserConnection
+	mu sync.RWMutex
+)
+
+func init() {
+	m = make(map[string]*UserConnection)
+}
+
 type UserConnection struct {
 	Fd          int         `json:"fd"`
 	AppId       string      `json:"appId"`
-	UserId      string      `json:"userId"`
+	UserId      int64       `json:"userId"`
 	ClientAddr  string      `json:"clientAddr"`
 	BrokerAddr  string      `json:"brokerAddr"`
 	OS          enum.OSType `json:"os"`
 	ConnectTime int64       `json:"connectTime"`
+	C           gnet.Conn   `json:"-"`
 }
 
-func EmptyUserConnection(c gnet.Conn) UserConnection {
-	return UserConnection{
+func OpenUserConnection(c gnet.Conn) *UserConnection {
+	return &UserConnection{
 		Fd:          c.Fd(),
 		AppId:       "",
-		UserId:      "",
+		UserId:      0,
 		ClientAddr:  c.RemoteAddr().String(),
 		BrokerAddr:  c.LocalAddr().String(),
 		OS:          enum.OSType(0),
 		ConnectTime: time.Now().UnixMilli(),
+		C:           c,
 	}
 }
 
-func (u UserConnection) Label() string {
-	if str.IsBlank(u.UserId) {
+func (u *UserConnection) Label() string {
+	if u.UserId == 0 {
 		return ""
 	}
 
@@ -65,7 +85,28 @@ func (u UserConnection) Label() string {
 		return ""
 	}
 
-	return u.UserId + "#" + dt.String()
+	return strconv.FormatInt(u.UserId, 10) + "#" + dt.String()
+}
+
+func (u *UserConnection) Store(appId string, userId int64) error {
+	mu.Lock()
+	defer mu.Unlock()
+	u.AppId = appId
+	u.UserId = userId
+	m[u.Label()] = u
+	return nil
+}
+
+func Load(ucLabel string) (*UserConnection, error) {
+	mu.RLock()
+	defer mu.RUnlock()
+	uc := m[ucLabel]
+	if uc == nil {
+		return nil, errors.UserConnectionNotHeld
+	}
+
+	return uc, nil
+
 }
 
 func CurrentContextFromConn(c gnet.Conn) (context.Context, error) {
@@ -73,7 +114,7 @@ func CurrentContextFromConn(c gnet.Conn) (context.Context, error) {
 		return ctx, nil
 	}
 
-	return nil, errors.New("current context not found in connection")
+	return nil, errors.CtxNotExists
 }
 
 func CurrentUserFromConn(c gnet.Conn) (*UserConnection, error) {
@@ -90,22 +131,25 @@ func CurrentUserFromCtx(ctx context.Context) (*UserConnection, error) {
 		return u, nil
 	}
 
-	return nil, errors.New("current user not found in context")
+	return nil, errors.UcNotExists
 }
 
-func SetBroker(ctx context.Context, broker BrokerInfo) (string, error) {
+func SetupBroker(ctx context.Context, broker BrokerInfo) (string, error) {
 	json, err := json.Marshal(broker)
 	if err != nil {
-		return "", err
+		return "", errors.BrokerSetupError.Fill(err.Error())
 	}
 
 	key := fmt.Sprintf("%s%s", KeyBrokerInfo, broker.Addr)
 	ret := redis.RDS.Set(ctx, key, json, Expire)
 
-	logger.InfoF("BrokerInfo set,key:%s,result:%s,error:%v",
+	if ret.Err() != nil {
+		return "", errors.BrokerSetupError.Fill(ret.Err().Error())
+	}
+
+	logger.DebugF("BrokerInfo setup,key:%s,result:%s",
 		key,
-		ret.Val(),
-		ret.Err())
+		ret.Val())
 
 	return ret.Val(), ret.Err()
 }
@@ -114,69 +158,12 @@ func RefreshBroker(ctx context.Context, broker BrokerInfo) (bool, error) {
 	key := fmt.Sprintf("%s%s", KeyBrokerInfo, broker.Addr)
 	ret := redis.RDS.Expire(ctx, key, Expire)
 
-	//logger.DebugF("BrokerInfo refresh,key:%s,result:%t,error:%v",
-	//	key,
-	//	ret.Val(),
-	//	ret.Err())
+	if ret.Err() != nil {
+		return false, errors.BrokerRefreshError.Fill(ret.Err().Error())
+	}
+
+	logger.DebugF("BrokerInfo refresh,key:%s,result:%t",
+		key,
+		ret.Val())
 	return ret.Val(), ret.Err()
 }
-
-//// SetConnection TODO.. 更换为Lua
-//func SetConnection(ctx context.Context, uc UserConnection) (any, error) {
-//	jsonStr, err := json.Marshal(uc)
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	if str.IsBlank(uc.Label()) {
-//		return nil, errors.New("empty label")
-//	}
-//
-//	logger.DebugF("[%d] Get UserConnection label:%s", routine.Goid(), label)
-//
-//	{
-//		key := fmt.Sprintf("%s%s", KeyUserClients, uc.UserId)
-//		ret := redis.RDS.HSetNX(ctx, key, label, jsonStr)
-//
-//		logger.InfoF("[%d] Set UserClient [%s:%s:%v]", routine.Goid(), key, label, ret)
-//
-//		if ret.Err() != nil {
-//			return nil, ret.Err()
-//		}
-//
-//		if !ret.Val() {
-//			r := redis.RDS.HGet(ctx, key, label)
-//
-//			logger.InfoF("[%d] Set existed UserConnection [%s:%s:%v]", routine.Goid(), key, label, r)
-//
-//			if r.Err() != nil {
-//				return nil, fmt.Errorf("[%d] Failed to set UserConnection because it already exists, but the existing one could not be found [%s:%s:%v]", routine.Goid(), key, label, r)
-//			}
-//
-//			if str.IsBlank(r.Val()) {
-//				return nil, fmt.Errorf("[%d] Failed to set UserConnection because it already exists, but an empty string was found [%s:%s:%v]", routine.Goid(), key, label, r)
-//			}
-//
-//			existed := UserConnection{}
-//
-//			if e := json.Unmarshal([]byte(r.String()), existed); e != nil {
-//				return nil, e
-//			}
-//
-//			return existed, nil
-//		}
-//	}
-//
-//	{
-//		key := fmt.Sprintf("%s%s", KeyBrokerConnections, uc.BrokerAddr)
-//		ret := redis.RDS.HSet(ctx, key, label, jsonStr)
-//
-//		logger.InfoF("[%d] Set BrokerConnections [%s:%s:%v]", routine.Goid(), key, label, ret)
-//
-//		if ret.Err() != nil {
-//			return nil, ret.Err()
-//		}
-//	}
-//
-//	return nil, nil
-//}

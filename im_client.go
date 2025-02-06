@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"github.com/magicnana999/im/broker/core"
 	"github.com/magicnana999/im/common/pb"
+	"github.com/magicnana999/im/common/protocol"
 	"github.com/magicnana999/im/logger"
 	"github.com/magicnana999/im/util/id"
 	"google.golang.org/protobuf/proto"
@@ -20,7 +21,12 @@ import (
 
 const (
 	serverAddress     = "127.0.0.1:7539" // IM 服务器地址和端口
-	heartbeatInterval = 5 * time.Second  // 心跳间隔
+	heartbeatInterval = 25 * time.Second // 心跳间隔
+)
+
+var (
+	CurrentUserId int64
+	CurrentAppId  string
 )
 
 func main() {
@@ -33,13 +39,13 @@ func main() {
 	var wg sync.WaitGroup
 	wg.Add(3)
 
-	ctx, _ := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(context.Background())
 
 	go sendHeartbeat(ctx, conn, &wg)
 
 	go readMessages(ctx, conn, &wg)
 
-	//go sendMessage(ctx, cancel, conn, &wg)
+	go sendMessage(ctx, cancel, conn, &wg)
 
 	wg.Wait()
 	fmt.Println("OK")
@@ -56,7 +62,7 @@ func sendMessage(ctx context.Context, cancel context.CancelFunc, conn net.Conn, 
 		case <-ctx.Done():
 			return
 		default:
-			fmt.Print("请输入消息: ")
+			fmt.Println("请输入消息: ")
 			if !scanner.Scan() {
 				continue
 			}
@@ -64,7 +70,7 @@ func sendMessage(ctx context.Context, cancel context.CancelFunc, conn net.Conn, 
 			if message == "exit" {
 				cancel()
 			} else if message == "login" {
-				fmt.Print("请输入UserSig: ")
+				fmt.Println("请输入UserSig: ")
 				if !scanner.Scan() {
 					continue
 				}
@@ -74,6 +80,8 @@ func sendMessage(ctx context.Context, cancel context.CancelFunc, conn net.Conn, 
 
 				//} else {
 				//	writeMessage(conn, message)
+			} else if message == "logout" {
+
 			}
 		}
 	}
@@ -81,7 +89,7 @@ func sendMessage(ctx context.Context, cancel context.CancelFunc, conn net.Conn, 
 
 func writeLogin(conn net.Conn, userSig string) {
 
-	loginContent := pb.LoginContent{
+	loginRequest := pb.LoginRequest{
 		AppId:        "19860220",
 		UserSig:      userSig,
 		Version:      "1.0.0",
@@ -89,7 +97,7 @@ func writeLogin(conn net.Conn, userSig string) {
 		PushDeviceId: id.GenerateXId(),
 	}
 
-	request, err := pb.NewCommandRequest(0, pb.CTypeUserLogin, &loginContent)
+	request, err := pb.NewCommandRequest(0, pb.CTypeUserLogin, &loginRequest)
 	if err != nil {
 		panic(err)
 	}
@@ -244,18 +252,58 @@ func readMessages(ctx context.Context, conn net.Conn, wg *sync.WaitGroup) {
 					panic(e4)
 				}
 
-				packet, eee := pb.RevertPacket(&p)
-				if eee != nil {
-					panic(eee)
+				ret, e5 := pb.RevertPacket(&p)
+				if e5 != nil {
+					panic(e5)
 				}
 
-				js, eeee := json.Marshal(packet)
-				if eeee != nil {
-					panic(eeee)
+				js, e7 := json.Marshal(ret)
+				if e7 != nil {
+					panic(e7)
 				}
 
 				fmt.Println(string(js))
+
+				handleMessage(ctx, ret)
 			}
 		}
+	}
+}
+
+func handleMessage(ctx context.Context, packet *protocol.Packet) {
+	switch packet.BType {
+	case pb.BTypeHeartbeat:
+		heartbeat := packet.Body.(uint32)
+		fmt.Printf("收到服务端心跳:%d\n", heartbeat)
+		return
+	case pb.BTypeCommand:
+		command := packet.Body.(*protocol.CommandBody)
+		cType := command.CType
+		if command.Code != 0 {
+			fmt.Printf("%s 失败 %d %v\n", cType, command.Code, command.Message)
+		}
+
+		switch cType {
+		case pb.CTypeUserLogin:
+
+			if command.Code != 0 {
+				fmt.Printf("%s 失败 %d %v\n", cType, command.Code, command.Message)
+			} else {
+				CurrentAppId = command.Reply.(*protocol.LoginReply).AppId
+				CurrentUserId = command.Reply.(*protocol.LoginReply).UserId
+				fmt.Printf("%s 成功 %s %d\n", cType, CurrentAppId, CurrentUserId)
+			}
+		case pb.CTypeUserLogout:
+			if command.Code != 0 {
+				fmt.Printf("%s 失败 %d %v\n", cType, command.Code, command.Message)
+			} else {
+				CurrentAppId = ""
+				CurrentUserId = 0
+				fmt.Printf("%s 成功 %s %d\n", cType, CurrentAppId, CurrentUserId)
+			}
+		}
+
+	default:
+		fmt.Printf("不知道啥Type: %d\n", packet.BType)
 	}
 }

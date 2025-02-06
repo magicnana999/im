@@ -23,7 +23,7 @@ var DefaultHandler = &PacketHandlerImpl{
 func init() {
 
 	DefaultHandler.handlers = append(DefaultHandler.handlers,
-		DefaultHeartbeatHandler)
+		DefaultHeartbeatHandler, DefaultCommandHandler)
 	DefaultHandler.InitHandler()
 }
 

@@ -56,7 +56,7 @@ func ConvertPacketBody(pType int32, body any) (*anypb.Any, error) {
 			return nil, err
 		}
 
-		if content, err := ConvertContent(src.CType, src.Content); err == nil {
+		if content, err := ConvertMessageContent(src.CType, src.Content); err == nil {
 			dest.Content = content
 		} else {
 			return nil, err
@@ -71,11 +71,13 @@ func ConvertPacketBody(pType int32, body any) (*anypb.Any, error) {
 			Message: src.Message,
 		}
 
-		if content, err := ConvertContent(src.CType, src.Content); err == nil {
-			dest.Content = content
+		if req, res, err := ConvertCommandContent(src.CType, src.Request, src.Reply); err == nil {
+			dest.Request = req
+			dest.Reply = res
 		} else {
 			return nil, err
 		}
+
 		ret = dest
 	default:
 		return nil, fmt.Errorf("unsupported packet type: %v", pType)
@@ -88,7 +90,7 @@ func ConvertPacketBody(pType int32, body any) (*anypb.Any, error) {
 	}
 }
 
-func ConvertContent(mType string, content any) (*anypb.Any, error) {
+func ConvertMessageContent(mType string, content any) (*anypb.Any, error) {
 	var ret any
 	switch mType {
 	case CTypeText:
@@ -118,23 +120,6 @@ func ConvertContent(mType string, content any) (*anypb.Any, error) {
 			Width:  src.Width,
 			Height: src.Height,
 		}
-	case CTypeUserLogin:
-		src := content.(protocol.LoginContent)
-
-		ret = &LoginContent{
-			AppId:        src.AppId,
-			UserSig:      src.UserSig,
-			Version:      src.Version,
-			Os:           OSType(int32(src.OS)),
-			PushDeviceId: src.PushDeviceId,
-		}
-	case CTypeUserLogout:
-		src := content.(protocol.LogoutContent)
-
-		ret = &LogoutContent{
-			AppId:  src.AppId,
-			UserId: src.UserId,
-		}
 	default:
 		return nil, fmt.Errorf("unsupported message type: %v", mType)
 	}
@@ -143,6 +128,73 @@ func ConvertContent(mType string, content any) (*anypb.Any, error) {
 		return c, nil
 	} else {
 		return nil, e
+	}
+}
+
+func ConvertCommandContent(mType string, request any, reply any) (*anypb.Any, *anypb.Any, error) {
+	switch mType {
+
+	case CTypeUserLogin:
+
+		var req *anypb.Any
+		var res *anypb.Any
+
+		if request != nil {
+
+			input := request.(protocol.LoginRequest)
+			ret, err := anypb.New(&LoginRequest{
+				AppId:        input.AppId,
+				UserSig:      input.UserSig,
+				Version:      input.Version,
+				Os:           OSType(int32(input.OS)),
+				PushDeviceId: input.PushDeviceId,
+			})
+
+			if err != nil {
+				return nil, nil, err
+			}
+
+			req = ret
+		}
+
+		if reply != nil {
+
+			output := reply.(protocol.LoginReply)
+			ret, err := anypb.New(&LoginReply{
+				AppId:  output.AppId,
+				UserId: output.UserId,
+			})
+
+			if err != nil {
+				return nil, nil, err
+			}
+
+			res = ret
+		}
+
+		return req, res, nil
+
+	case CTypeUserLogout:
+		var req *anypb.Any
+
+		if request != nil {
+
+			input := request.(protocol.LogoutRequest)
+			ret, err := anypb.New(&LogoutRequest{
+				AppId:  input.AppId,
+				UserId: input.UserId,
+			})
+
+			if err != nil {
+				return nil, nil, err
+			}
+
+			req = ret
+		}
+
+		return req, nil, nil
+	default:
+		return nil, nil, fmt.Errorf("unsupported message type: %v", mType)
 	}
 }
 
@@ -177,7 +229,7 @@ func ConvertMessageRefer(src []*protocol.Refer) ([]*Refer, error) {
 			Avatar: refer.Avatar,
 		}
 
-		if referContent, err := ConvertContent(refer.CType, refer.Content); err == nil {
+		if referContent, err := ConvertMessageContent(refer.CType, refer.Content); err == nil {
 			referDest.CType = refer.CType
 			referDest.Content = referContent
 		} else {
@@ -240,7 +292,7 @@ func RevertPacketBody(pType int32, body *anypb.Any) (any, error) {
 			return nil, err
 		}
 
-		if content, err := RevertContent(src.CType, src.Content); err == nil {
+		if content, err := RevertMessageContent(src.CType, src.Content); err == nil {
 			dest.Content = content
 		} else {
 			return nil, err
@@ -258,8 +310,9 @@ func RevertPacketBody(pType int32, body *anypb.Any) (any, error) {
 			Message: src.Message,
 		}
 
-		if content, err := RevertContent(src.CType, src.Content); err == nil {
-			dest.Content = content
+		if req, res, err := RevertCommandContent(src.CType, src.Request, src.Reply); err == nil {
+			dest.Request = req
+			dest.Reply = res
 		} else {
 			return nil, err
 		}
@@ -272,8 +325,7 @@ func RevertPacketBody(pType int32, body *anypb.Any) (any, error) {
 
 }
 
-func RevertContent(mType string, content *anypb.Any) (any, error) {
-	var ret any
+func RevertMessageContent(mType string, content *anypb.Any) (any, error) {
 	switch mType {
 	case CTypeText:
 
@@ -282,71 +334,115 @@ func RevertContent(mType string, content *anypb.Any) (any, error) {
 			return nil, err
 		}
 
-		ret = &protocol.TextContent{
+		ret := &protocol.TextContent{
 			Text: src.Text,
 		}
+
+		return ret, nil
 	case CTypeImage:
 		var src ImageContent
 		if err := content.UnmarshalTo(&src); err != nil {
 			return nil, err
 		}
 
-		ret = &protocol.ImageContent{
+		ret := &protocol.ImageContent{
 			Url:    src.Url,
 			Width:  src.Width,
 			Height: src.Height,
 		}
+
+		return ret, nil
+
 	case CTypeAudio:
 		var src AudioContent
 		if err := content.UnmarshalTo(&src); err != nil {
 			return nil, err
 		}
-		ret = &protocol.AudioContent{
+		ret := &protocol.AudioContent{
 			Url:    src.Url,
 			Length: src.Length,
 		}
+
+		return ret, nil
 	case CTypeVideo:
 		var src VideoContent
 		if err := content.UnmarshalTo(&src); err != nil {
 			return nil, err
 		}
-		ret = &protocol.VideoContent{
+		ret := &protocol.VideoContent{
 			Url:    src.Url,
 			Cover:  src.Cover,
 			Length: src.Length,
 			Width:  src.Width,
 			Height: src.Height,
 		}
-	case CTypeUserLogin:
-		var src LoginContent
-		if err := content.UnmarshalTo(&src); err != nil {
-			return nil, err
-		}
-
-		ret = &protocol.LoginContent{
-			AppId:        src.AppId,
-			UserSig:      src.UserSig,
-			Version:      src.Version,
-			OS:           enum.OSType(int32(src.Os)),
-			PushDeviceId: src.PushDeviceId,
-		}
-
-	case CTypeUserLogout:
-
-		var src LogoutContent
-		if err := content.UnmarshalTo(&src); err != nil {
-			return nil, err
-		}
-
-		ret = &protocol.LogoutContent{
-			AppId:  src.AppId,
-			UserId: src.UserId,
-		}
+		return ret, nil
 
 	default:
 		return nil, fmt.Errorf("unsupported message type: %v", mType)
 	}
-	return ret, nil
+}
+
+func RevertCommandContent(mType string, request *anypb.Any, reply *anypb.Any) (any, any, error) {
+	switch mType {
+
+	case CTypeUserLogin:
+
+		var req *protocol.LoginRequest
+		var res *protocol.LoginReply
+
+		if request != nil {
+			var input LoginRequest
+
+			if err := request.UnmarshalTo(&input); err != nil {
+				return nil, nil, err
+			}
+
+			req = &protocol.LoginRequest{
+				AppId:        input.AppId,
+				UserSig:      input.UserSig,
+				Version:      input.Version,
+				OS:           enum.OSType(int32(input.Os)),
+				PushDeviceId: input.PushDeviceId,
+			}
+		}
+
+		if reply != nil {
+			var input LoginReply
+
+			if err := reply.UnmarshalTo(&input); err != nil {
+				return nil, nil, err
+			}
+
+			res = &protocol.LoginReply{
+				AppId:  input.AppId,
+				UserId: input.UserId,
+			}
+		}
+
+		return req, res, nil
+
+	case CTypeUserLogout:
+
+		var req *protocol.LogoutRequest
+
+		if request != nil {
+			var input LogoutRequest
+			if err := request.UnmarshalTo(&input); err != nil {
+				return nil, nil, err
+			}
+
+			req = &protocol.LogoutRequest{
+				AppId:  input.AppId,
+				UserId: input.UserId,
+			}
+		}
+
+		return req, nil, nil
+
+	default:
+		return nil, nil, fmt.Errorf("unsupported message type: %v", mType)
+	}
 }
 
 func RevertMessageAt(src []*At) ([]*protocol.At, error) {
@@ -379,7 +475,7 @@ func RevertMessageRefer(src []*Refer) ([]*protocol.Refer, error) {
 			Avatar: refer.Avatar,
 		}
 
-		if referContent, err := RevertContent(refer.CType, refer.Content); err == nil {
+		if referContent, err := RevertMessageContent(refer.CType, refer.Content); err == nil {
 			referDest.CType = refer.CType
 			referDest.Content = referContent
 		} else {

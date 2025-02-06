@@ -73,11 +73,12 @@ func (s *BrokerServer) OnBoot(eng gnet.Engine) (action gnet.Action) {
 
 	s.eng = eng
 
-	broker := state.BrokerInfo{
-		Addr:    s.name,
-		StartAt: time.Now().UnixMilli(),
+	broker := state.NewBrokerInfo(s.name)
+
+	if _, err := state.SetupBroker(s.ctx, broker); err != nil {
+		logger.FatalF("BrokerInstance start error: %v", err)
 	}
-	state.SetBroker(s.ctx, broker)
+
 	return gnet.None
 }
 
@@ -86,20 +87,23 @@ func (s *BrokerServer) OnShutdown(eng gnet.Engine) {
 }
 
 func (s *BrokerServer) OnOpen(c gnet.Conn) (out []byte, action gnet.Action) {
-	uc := state.EmptyUserConnection(c)
+	uc := state.OpenUserConnection(c)
 	subCtx := context.WithValue(context.Background(), state.CurrentUser, &uc)
 	c.SetContext(subCtx)
 
 	logger.InfoF("[%s#%s] Connection open", c.RemoteAddr().String(), uc.Label())
 
-	handler.DefaultHeartbeatHandler.StartTicker(subCtx, c, &uc)
+	if err := handler.DefaultHeartbeatHandler.StartTicker(subCtx, c, uc); err != nil {
+		logger.ErrorF("Connection open error: %v", err)
+		handler.DefaultHeartbeatHandler.StopTicker(c)
+	}
 	return nil, gnet.None
 }
 
 func (s *BrokerServer) OnClose(c gnet.Conn, err error) (action gnet.Action) {
 	user, err := state.CurrentUserFromConn(c)
 	if err != nil {
-		logger.Error(err)
+		logger.ErrorF("Connection close error: %v", err)
 	}
 
 	handler.DefaultHeartbeatHandler.StopTicker(c)
@@ -114,7 +118,8 @@ func (s *BrokerServer) OnTraffic(c gnet.Conn) (action gnet.Action) {
 
 	user, err := state.CurrentUserFromConn(c)
 	if err != nil {
-		logger.Error(err)
+		logger.ErrorF("Connection traffic error: %v", err)
+		handler.DefaultHeartbeatHandler.StopTicker(c)
 	}
 
 	logger.InfoF("[%s#%s] Connection traffic", c.RemoteAddr().String(), user.Label())
@@ -163,7 +168,10 @@ func (s *BrokerServer) OnTick() (delay time.Duration, action gnet.Action) {
 		Addr:    s.name,
 		StartAt: time.Now().UnixMilli(),
 	}
-	state.RefreshBroker(s.ctx, broker)
+	_, err := state.RefreshBroker(s.ctx, broker)
+	if err != nil {
+		logger.FatalF("BrokerInstance ticking error: %v", err)
+	}
 
 	return s.interval, gnet.None
 }
