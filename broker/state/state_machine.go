@@ -20,7 +20,8 @@ const (
 
 	keyLock = ":im:user:lock:"
 
-	keyUserConn = ":im:user:conn:"
+	keyUserConn    = ":im:user:connect:"
+	keyUserClients = ":im:user:clients:"
 
 	KeyBrokerConnections               = "im:broker:connections:"
 	KeyUserClients                     = "im:user:clients:"
@@ -93,13 +94,14 @@ func (u *UserConnection) Label() string {
 	return strconv.FormatInt(u.UserId, 10) + "#" + dt.String()
 }
 
-func (u *UserConnection) Store(appId string, userId int64) error {
+func (u *UserConnection) Store(ctx context.Context, appId string, userId int64) error {
 	mu.Lock()
 	defer mu.Unlock()
 	u.AppId = appId
 	u.UserId = userId
 	m[u.Label()] = u
-	return nil
+
+	return storeUserToRedis(ctx, u)
 }
 
 func Load(ucLabel string) (*UserConnection, error) {
@@ -173,10 +175,31 @@ func RefreshBroker(ctx context.Context, broker BrokerInfo) (bool, error) {
 	return ret.Val(), ret.Err()
 }
 
+func storeUserToRedis(ctx context.Context, uc *UserConnection) error {
+	lock, e := redisLock(ctx, uc.AppId, uc.Label())
+	if e != nil {
+		return e
+	}
+
+	defer redisUnlock(ctx, uc.AppId, uc.Label(), lock)
+
+	_, e1 := setupUserConn(ctx, uc)
+	if e1 != nil {
+		return e1
+	}
+
+	_, e2 := setupUserClients(ctx, uc)
+	if e2 != nil {
+		return e2
+	}
+
+	return nil
+}
+
 func redisLock(ctx context.Context, appId, ucLabel string) (string, error) {
 	key := fmt.Sprintf("%s%s%s", appId, keyLock, ucLabel)
 	val := time.Now().UnixMilli()
-	ret := redis.RDS.SetNX(ctx, key, val, time.Minute)
+	ret := redis.RDS.SetNX(ctx, key, strconv.FormatInt(val, 10), time.Minute)
 	if ret.Err() != nil {
 		return "", errors.UserStoreError.Fill(ret.Err().Error())
 	}
@@ -188,22 +211,50 @@ func redisLock(ctx context.Context, appId, ucLabel string) (string, error) {
 	return strconv.FormatInt(val, 10), nil
 }
 
-func setupUserConn(ctx context.Context, uc *UserConnection) error {
-	key := fmt.Sprintf("%s%s%s", uc.AppId, keyUserConn, uc.Label())
-
-	js, err := json.Marshal(uc)
-	if err != nil {
-		return errors.BrokerSetupError.Fill(err.Error())
-	}
-
-	ret := redis.RDS.SetNX(ctx, key, val, time.Minute)
+func redisUnlock(ctx context.Context, appId, ucLabel, lock string) (string, error) {
+	key := fmt.Sprintf("%s%s%s", appId, keyLock, ucLabel)
+	ret := redis.RDS.Get(ctx, key)
 	if ret.Err() != nil {
 		return "", errors.UserStoreError.Fill(ret.Err().Error())
 	}
 
-	if !ret.Val() {
-		return "", errors.UserStoreError.Fill("redis is not ok")
+	if ret.Val() == lock {
+		redis.RDS.Del(ctx, key)
 	}
 
-	return strconv.FormatInt(val, 10), nil
+	return ret.Val(), nil
+}
+
+func setupUserConn(ctx context.Context, uc *UserConnection) (string, error) {
+	key := fmt.Sprintf("%s%s%s", uc.AppId, keyUserConn, uc.Label())
+
+	js, err := json.Marshal(uc)
+	if err != nil {
+		return "", errors.UserStoreError.Fill(err.Error())
+	}
+
+	ret := redis.RDS.Set(ctx, key, string(js), time.Minute)
+	if ret.Err() != nil {
+		return "", errors.UserStoreError.Fill(ret.Err().Error())
+	}
+
+	return ret.Val(), nil
+}
+
+func setupUserClients(ctx context.Context, uc *UserConnection) (int64, error) {
+	key := fmt.Sprintf("%s%s%d", uc.AppId, keyUserConn, uc.UserId)
+
+	js, err := json.Marshal(uc)
+	if err != nil {
+		return 0, errors.UserStoreError.Fill(err.Error())
+	}
+
+	ret := redis.RDS.HSet(ctx, key, uc.Label(), string(js))
+	if ret.Err() != nil {
+		return 0, errors.UserStoreError.Fill(ret.Err().Error())
+	}
+
+	//TODO... 过期时间没设置
+
+	return ret.Val(), nil
 }

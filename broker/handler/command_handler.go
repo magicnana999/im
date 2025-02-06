@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"github.com/magicnana999/im/broker/state"
 	"github.com/magicnana999/im/common/pb"
 	"github.com/magicnana999/im/errors"
 	"github.com/magicnana999/im/logger"
@@ -48,6 +49,11 @@ func (c *CommandHandler) InitHandler() error {
 
 func (c *CommandHandler) HandleCommand(ctx context.Context, cType string, content *anypb.Any) (proto.Message, error) {
 
+	uc, e := state.CurrentUserFromCtx(ctx)
+	if e != nil {
+		return nil, e
+	}
+
 	switch cType {
 	case pb.CTypeUserLogin:
 		var src pb.LoginRequest
@@ -55,7 +61,18 @@ func (c *CommandHandler) HandleCommand(ctx context.Context, cType string, conten
 			return nil, errors.HandleUnmarshalError.Fill(err.Error())
 		}
 		//return c.userApiClient.Login(ctx, &src)
-		return login(ctx, &src)
+
+		rep, err := login(ctx, &src)
+		if err != nil {
+			return nil, err
+		}
+
+		if err = uc.Store(ctx, rep.AppId, rep.UserId); err != nil {
+			return nil, err
+		}
+
+		return rep, nil
+
 	default:
 		return nil, errors.HandleInvalidCType
 	}
