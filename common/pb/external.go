@@ -2,8 +2,9 @@ package pb
 
 import (
 	"errors"
+	imerror "github.com/magicnana999/im/errors"
 	"github.com/magicnana999/im/util/id"
-	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/anypb"
 	"google.golang.org/protobuf/types/known/wrapperspb"
@@ -44,7 +45,7 @@ func NewCommandRequest(userId int64, ct string, content proto.Message) (*Packet,
 
 	c, e := anypb.New(content)
 	if e != nil {
-		return nil, e
+		return nil, imerror.HandleWrapRequestError.Fill(e.Error())
 	}
 
 	b, e := anypb.New(&CommandBody{
@@ -52,7 +53,7 @@ func NewCommandRequest(userId int64, ct string, content proto.Message) (*Packet,
 		Request: c,
 	})
 	if e != nil {
-		return nil, e
+		return nil, imerror.HandleWrapRequestError.Fill(e.Error())
 	}
 
 	packet := Packet{
@@ -74,32 +75,25 @@ func NewCommandResponse(packet *Packet, ct string, content proto.Message, err er
 	var body *anypb.Any
 
 	if err != nil {
-		var pbError Error
-		if errors.As(err, &pbError) {
-			b, e := anypb.New(&CommandBody{
-				CType:   ct,
-				Code:    int32(pbError.Code),
-				Message: pbError.Message,
-			})
-			if e != nil {
-				return nil, e
-			}
-			body = b
-		} else {
-			b, e := anypb.New(&CommandBody{
-				CType:   ct,
-				Code:    int32(codes.Unknown),
-				Message: err.Error(),
-			})
-			if e != nil {
-				return nil, e
-			}
-			body = b
+
+		c, m := formatCommandError(err)
+
+		b, e := anypb.New(&CommandBody{
+			CType:   ct,
+			Code:    int32(c),
+			Message: m,
+		})
+
+		if e != nil {
+			return nil, imerror.HandleWrapReplyError.Fill(e.Error())
 		}
+
+		body = b
+
 	} else {
 		c, e := anypb.New(content)
 		if e != nil {
-			return nil, e
+			return nil, imerror.HandleWrapReplyError.Fill(e.Error())
 		}
 
 		body, e = anypb.New(&CommandBody{
@@ -107,7 +101,7 @@ func NewCommandResponse(packet *Packet, ct string, content proto.Message, err er
 			Reply: c,
 		})
 		if e != nil {
-			return nil, e
+			return nil, imerror.HandleWrapReplyError.Fill(e.Error())
 		}
 	}
 
@@ -124,4 +118,22 @@ func NewCommandResponse(packet *Packet, ct string, content proto.Message, err er
 	}
 
 	return &response, nil
+}
+
+func formatCommandError(err error) (int, string) {
+
+	if err == nil {
+		return 0, ""
+	}
+
+	if _, ok := status.FromError(err); ok {
+		return imerror.HandleGrpcError.Code, err.Error()
+	}
+
+	var e imerror.Error
+	if b := errors.Is(err, &e); b {
+		return imerror.HandleGrpcError.Code, e.Error()
+	}
+
+	return imerror.HandleInternalError.Code, err.Error()
 }

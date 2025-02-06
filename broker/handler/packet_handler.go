@@ -2,14 +2,15 @@ package handler
 
 import (
 	"context"
-	"errors"
 	"github.com/magicnana999/im/common/pb"
+	"github.com/magicnana999/im/errors"
+	"github.com/magicnana999/im/logger"
 )
 
 type PacketHandler interface {
 	HandlePacket(ctx context.Context, packet *pb.Packet) (*pb.Packet, error)
 	IsSupport(ctx context.Context, packetType int32) bool
-	InitHandler()
+	InitHandler() error
 }
 
 type PacketHandlerImpl struct {
@@ -33,7 +34,7 @@ func (p *PacketHandlerImpl) HandlePacket(ctx context.Context, packet *pb.Packet)
 			return handler.HandlePacket(ctx, packet)
 		}
 	}
-	return nil, errors.New("not support")
+	return nil, errors.HandlerNoSupportError
 }
 
 func (p *PacketHandlerImpl) IsSupport(ctx context.Context, packetType int32) bool {
@@ -42,11 +43,18 @@ func (p *PacketHandlerImpl) IsSupport(ctx context.Context, packetType int32) boo
 			return true
 		}
 	}
+
+	logger.ErrorF("no handler support %d", packetType)
 	return false
 }
 
-func (p *PacketHandlerImpl) InitHandler() {
+func (p *PacketHandlerImpl) InitHandler() error {
 	for _, handler := range p.handlers {
-		handler.InitHandler()
+		err := handler.InitHandler()
+		if err != nil {
+			logger.FatalF("init handler error: %v", err)
+		}
 	}
+
+	return nil
 }

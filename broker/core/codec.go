@@ -2,10 +2,9 @@ package core
 
 import (
 	"encoding/binary"
-	"encoding/json"
-	"errors"
 	"github.com/magicnana999/im/broker/state"
 	"github.com/magicnana999/im/common/pb"
+	"github.com/magicnana999/im/errors"
 	"github.com/magicnana999/im/logger"
 	"github.com/panjf2000/gnet/v2"
 	"google.golang.org/protobuf/proto"
@@ -15,8 +14,8 @@ import (
 )
 
 type Codec interface {
-	Encode(p *pb.Packet) ([][]byte, error)
-	Decode(s *BrokerServer, c gnet.Conn) ([]*pb.Packet, error)
+	Encode(c gnet.Conn, p *pb.Packet) ([][]byte, error)
+	Decode(c gnet.Conn) ([]*pb.Packet, error)
 }
 
 var DefaultCodec = &LengthFieldBasedFrameCodec{}
@@ -24,16 +23,22 @@ var DefaultCodec = &LengthFieldBasedFrameCodec{}
 type LengthFieldBasedFrameCodec struct {
 }
 
-func (l LengthFieldBasedFrameCodec) Encode(p *pb.Packet) ([][]byte, error) {
+func (l LengthFieldBasedFrameCodec) Encode(c gnet.Conn, p *pb.Packet) ([][]byte, error) {
+
+	user, err := state.CurrentUserFromConn(c)
+	if err != nil {
+		return nil, errors.ConnectionEncodeError.Fill("failed to get current user," + err.Error())
+	}
+
 	if pb.IsHeartbeat(p) {
 
 		var hb wrapperspb.UInt32Value
 		if err := p.Body.UnmarshalTo(&hb); err != nil {
-			return nil, err
+			return nil, errors.ConnectionEncodeError.Fill("failed to unmarshal length field," + err.Error())
 		}
 
 		if hb.Value < 0 || hb.Value >= math.MaxInt32 {
-			return nil, errors.New("invalid heartbeat body")
+			return nil, errors.ConnectionEncodeError.Fill("invalid heartbeat value")
 		}
 
 		bs := make([][]byte, 2)
@@ -42,8 +47,17 @@ func (l LengthFieldBasedFrameCodec) Encode(p *pb.Packet) ([][]byte, error) {
 
 		binary.BigEndian.PutUint32(bs[0], uint32(4))
 		binary.BigEndian.PutUint32(bs[1], hb.Value)
+
+		logger.DebugF("[%s#%s] Encode heartbeat,buffer:%d,length:%d,value:%s",
+			c.RemoteAddr().String(),
+			user.Label(),
+			len(bs[0])+len(bs[1]),
+			len(bs[1]),
+			hb.Value)
+
 		return bs, nil
 	} else {
+
 		var err error
 
 		bs := make([][]byte, 2)
@@ -51,73 +65,51 @@ func (l LengthFieldBasedFrameCodec) Encode(p *pb.Packet) ([][]byte, error) {
 		bs[1], err = proto.Marshal(p)
 
 		if err != nil {
-			return nil, err
+			return nil, errors.ConnectionDecodeError.Fill("failed to marshal packet," + err.Error())
 		}
 
 		if len(bs[1]) <= 0 || len(bs[1]) >= math.MaxInt32 {
-			return nil, errors.New("invalid packet body")
+			return nil, errors.ConnectionEncodeError.Fill("invalid packet length")
 		}
 
 		binary.BigEndian.PutUint32(bs[0], uint32(len(bs[1])))
+
+		logger.DebugF("[%s#%s] Encode packet,buffer:%d,length:%d,id:%s",
+			c.RemoteAddr().String(),
+			user.Label(),
+			len(bs[0])+len(bs[1]),
+			len(bs[1]),
+			p.Id)
 
 		return bs, nil
 	}
 }
 
-func (l LengthFieldBasedFrameCodec) Decode(s *BrokerServer, c gnet.Conn) ([]*pb.Packet, error) {
+func (l LengthFieldBasedFrameCodec) Decode(c gnet.Conn) ([]*pb.Packet, error) {
 
 	result := make([]*pb.Packet, 0)
 
 	user, err := state.CurrentUserFromConn(c)
 	if err != nil {
-		logger.Error(err)
+		return nil, errors.ConnectionDecodeError.Fill("failed to get current user," + err.Error())
+
 	}
-
-	logger.InfoF("[%s#%s] Decode start,buffer:%d -------------------------------",
-		c.RemoteAddr().String(),
-		user.Label(),
-		c.InboundBuffered())
-
-	//logger.InfoF("[%s#%s] Decode length field,buffer:%d",
-	//	c.RemoteAddr().String(),
-	//	user.Label(),
-	//	c.InboundBuffered())
 
 	for c.InboundBuffered() >= 4 {
 
 		bs, e1 := c.Next(4)
 		if e1 != nil {
 
-			logger.ErrorF("[%s#%s] Decode length field,buffer:%d,error:%v",
-				c.RemoteAddr().String(),
-				user.Label(),
-				c.InboundBuffered(),
-				e1)
-
 			c.Discard(c.InboundBuffered())
-			//continue
-			return nil, e1
+			return nil, errors.ConnectionDecodeError.Fill("failed to read length field," + e1.Error())
 		}
 
 		l := binary.BigEndian.Uint32(bs)
 
-		logger.InfoF("[%s#%s] Decode length field,buffer:%d,value:%d",
-			c.RemoteAddr().String(),
-			user.Label(),
-			c.InboundBuffered(),
-			l)
-
 		if l <= 0 || l >= math.MaxInt32 {
 
-			ee := errors.New("invalid decode length")
-			logger.ErrorF("[%s#%s] Decode length field,buffer:%d,error:%v",
-				c.RemoteAddr().String(),
-				user.Label(),
-				c.InboundBuffered(),
-				ee)
-
 			c.Discard(c.InboundBuffered())
-
+			ee := errors.ConnectionDecodeError.Fill("invalid packet length")
 			return nil, ee
 
 		}
@@ -130,24 +122,17 @@ func (l LengthFieldBasedFrameCodec) Decode(s *BrokerServer, c gnet.Conn) ([]*pb.
 
 			if e2 != nil {
 
-				logger.ErrorF("[%s#%s] Decode heartbeat body,buffer:%d,error:%v",
-					c.RemoteAddr().String(),
-					user.Label(),
-					c.InboundBuffered(),
-					e2)
-
 				c.Discard(c.InboundBuffered())
-
-				//continue
-				return nil, e2
+				return nil, errors.ConnectionDecodeError.Fill("failed to read heartbeat," + e2.Error())
 			}
 
 			heartbeat := binary.BigEndian.Uint32(b)
 
-			logger.InfoF("[%s#%s] Decode heartbeat body,buffer:%d,value:%d",
+			logger.InfoF("[%s#%s] Decode heartbeat,buffer:%d,length:%d,value:%d",
 				c.RemoteAddr().String(),
 				user.Label(),
 				c.InboundBuffered(),
+				length,
 				heartbeat)
 
 			if heartbeat > 0 && heartbeat < math.MaxInt32 {
@@ -174,42 +159,23 @@ func (l LengthFieldBasedFrameCodec) Decode(s *BrokerServer, c gnet.Conn) ([]*pb.
 
 			if e3 != nil {
 
-				logger.ErrorF("[%s#%s] Decode packet body,buffer:%d,error:%v",
-					c.RemoteAddr().String(),
-					user.Label(),
-					c.InboundBuffered(),
-					e3)
-
 				c.Discard(c.InboundBuffered())
-
-				//continue
-				return nil, e3
+				return nil, errors.ConnectionDecodeError.Fill("failed to read packet," + e3.Error())
 			}
 
 			var p pb.Packet
 			if e4 := proto.Unmarshal(b, &p); e4 != nil {
 
-				logger.ErrorF("[%s#%s] Decode packet body,unmarshal packet,buffer:%d,error:%v",
-					c.RemoteAddr().String(),
-					user.Label(),
-					c.InboundBuffered(),
-					e4)
-
 				c.Discard(c.InboundBuffered())
-
-				return nil, e4
-				//continue
+				return nil, errors.ConnectionDecodeError.Fill("failed to unmarshal packet," + e4.Error())
 			}
 
-			pp, _ := pb.RevertPacket(&p)
-
-			jb, _ := json.Marshal(pp)
-
-			logger.InfoF("[%s#%s] Decode packet body,buffer:%d,value:%s",
+			logger.InfoF("[%s#%s] Decode packet,buffer:%d,length:%d,id:%s",
 				c.RemoteAddr().String(),
 				user.Label(),
 				c.InboundBuffered(),
-				jb)
+				length,
+				p.Id)
 
 			result = append(result, &p)
 

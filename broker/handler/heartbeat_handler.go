@@ -40,7 +40,7 @@ func (h *HeartbeatHandler) IsSupport(ctx context.Context, packetType int32) bool
 	return packetType == pb.BTypeHeartbeat
 }
 
-func (h *HeartbeatHandler) InitHandler() {
+func (h *HeartbeatHandler) InitHandler() error {
 	var (
 		DefaultAntsPoolSize = 1 << 18
 		ExpiryDuration      = 10 * time.Second
@@ -58,13 +58,15 @@ func (h *HeartbeatHandler) InitHandler() {
 	defaultAntsPool, err := ants.NewPool(DefaultAntsPoolSize, ants.WithOptions(options))
 
 	if err != nil {
-		logger.FatalF("Init default ants pool error: %v", err)
+		logger.FatalF("init default ants pool error: %v", err)
 	}
 
 	DefaultHeartbeatHandler.heartbeatPool = defaultAntsPool
 	DefaultHeartbeatHandler.m = make(map[int]*HeartbeatTask)
 
 	logger.DebugF("HeartbeatHandler init")
+
+	return nil
 }
 
 func (h *HeartbeatHandler) Count() int {
@@ -160,19 +162,15 @@ func (h *HeartbeatHandler) StopTicker(c gnet.Conn) error {
 	return nil
 }
 
-func (h *HeartbeatHandler) SetLastHeartbeat(c *state.UserConnection) error {
+func (h *HeartbeatHandler) SetLastHeartbeat(c *state.UserConnection) {
 	h.mu.RLock()
 	task, flag := h.m[c.Fd]
 	h.mu.RUnlock()
 	if !flag {
-		return nil
+		return
 	}
 
 	task.setLastHeartbeat()
-
-	//logger.InfoF("[%s#%s] HeartbeatTask setLastHeartbeat", task.remoteAddr, task.uc.Label())
-
-	return nil
 }
 
 type HeartbeatTask struct {

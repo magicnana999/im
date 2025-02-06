@@ -14,6 +14,16 @@ import (
 	"time"
 )
 
+const (
+	DefaultPort = "7539"
+)
+
+type Option struct {
+	Name              string        `json:"name"`
+	ServerInterval    time.Duration `json:"serverInterval"`
+	HeartbeatInterval time.Duration `json:"heartbeatInterval"`
+}
+
 type BrokerServer struct {
 	*gnet.BuiltinEventEngine
 	eng               gnet.Engine
@@ -120,42 +130,50 @@ func (s *BrokerServer) OnTraffic(c gnet.Conn) (action gnet.Action) {
 	if err != nil {
 		logger.ErrorF("Connection traffic error: %v", err)
 		handler.DefaultHeartbeatHandler.StopTicker(c)
+		return gnet.None
 	}
 
 	logger.InfoF("[%s#%s] Connection traffic", c.RemoteAddr().String(), user.Label())
 
-	packets, e := DefaultCodec.Decode(s, c)
+	packets, e := DefaultCodec.Decode(c)
 	if e != nil {
 
-		logger.FatalF("[%s#%s] Connection traffic error:%v",
+		logger.ErrorF("[%s#%s] Connection traffic error:%v",
 			c.RemoteAddr().String(),
 			user.Label(),
 			e)
+		handler.DefaultHeartbeatHandler.StopTicker(c)
+		return gnet.None
 	}
 
 	if packets != nil {
 		for _, packet := range packets {
 			response, err11 := handler.DefaultHandler.HandlePacket(ctx, packet)
 			if err11 != nil {
-				logger.FatalF("[%s#%s] Connection traffic error:%v", c.RemoteAddr().String(), user.Label(), err11)
+				logger.ErrorF("[%s#%s] Connection traffic error:%v", c.RemoteAddr().String(), user.Label(), err11)
+				handler.DefaultHeartbeatHandler.StopTicker(c)
+				return gnet.None
 			}
 
 			if response == nil {
 				continue
 			}
 
-			bs, err12 := DefaultCodec.Encode(response)
+			bs, err12 := DefaultCodec.Encode(c, response)
 			if err12 != nil {
-				logger.FatalF("[%s#%s] Connection traffic error:%v", c.RemoteAddr().String(), user.Label(), err12)
+				logger.ErrorF("[%s#%s] Connection traffic error:%v", c.RemoteAddr().String(), user.Label(), err12)
+				handler.DefaultHeartbeatHandler.StopTicker(c)
+				return gnet.None
 			}
 
-			_ = c.AsyncWritev(bs, func(c gnet.Conn, err error) error {
+			c.AsyncWritev(bs, func(c gnet.Conn, err error) error {
 				if err != nil {
 					logging.Fatalf("[%s#%s] Connection traffic,write error:%v", c.RemoteAddr().String(), user.Label(), err)
 					handler.DefaultHeartbeatHandler.StopTicker(c)
 				}
-				return nil
+				return err
 			})
+
 		}
 	}
 

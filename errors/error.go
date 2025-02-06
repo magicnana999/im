@@ -8,33 +8,53 @@ import (
 const (
 	brokerSetup = iota + 1101
 	brokerRefresh
-)
 
-var (
-	BrokerSetupError   = New(brokerSetup, "broker setup error")
-	BrokerRefreshError = New(brokerRefresh, "broker refresh error")
-)
-
-const (
-	connectionHeartbeatInit = iota + 1201
+	connectionHeartbeatInit
 	connectionDecode
 	connectionEncode
 )
 
 var (
+	BrokerSetupError   = New(brokerSetup, "broker setup error")
+	BrokerRefreshError = New(brokerRefresh, "broker refresh error")
+
 	ConnectionHeartbeatInitError = New(connectionHeartbeatInit, "connection heartbeat init error")
 	ConnectionDecodeError        = New(connectionDecode, "connection decode error")
 	ConnectionEncodeError        = New(connectionEncode, "connection encode error")
 )
 
 const (
-	ucNotExists = iota + 1301
-	ctxNotExists
+	internal = iota + 1201
+	handlerNoSupport
+	UnmarshalPacket
+	invalidCType
+	grpcError
+	wrapRequest
+	wrapReply
 )
 
 var (
-	UcNotExists  = New(ucNotExists, "no such user connection")
-	CtxNotExists = New(ctxNotExists, "no such context")
+	HandleInternalError    = New(internal, "internal error")
+	HandlerNoSupportError  = New(handlerNoSupport, "no handler is support")
+	HandleUnmarshalError   = New(UnmarshalPacket, "unmarshal error")
+	HandleInvalidCType     = New(invalidCType, "invalid cType")
+	HandleGrpcError        = New(grpcError, "grpc error")
+	HandleWrapRequestError = New(wrapRequest, "wrap request error")
+	HandleWrapReplyError   = New(wrapReply, "wrap reply error")
+)
+
+const (
+	ucNotExists = iota + 1501
+	ctxNotExists
+	userNotLogin
+	userStore
+)
+
+var (
+	UcNotExists    = New(ucNotExists, "no such user connection")
+	CtxNotExists   = New(ctxNotExists, "no such user context")
+	UserNotLogin   = New(userNotLogin, "user is not login")
+	UserStoreError = New(userStore, "user store error")
 )
 
 type Error struct {
@@ -63,13 +83,5 @@ func New(code int, message string) Error {
 	return Error{
 		Code:    code,
 		Message: message,
-	}
-}
-
-func CompleteError(code int, message string, detail string) Error {
-	return Error{
-		Code:    code,
-		Message: message,
-		Details: detail,
 	}
 }

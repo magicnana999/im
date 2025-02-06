@@ -2,8 +2,8 @@ package handler
 
 import (
 	"context"
-	"fmt"
 	"github.com/magicnana999/im/common/pb"
+	"github.com/magicnana999/im/errors"
 	"github.com/magicnana999/im/logger"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -18,44 +18,71 @@ type CommandHandler struct {
 	userApiClient pb.UserApiClient
 }
 
-func (c2 *CommandHandler) HandlePacket(ctx context.Context, packet *pb.Packet) (*pb.Packet, error) {
+func (c *CommandHandler) HandlePacket(ctx context.Context, packet *pb.Packet) (*pb.Packet, error) {
 
 	var body pb.CommandBody
 	if err := packet.Body.UnmarshalTo(&body); err != nil {
-		return nil, err
+		return nil, errors.HandleUnmarshalError.Fill(err.Error())
 	}
 
-	reply, err := c2.HandleCommand(ctx, body.CType, body.Request)
+	reply, err := c.HandleCommand(ctx, body.CType, body.Request)
 
 	return pb.NewCommandResponse(packet, body.CType, reply, err)
 
 }
 
-func (c2 *CommandHandler) IsSupport(ctx context.Context, packetType int32) bool {
+func (c *CommandHandler) IsSupport(ctx context.Context, packetType int32) bool {
 	return pb.BTypeCommand == packetType
 }
 
-func (c2 *CommandHandler) InitHandler() {
+func (c *CommandHandler) InitHandler() error {
 	conn, err := grpc.NewClient("localhost:7540", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		logger.FatalF("did not connect: %v", err)
 	}
-	c2.conn = conn
-	c2.userApiClient = pb.NewUserApiClient(conn)
+	c.conn = conn
+	c.userApiClient = pb.NewUserApiClient(conn)
+
+	return nil
 }
 
-func (c2 *CommandHandler) HandleCommand(ctx context.Context, cType string, content *anypb.Any) (proto.Message, error) {
+func (c *CommandHandler) HandleCommand(ctx context.Context, cType string, content *anypb.Any) (proto.Message, error) {
 
 	switch cType {
 	case pb.CTypeUserLogin:
 		var src pb.LoginRequest
 		if err := content.UnmarshalTo(&src); err != nil {
-			break
+			return nil, errors.HandleUnmarshalError.Fill(err.Error())
 		}
-		return c2.userApiClient.Login(ctx, &src)
+		//return c.userApiClient.Login(ctx, &src)
+		return login(ctx, &src)
 	default:
-		return nil, fmt.Errorf("unsupported command type: %v", cType)
+		return nil, errors.HandleInvalidCType
 	}
+}
 
-	return nil, fmt.Errorf("unsupported command type: %v", cType)
+func login(ctx context.Context, request *pb.LoginRequest) (*pb.LoginReply, error) {
+
+	switch request.UserSig {
+	case "cuf5ofe1a37nfi3p4b5g":
+		return &pb.LoginReply{
+			AppId:  "19860220",
+			UserId: 1200120,
+		}, nil
+	case "cuf5ofe1a37nfi3p4b6g":
+		return &pb.LoginReply{
+			AppId:  "19860220",
+			UserId: 1200122,
+		}, nil
+	case "cuf5ofe1a37nfi3p4b60":
+		return &pb.LoginReply{
+			AppId:  "19860221",
+			UserId: 1200122,
+		}, nil
+	default:
+		return &pb.LoginReply{
+			AppId:  "19860220",
+			UserId: 0,
+		}, nil
+	}
 }

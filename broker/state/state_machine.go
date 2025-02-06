@@ -16,14 +16,24 @@ import (
 )
 
 const (
-	KeyBrokerInfo        string        = "im:broker:"
+	KeyBrokerInfo = "im:broker:"
+
+	keyLock = ":im:user:lock:"
+
+	keyUserConn = ":im:user:conn:"
+
 	KeyBrokerConnections               = "im:broker:connections:"
-	KeyUserClients       string        = "im:user:clients:"
+	KeyUserClients                     = "im:user:clients:"
 	Expire               time.Duration = 60 * time.Second
 )
 
 const (
 	CurrentUser string = `CurrentUser`
+)
+
+var (
+	m  map[string]*UserConnection
+	mu sync.RWMutex
 )
 
 type BrokerInfo struct {
@@ -37,11 +47,6 @@ func NewBrokerInfo(addr string) BrokerInfo {
 		StartAt: time.Now().Unix(),
 	}
 }
-
-var (
-	m  map[string]*UserConnection
-	mu sync.RWMutex
-)
 
 func init() {
 	m = make(map[string]*UserConnection)
@@ -102,7 +107,7 @@ func Load(ucLabel string) (*UserConnection, error) {
 	defer mu.RUnlock()
 	uc := m[ucLabel]
 	if uc == nil {
-		return nil, errors.UserConnectionNotHeld
+		return nil, errors.UserNotLogin.Fill(ucLabel)
 	}
 
 	return uc, nil
@@ -166,4 +171,39 @@ func RefreshBroker(ctx context.Context, broker BrokerInfo) (bool, error) {
 		key,
 		ret.Val())
 	return ret.Val(), ret.Err()
+}
+
+func redisLock(ctx context.Context, appId, ucLabel string) (string, error) {
+	key := fmt.Sprintf("%s%s%s", appId, keyLock, ucLabel)
+	val := time.Now().UnixMilli()
+	ret := redis.RDS.SetNX(ctx, key, val, time.Minute)
+	if ret.Err() != nil {
+		return "", errors.UserStoreError.Fill(ret.Err().Error())
+	}
+
+	if !ret.Val() {
+		return "", errors.UserStoreError.Fill("redis is not ok")
+	}
+
+	return strconv.FormatInt(val, 10), nil
+}
+
+func setupUserConn(ctx context.Context, uc *UserConnection) error {
+	key := fmt.Sprintf("%s%s%s", uc.AppId, keyUserConn, uc.Label())
+
+	js, err := json.Marshal(uc)
+	if err != nil {
+		return errors.BrokerSetupError.Fill(err.Error())
+	}
+
+	ret := redis.RDS.SetNX(ctx, key, val, time.Minute)
+	if ret.Err() != nil {
+		return "", errors.UserStoreError.Fill(ret.Err().Error())
+	}
+
+	if !ret.Val() {
+		return "", errors.UserStoreError.Fill("redis is not ok")
+	}
+
+	return strconv.FormatInt(val, 10), nil
 }
