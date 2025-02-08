@@ -118,6 +118,8 @@ func (h *HeartbeatHandler) StartTicker(ctx context.Context, c gnet.Conn, uc *sta
 						format(time.UnixMilli(task.lastHeartbeat)),
 						heartbeatInterval.Milliseconds())
 					h.StopTicker(task.c)
+				} else {
+					task.uc.Refresh(task.ctx)
 				}
 			}
 		}
@@ -127,7 +129,7 @@ func (h *HeartbeatHandler) StartTicker(ctx context.Context, c gnet.Conn, uc *sta
 		return errors.ConnectionHeartbeatInitError.Fill(err.Error())
 	}
 
-	logger.InfoF("[%s#%s] HeartbeatTask started", task.remoteAddr, task.uc.Label())
+	logger.DebugF("[%s#%s] HeartbeatTask started", task.remoteAddr, task.uc.Label())
 
 	return nil
 }

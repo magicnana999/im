@@ -48,7 +48,7 @@ func (l LengthFieldBasedFrameCodec) Encode(c gnet.Conn, p *pb.Packet) ([][]byte,
 		binary.BigEndian.PutUint32(bs[0], uint32(4))
 		binary.BigEndian.PutUint32(bs[1], hb.Value)
 
-		logger.DebugF("[%s#%s] Encode heartbeat,buffer:%d,length:%d,value:%s",
+		logger.DebugF("[%s#%s] Encode heartbeat,buffer:%d,length:%d,value:%d",
 			c.RemoteAddr().String(),
 			user.Label(),
 			len(bs[0])+len(bs[1]),
@@ -128,7 +128,7 @@ func (l LengthFieldBasedFrameCodec) Decode(c gnet.Conn) ([]*pb.Packet, error) {
 
 			heartbeat := binary.BigEndian.Uint32(b)
 
-			logger.InfoF("[%s#%s] Decode heartbeat,buffer:%d,length:%d,value:%d",
+			logger.DebugF("[%s#%s] Decode heartbeat,buffer:%d,length:%d,value:%d",
 				c.RemoteAddr().String(),
 				user.Label(),
 				c.InboundBuffered(),
@@ -170,7 +170,7 @@ func (l LengthFieldBasedFrameCodec) Decode(c gnet.Conn) ([]*pb.Packet, error) {
 				return nil, errors.ConnectionDecodeError.Fill("failed to unmarshal packet," + e4.Error())
 			}
 
-			logger.InfoF("[%s#%s] Decode packet,buffer:%d,length:%d,id:%s",
+			logger.DebugF("[%s#%s] Decode packet,buffer:%d,length:%d,id:%s",
 				c.RemoteAddr().String(),
 				user.Label(),
 				c.InboundBuffered(),

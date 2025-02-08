@@ -48,13 +48,15 @@ const (
 	ctxNotExists
 	userNotLogin
 	userStore
+	userRefresh
 )
 
 var (
-	UcNotExists    = New(ucNotExists, "no such user connection")
-	CtxNotExists   = New(ctxNotExists, "no such user context")
-	UserNotLogin   = New(userNotLogin, "user is not login")
-	UserStoreError = New(userStore, "user store error")
+	UcNotExists      = New(ucNotExists, "no such user connection")
+	CtxNotExists     = New(ctxNotExists, "no such user context")
+	UserNotLogin     = New(userNotLogin, "user is not login")
+	UserStoreError   = New(userStore, "user store error")
+	UserRefreshError = New(userRefresh, "user refresh error")
 )
 
 type Error struct {

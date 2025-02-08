@@ -19,11 +19,15 @@ func IsCommand(p *Packet) bool {
 	return p.BType == BTypeCommand
 }
 
-func isMessage(packet *Packet) bool {
+func IsMessage(packet *Packet) bool {
 	return packet.BType == BTypeMessage
 }
 
-func NewHeartbeatRequest(v int) (*Packet, error) {
+func IsResponse(p *Packet) bool {
+	return p.Flow == FlowResponse
+}
+
+func NewHeartbeatRequest(v int32) (*Packet, error) {
 	body, _ := anypb.New(wrapperspb.UInt32(uint32(v)))
 	packet := &Packet{
 		BType: BTypeHeartbeat,

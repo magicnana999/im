@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/magicnana999/im/common/enum"
+	"github.com/magicnana999/im/common/pb"
 	"github.com/magicnana999/im/errors"
 	"github.com/magicnana999/im/logger"
 	"github.com/magicnana999/im/redis"
@@ -61,6 +62,7 @@ type UserConnection struct {
 	BrokerAddr  string      `json:"brokerAddr"`
 	OS          enum.OSType `json:"os"`
 	ConnectTime int64       `json:"connectTime"`
+	IsLogin     bool        `json:"isLogin"`
 	C           gnet.Conn   `json:"-"`
 }
 
@@ -94,14 +96,20 @@ func (u *UserConnection) Label() string {
 	return strconv.FormatInt(u.UserId, 10) + "#" + dt.String()
 }
 
-func (u *UserConnection) Store(ctx context.Context, appId string, userId int64) error {
+func (u *UserConnection) Store(ctx context.Context, appId string, userId int64, os pb.OSType) error {
 	mu.Lock()
 	defer mu.Unlock()
 	u.AppId = appId
 	u.UserId = userId
+	u.OS = enum.OSType(os)
+	u.IsLogin = true
 	m[u.Label()] = u
 
-	return storeUserToRedis(ctx, u)
+	return StoreUserToRedis(ctx, u)
+}
+
+func (u *UserConnection) Refresh(ctx context.Context) error {
+	return RefreshUserToRedis(ctx, u)
 }
 
 func Load(ucLabel string) (*UserConnection, error) {
@@ -125,11 +133,11 @@ func CurrentContextFromConn(c gnet.Conn) (context.Context, error) {
 }
 
 func CurrentUserFromConn(c gnet.Conn) (*UserConnection, error) {
+
 	ctx, err := CurrentContextFromConn(c)
 	if err != nil {
 		return nil, err
 	}
-
 	return CurrentUserFromCtx(ctx)
 }
 
@@ -169,13 +177,13 @@ func RefreshBroker(ctx context.Context, broker BrokerInfo) (bool, error) {
 		return false, errors.BrokerRefreshError.Fill(ret.Err().Error())
 	}
 
-	logger.DebugF("BrokerInfo refresh,key:%s,result:%t",
-		key,
-		ret.Val())
+	//logger.DebugF("BrokerInfo refresh,key:%s,result:%t",
+	//	key,
+	//	ret.Val())
 	return ret.Val(), ret.Err()
 }
 
-func storeUserToRedis(ctx context.Context, uc *UserConnection) error {
+func StoreUserToRedis(ctx context.Context, uc *UserConnection) error {
 	lock, e := redisLock(ctx, uc.AppId, uc.Label())
 	if e != nil {
 		return e
@@ -191,6 +199,22 @@ func storeUserToRedis(ctx context.Context, uc *UserConnection) error {
 	_, e2 := setupUserClients(ctx, uc)
 	if e2 != nil {
 		return e2
+	}
+
+	return nil
+}
+
+func RefreshUserToRedis(ctx context.Context, uc *UserConnection) error {
+	lock, e := redisLock(ctx, uc.AppId, uc.Label())
+	if e != nil {
+		return e
+	}
+
+	defer redisUnlock(ctx, uc.AppId, uc.Label(), lock)
+
+	_, e1 := refreshUserConn(ctx, uc)
+	if e1 != nil {
+		return e1
 	}
 
 	return nil
@@ -239,6 +263,16 @@ func setupUserConn(ctx context.Context, uc *UserConnection) (string, error) {
 	}
 
 	return ret.Val(), nil
+}
+
+func refreshUserConn(ctx context.Context, uc *UserConnection) (bool, error) {
+	key := fmt.Sprintf("%s%s%s", uc.AppId, keyUserConn, uc.Label())
+	ret := redis.RDS.Expire(ctx, key, time.Minute)
+	if ret.Err() != nil {
+		return false, errors.UserRefreshError.Fill(ret.Err().Error())
+	}
+	return ret.Val(), nil
+
 }
 
 func setupUserClients(ctx context.Context, uc *UserConnection) (int64, error) {

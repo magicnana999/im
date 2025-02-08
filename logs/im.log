@@ -32622,3 +32622,555 @@
 2025-02-05T20:37:08.866+0800 INFO [127.0.0.1:51112#] HeartbeatTask closed
 2025-02-05T20:37:08.866+0800 INFO [127.0.0.1:51112#] HeartbeatTask done
 2025-02-05T20:37:08.866+0800 INFO [127.0.0.1:51112#] Connection close
+2025-02-08T21:04:37.320+0800 DEBUG HeartbeatHandler init
+2025-02-08T21:04:37.320+0800 INFO BrokerOption:{"name":"192.168.1.105:7539","serverInterval":30000000000,"heartbeatInterval":30000000000}
+2025-02-08T21:04:37.321+0800 DEBUG default logging level is INFO
+2025-02-08T21:04:37.321+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-02-08T21:04:37.321+0800 INFO BrokerInstance started
+2025-02-08T21:04:37.325+0800 DEBUG BrokerInfo setup,key:im:broker:192.168.1.105:7539,result:OK
+2025-02-08T21:04:37.326+0800 DEBUG BrokerInfo refresh,key:im:broker:192.168.1.105:7539,result:true
+2025-02-08T21:05:07.327+0800 DEBUG BrokerInfo refresh,key:im:broker:192.168.1.105:7539,result:true
+2025-02-08T21:05:37.330+0800 DEBUG BrokerInfo refresh,key:im:broker:192.168.1.105:7539,result:true
+2025-02-08T21:35:55.032+0800 DEBUG HeartbeatHandler init
+2025-02-08T21:35:55.034+0800 INFO BrokerOption:{"name":"192.168.1.105:7539","serverInterval":30000000000,"heartbeatInterval":30000000000}
+2025-02-08T21:35:55.034+0800 DEBUG default logging level is INFO
+2025-02-08T21:35:55.034+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-02-08T21:35:55.034+0800 INFO BrokerInstance started
+2025-02-08T21:35:55.036+0800 DEBUG BrokerInfo setup,key:im:broker:192.168.1.105:7539,result:OK
+2025-02-08T21:35:55.037+0800 DEBUG BrokerInfo refresh,key:im:broker:192.168.1.105:7539,result:true
+2025-02-08T21:36:01.021+0800 INFO [127.0.0.1:53684#] Connection open
+2025-02-08T21:36:01.021+0800 INFO [127.0.0.1:53684#] HeartbeatTask started
+2025-02-09T00:41:16.206+0800 DEBUG HeartbeatHandler init
+2025-02-09T00:41:16.207+0800 INFO BrokerOption:{"name":"192.168.1.105:7539","serverInterval":30000000000,"heartbeatInterval":30000000000}
+2025-02-09T00:41:16.207+0800 DEBUG default logging level is INFO
+2025-02-09T00:41:16.207+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-02-09T00:41:16.207+0800 INFO BrokerInstance started
+2025-02-09T00:41:16.210+0800 DEBUG BrokerInfo setup,key:im:broker:192.168.1.105:7539,result:OK
+2025-02-09T00:41:16.210+0800 DEBUG BrokerInfo refresh,key:im:broker:192.168.1.105:7539,result:true
+2025-02-09T00:41:22.620+0800 INFO [127.0.0.1:62396#] Connection open
+2025-02-09T00:41:22.620+0800 INFO [127.0.0.1:62396#] HeartbeatTask started
+2025-02-09T00:41:23.623+0800 ERROR Connection traffic error: {"code":1501,"message":"no such user connection"}
+2025-02-09T00:41:23.623+0800 INFO [127.0.0.1:62396#] HeartbeatTask closed
+2025-02-09T00:41:23.624+0800 ERROR Connection close error: {"code":1501,"message":"no such user connection"}
+2025-02-09T00:43:09.818+0800 DEBUG HeartbeatHandler init
+2025-02-09T00:43:09.819+0800 INFO BrokerOption:{"name":"192.168.1.105:7539","serverInterval":30000000000,"heartbeatInterval":30000000000}
+2025-02-09T00:43:09.819+0800 DEBUG default logging level is INFO
+2025-02-09T00:43:09.819+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-02-09T00:43:09.819+0800 INFO BrokerInstance started
+2025-02-09T00:43:09.821+0800 DEBUG BrokerInfo setup,key:im:broker:192.168.1.105:7539,result:OK
+2025-02-09T00:43:09.821+0800 DEBUG BrokerInfo refresh,key:im:broker:192.168.1.105:7539,result:true
+2025-02-09T00:43:29.102+0800 INFO [127.0.0.1:62454#] Connection open
+2025-02-09T00:43:29.102+0800 INFO [127.0.0.1:62454#] HeartbeatTask started
+2025-02-09T00:43:39.822+0800 DEBUG BrokerInfo refresh,key:im:broker:192.168.1.105:7539,result:true
+2025-02-09T00:43:59.103+0800 INFO [127.0.0.1:62454#] HeartbeatTask timeout,now:2025-02-09 00:43:59.4359,last:2025-02-09 00:43:29.4329,interval:30000(ms)
+2025-02-09T00:43:59.104+0800 INFO [127.0.0.1:62454#] HeartbeatTask closed
+2025-02-09T00:43:59.104+0800 INFO [127.0.0.1:62454#] HeartbeatTask done
+2025-02-09T00:43:59.104+0800 ERROR Connection close error: {"code":1501,"message":"no such user connection"}
+2025-02-09T00:53:03.450+0800 DEBUG HeartbeatHandler init
+2025-02-09T00:53:03.451+0800 INFO BrokerOption:{"name":"192.168.1.105:7539","serverInterval":30000000000,"heartbeatInterval":30000000000}
+2025-02-09T00:53:03.451+0800 DEBUG default logging level is INFO
+2025-02-09T00:53:03.451+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-02-09T00:53:03.451+0800 INFO BrokerInstance started
+2025-02-09T00:53:03.454+0800 DEBUG BrokerInfo setup,key:im:broker:192.168.1.105:7539,result:OK
+2025-02-09T00:53:03.454+0800 DEBUG BrokerInfo refresh,key:im:broker:192.168.1.105:7539,result:true
+2025-02-09T00:53:18.076+0800 INFO [127.0.0.1:62725#] Connection open
+2025-02-09T00:53:18.076+0800 INFO [127.0.0.1:62725#] HeartbeatTask started
+2025-02-09T00:53:33.455+0800 DEBUG BrokerInfo refresh,key:im:broker:192.168.1.105:7539,result:true
+2025-02-09T00:53:48.077+0800 INFO [127.0.0.1:62725#] HeartbeatTask timeout,now:2025-02-09 00:53:48.5348,last:2025-02-09 00:53:18.5318,interval:30000(ms)
+2025-02-09T00:53:48.077+0800 INFO [127.0.0.1:62725#] HeartbeatTask closed
+2025-02-09T00:53:48.077+0800 INFO [127.0.0.1:62725#] HeartbeatTask done
+2025-02-09T00:53:48.078+0800 ERROR Connection close error: {"code":1501,"message":"no such user connection"}
+2025-02-09T00:54:29.040+0800 DEBUG HeartbeatHandler init
+2025-02-09T00:54:29.041+0800 INFO BrokerOption:{"name":"192.168.1.105:7539","serverInterval":30000000000,"heartbeatInterval":30000000000}
+2025-02-09T00:54:29.041+0800 DEBUG default logging level is INFO
+2025-02-09T00:54:29.041+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-02-09T00:54:29.041+0800 INFO BrokerInstance started
+2025-02-09T00:54:29.045+0800 DEBUG BrokerInfo setup,key:im:broker:192.168.1.105:7539,result:OK
+2025-02-09T00:54:29.046+0800 DEBUG BrokerInfo refresh,key:im:broker:192.168.1.105:7539,result:true
+2025-02-09T00:54:33.720+0800 INFO [127.0.0.1:62751#] Connection open
+2025-02-09T00:54:33.720+0800 INFO [127.0.0.1:62751#] HeartbeatTask started
+2025-02-09T00:54:58.722+0800 ERROR Connection traffic error: {"code":1501,"message":"no such user connection"}
+2025-02-09T00:54:58.722+0800 INFO [127.0.0.1:62751#] HeartbeatTask closed
+2025-02-09T00:54:58.722+0800 ERROR Connection close error: {"code":1501,"message":"no such user connection"}
+2025-02-09T00:55:29.724+0800 DEBUG HeartbeatHandler init
+2025-02-09T00:55:29.725+0800 INFO BrokerOption:{"name":"192.168.1.105:7539","serverInterval":30000000000,"heartbeatInterval":30000000000}
+2025-02-09T00:55:29.725+0800 DEBUG default logging level is INFO
+2025-02-09T00:55:29.725+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-02-09T00:55:29.725+0800 INFO BrokerInstance started
+2025-02-09T00:55:29.728+0800 DEBUG BrokerInfo setup,key:im:broker:192.168.1.105:7539,result:OK
+2025-02-09T00:55:29.728+0800 DEBUG BrokerInfo refresh,key:im:broker:192.168.1.105:7539,result:true
+2025-02-09T00:55:35.261+0800 INFO [127.0.0.1:62776#] Connection open
+2025-02-09T00:55:35.262+0800 INFO [127.0.0.1:62776#] HeartbeatTask started
+2025-02-09T00:55:44.872+0800 ERROR Connection close error: {"code":1501,"message":"no such user connection"}
+2025-02-09T00:55:44.873+0800 INFO [127.0.0.1:62776#] HeartbeatTask closed
+2025-02-09T00:56:06.582+0800 DEBUG HeartbeatHandler init
+2025-02-09T00:56:06.583+0800 INFO BrokerOption:{"name":"192.168.1.105:7539","serverInterval":30000000000,"heartbeatInterval":30000000000}
+2025-02-09T00:56:06.584+0800 DEBUG default logging level is INFO
+2025-02-09T00:56:06.584+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-02-09T00:56:06.584+0800 INFO BrokerInstance started
+2025-02-09T00:56:06.586+0800 DEBUG BrokerInfo setup,key:im:broker:192.168.1.105:7539,result:OK
+2025-02-09T00:56:06.586+0800 DEBUG BrokerInfo refresh,key:im:broker:192.168.1.105:7539,result:true
+2025-02-09T00:56:12.286+0800 INFO [127.0.0.1:62802#] Connection open
+2025-02-09T00:56:12.286+0800 INFO [127.0.0.1:62802#] HeartbeatTask started
+2025-02-09T00:56:13.288+0800 ERROR Connection traffic error: {"code":1501,"message":"no such user connection"}
+2025-02-09T00:56:13.288+0800 INFO [127.0.0.1:62802#] HeartbeatTask closed
+2025-02-09T00:56:13.289+0800 ERROR Connection close error: {"code":1501,"message":"no such user connection"}
+2025-02-09T00:56:13.289+0800 INFO [127.0.0.1:62802#] HeartbeatTask done
+2025-02-09T00:56:33.146+0800 DEBUG HeartbeatHandler init
+2025-02-09T00:56:33.147+0800 INFO BrokerOption:{"name":"192.168.1.105:7539","serverInterval":30000000000,"heartbeatInterval":30000000000}
+2025-02-09T00:56:33.147+0800 DEBUG default logging level is INFO
+2025-02-09T00:56:33.147+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-02-09T00:56:33.147+0800 INFO BrokerInstance started
+2025-02-09T00:56:33.149+0800 DEBUG BrokerInfo setup,key:im:broker:192.168.1.105:7539,result:OK
+2025-02-09T00:56:33.149+0800 DEBUG BrokerInfo refresh,key:im:broker:192.168.1.105:7539,result:true
+2025-02-09T00:56:45.347+0800 INFO [127.0.0.1:62815#] Connection open
+2025-02-09T00:56:45.348+0800 INFO [127.0.0.1:62815#] HeartbeatTask started
+2025-02-09T00:57:03.150+0800 DEBUG BrokerInfo refresh,key:im:broker:192.168.1.105:7539,result:true
+2025-02-09T00:57:15.349+0800 INFO [127.0.0.1:62815#] HeartbeatTask timeout,now:2025-02-09 00:57:15.5715,last:2025-02-09 00:56:45.5645,interval:30000(ms)
+2025-02-09T00:57:15.349+0800 INFO [127.0.0.1:62815#] HeartbeatTask closed
+2025-02-09T00:57:15.349+0800 INFO [127.0.0.1:62815#] HeartbeatTask done
+2025-02-09T00:57:15.349+0800 ERROR Connection close error: {"code":1501,"message":"no such user connection"}
+2025-02-09T00:57:50.698+0800 DEBUG HeartbeatHandler init
+2025-02-09T00:57:50.698+0800 INFO BrokerOption:{"name":"192.168.1.105:7539","serverInterval":30000000000,"heartbeatInterval":30000000000}
+2025-02-09T00:57:50.698+0800 DEBUG default logging level is INFO
+2025-02-09T00:57:50.698+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-02-09T00:57:50.698+0800 INFO BrokerInstance started
+2025-02-09T00:57:50.701+0800 DEBUG BrokerInfo setup,key:im:broker:192.168.1.105:7539,result:OK
+2025-02-09T00:57:50.701+0800 DEBUG BrokerInfo refresh,key:im:broker:192.168.1.105:7539,result:true
+2025-02-09T00:57:54.194+0800 INFO [127.0.0.1:62838#] Connection open
+2025-02-09T00:57:54.194+0800 INFO [127.0.0.1:62838#] HeartbeatTask started
+2025-02-09T00:58:20.030+0800 ERROR Connection traffic error: {"code":1501,"message":"no such user connection"}
+2025-02-09T00:58:20.031+0800 INFO [127.0.0.1:62838#] HeartbeatTask closed
+2025-02-09T00:58:20.032+0800 ERROR Connection close error: {"code":1501,"message":"no such user connection"}
+2025-02-09T00:58:20.032+0800 INFO [127.0.0.1:62838#] HeartbeatTask done
+2025-02-09T00:59:17.264+0800 DEBUG HeartbeatHandler init
+2025-02-09T00:59:17.265+0800 INFO BrokerOption:{"name":"192.168.1.105:7539","serverInterval":30000000000,"heartbeatInterval":30000000000}
+2025-02-09T00:59:17.265+0800 DEBUG default logging level is INFO
+2025-02-09T00:59:17.265+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-02-09T00:59:17.265+0800 INFO BrokerInstance started
+2025-02-09T00:59:17.268+0800 DEBUG BrokerInfo setup,key:im:broker:192.168.1.105:7539,result:OK
+2025-02-09T00:59:17.268+0800 DEBUG BrokerInfo refresh,key:im:broker:192.168.1.105:7539,result:true
+2025-02-09T00:59:19.399+0800 INFO [127.0.0.1:62892#] Connection open
+2025-02-09T00:59:19.399+0800 INFO [127.0.0.1:62892#] HeartbeatTask started
+2025-02-09T00:59:20.402+0800 ERROR Connection traffic error: {"code":1501,"message":"no such user connection"}
+2025-02-09T00:59:20.402+0800 INFO [127.0.0.1:62892#] HeartbeatTask closed
+2025-02-09T00:59:20.402+0800 ERROR Connection close error: {"code":1501,"message":"no such user connection"}
+2025-02-09T00:59:20.402+0800 INFO [127.0.0.1:62892#] HeartbeatTask done
+2025-02-09T01:00:04.306+0800 DEBUG HeartbeatHandler init
+2025-02-09T01:00:04.307+0800 INFO BrokerOption:{"name":"192.168.1.105:7539","serverInterval":30000000000,"heartbeatInterval":30000000000}
+2025-02-09T01:00:04.307+0800 DEBUG default logging level is INFO
+2025-02-09T01:00:04.307+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-02-09T01:00:04.307+0800 INFO BrokerInstance started
+2025-02-09T01:00:04.309+0800 DEBUG BrokerInfo setup,key:im:broker:192.168.1.105:7539,result:OK
+2025-02-09T01:00:04.309+0800 DEBUG BrokerInfo refresh,key:im:broker:192.168.1.105:7539,result:true
+2025-02-09T01:00:07.547+0800 INFO [127.0.0.1:62944#] Connection open
+2025-02-09T01:00:07.547+0800 INFO [127.0.0.1:62944#] HeartbeatTask started
+2025-02-09T01:00:19.730+0800 ERROR Connection traffic error: {"code":1501,"message":"no such user connection"}
+2025-02-09T01:00:50.476+0800 DEBUG HeartbeatHandler init
+2025-02-09T01:00:50.477+0800 INFO BrokerOption:{"name":"192.168.1.105:7539","serverInterval":30000000000,"heartbeatInterval":30000000000}
+2025-02-09T01:00:50.477+0800 DEBUG default logging level is INFO
+2025-02-09T01:00:50.477+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-02-09T01:00:50.477+0800 INFO BrokerInstance started
+2025-02-09T01:00:50.479+0800 DEBUG BrokerInfo setup,key:im:broker:192.168.1.105:7539,result:OK
+2025-02-09T01:00:50.479+0800 DEBUG BrokerInfo refresh,key:im:broker:192.168.1.105:7539,result:true
+2025-02-09T01:01:00.954+0800 INFO [127.0.0.1:62960#] Connection open
+2025-02-09T01:01:02.735+0800 INFO [127.0.0.1:62960#] HeartbeatTask started
+2025-02-09T01:01:24.559+0800 ERROR Connection traffic error: {"code":1501,"message":"no such user connection"}
+2025-02-09T01:02:06.430+0800 DEBUG HeartbeatHandler init
+2025-02-09T01:02:06.430+0800 INFO BrokerOption:{"name":"192.168.1.105:7539","serverInterval":30000000000,"heartbeatInterval":30000000000}
+2025-02-09T01:02:06.431+0800 DEBUG default logging level is INFO
+2025-02-09T01:02:06.431+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-02-09T01:02:06.431+0800 INFO BrokerInstance started
+2025-02-09T01:02:06.434+0800 DEBUG BrokerInfo setup,key:im:broker:192.168.1.105:7539,result:OK
+2025-02-09T01:02:06.434+0800 DEBUG BrokerInfo refresh,key:im:broker:192.168.1.105:7539,result:true
+2025-02-09T01:02:14.234+0800 INFO [127.0.0.1:62999#] Connection open
+2025-02-09T01:02:14.234+0800 INFO [127.0.0.1:62999#] HeartbeatTask started
+2025-02-09T01:02:41.525+0800 ERROR Connection traffic error: {"code":1502,"message":"no such user context"}
+2025-02-09T01:02:41.529+0800 INFO [127.0.0.1:62999#] HeartbeatTask closed
+2025-02-09T01:04:38.177+0800 DEBUG HeartbeatHandler init
+2025-02-09T01:04:38.179+0800 INFO BrokerOption:{"name":"192.168.1.105:7539","serverInterval":30000000000,"heartbeatInterval":30000000000}
+2025-02-09T01:04:38.179+0800 DEBUG default logging level is INFO
+2025-02-09T01:04:38.179+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-02-09T01:04:38.179+0800 INFO BrokerInstance started
+2025-02-09T01:04:38.182+0800 DEBUG BrokerInfo setup,key:im:broker:192.168.1.105:7539,result:OK
+2025-02-09T01:04:38.183+0800 DEBUG BrokerInfo refresh,key:im:broker:192.168.1.105:7539,result:true
+2025-02-09T01:05:01.736+0800 INFO [127.0.0.1:63089#] Connection open
+2025-02-09T01:05:03.533+0800 INFO [127.0.0.1:63089#] HeartbeatTask started
+2025-02-09T01:05:38.953+0800 DEBUG BrokerInfo refresh,key:im:broker:192.168.1.105:7539,result:true
+2025-02-09T01:05:38.953+0800 INFO [127.0.0.1:63089#] HeartbeatTask timeout,now:2025-02-09 01:05:38.0538,last:2025-02-09 01:05:03.053,interval:30000(ms)
+2025-02-09T01:06:02.336+0800 DEBUG HeartbeatHandler init
+2025-02-09T01:06:02.337+0800 INFO BrokerOption:{"name":"192.168.1.105:7539","serverInterval":30000000000,"heartbeatInterval":30000000000}
+2025-02-09T01:06:02.338+0800 DEBUG default logging level is INFO
+2025-02-09T01:06:02.338+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-02-09T01:06:02.338+0800 INFO BrokerInstance started
+2025-02-09T01:06:02.340+0800 DEBUG BrokerInfo setup,key:im:broker:192.168.1.105:7539,result:OK
+2025-02-09T01:06:02.340+0800 DEBUG BrokerInfo refresh,key:im:broker:192.168.1.105:7539,result:true
+2025-02-09T01:06:09.545+0800 INFO [127.0.0.1:63135#] Connection open
+2025-02-09T01:06:09.545+0800 INFO [127.0.0.1:63135#] HeartbeatTask started
+2025-02-09T01:06:56.066+0800 INFO [127.0.0.1:63135#] HeartbeatTask timeout,now:2025-02-09 01:06:56.0656,last:2025-02-09 01:06:09.069,interval:30000(ms)
+2025-02-09T01:06:56.066+0800 INFO [127.0.0.1:63135#] HeartbeatTask closed
+2025-02-09T01:06:56.066+0800 ERROR Connection traffic error: {"code":1501,"message":"no such user connection"}
+2025-02-09T01:06:56.066+0800 INFO [127.0.0.1:63135#] HeartbeatTask done
+2025-02-09T01:07:50.366+0800 DEBUG HeartbeatHandler init
+2025-02-09T01:07:50.367+0800 INFO BrokerOption:{"name":"192.168.1.105:7539","serverInterval":30000000000,"heartbeatInterval":30000000000}
+2025-02-09T01:07:50.367+0800 DEBUG default logging level is INFO
+2025-02-09T01:07:50.367+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-02-09T01:07:50.367+0800 INFO BrokerInstance started
+2025-02-09T01:07:50.369+0800 DEBUG BrokerInfo setup,key:im:broker:192.168.1.105:7539,result:OK
+2025-02-09T01:07:50.369+0800 DEBUG BrokerInfo refresh,key:im:broker:192.168.1.105:7539,result:true
+2025-02-09T01:08:47.236+0800 DEBUG BrokerInfo refresh,key:im:broker:192.168.1.105:7539,result:true
+2025-02-09T01:08:57.970+0800 INFO [127.0.0.1:63177#] Connection open
+2025-02-09T01:09:23.254+0800 INFO [127.0.0.1:63177#] HeartbeatTask started
+2025-02-09T01:09:39.461+0800 DEBUG BrokerInfo refresh,key:im:broker:192.168.1.105:7539,result:true
+2025-02-09T01:11:35.765+0800 DEBUG HeartbeatHandler init
+2025-02-09T01:11:35.766+0800 INFO BrokerOption:{"name":"192.168.1.105:7539","serverInterval":30000000000,"heartbeatInterval":30000000000}
+2025-02-09T01:11:35.766+0800 DEBUG default logging level is INFO
+2025-02-09T01:11:35.766+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-02-09T01:11:35.766+0800 INFO BrokerInstance started
+2025-02-09T01:11:35.769+0800 DEBUG BrokerInfo setup,key:im:broker:192.168.1.105:7539,result:OK
+2025-02-09T01:11:35.769+0800 DEBUG BrokerInfo refresh,key:im:broker:192.168.1.105:7539,result:true
+2025-02-09T01:11:56.769+0800 INFO [127.0.0.1:63278#] Connection open
+2025-02-09T01:13:04.881+0800 DEBUG HeartbeatHandler init
+2025-02-09T01:13:04.882+0800 INFO BrokerOption:{"name":"192.168.1.105:7539","serverInterval":30000000000,"heartbeatInterval":30000000000}
+2025-02-09T01:13:04.882+0800 DEBUG default logging level is INFO
+2025-02-09T01:13:04.882+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-02-09T01:13:04.882+0800 INFO BrokerInstance started
+2025-02-09T01:13:04.885+0800 DEBUG BrokerInfo setup,key:im:broker:192.168.1.105:7539,result:OK
+2025-02-09T01:13:04.885+0800 DEBUG BrokerInfo refresh,key:im:broker:192.168.1.105:7539,result:true
+2025-02-09T01:13:18.721+0800 INFO [127.0.0.1:63337#] Connection open
+2025-02-09T01:13:18.722+0800 INFO [127.0.0.1:63337#] HeartbeatTask started
+2025-02-09T01:13:48.349+0800 DEBUG BrokerInfo refresh,key:im:broker:192.168.1.105:7539,result:true
+2025-02-09T01:13:53.374+0800 INFO [127.0.0.1:63337#] HeartbeatTask timeout,now:2025-02-09 01:13:49.1349,last:2025-02-09 01:13:18.1318,interval:30000(ms)
+2025-02-09T01:14:00.531+0800 INFO [127.0.0.1:63337#] HeartbeatTask closed
+2025-02-09T01:14:06.680+0800 ERROR Connection traffic error: {"code":1501,"message":"no such user connection"}
+2025-02-09T01:18:36.712+0800 DEBUG HeartbeatHandler init
+2025-02-09T01:18:36.713+0800 INFO BrokerOption:{"name":"192.168.1.105:7539","serverInterval":30000000000,"heartbeatInterval":30000000000}
+2025-02-09T01:18:36.713+0800 DEBUG default logging level is INFO
+2025-02-09T01:18:36.713+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-02-09T01:18:36.713+0800 INFO BrokerInstance started
+2025-02-09T01:18:36.715+0800 DEBUG BrokerInfo setup,key:im:broker:192.168.1.105:7539,result:OK
+2025-02-09T01:18:36.716+0800 DEBUG BrokerInfo refresh,key:im:broker:192.168.1.105:7539,result:true
+2025-02-09T01:18:50.004+0800 INFO [127.0.0.1:63695#] Connection open
+2025-02-09T01:18:50.004+0800 INFO [127.0.0.1:63695#] HeartbeatTask started
+2025-02-09T01:19:14.341+0800 DEBUG BrokerInfo refresh,key:im:broker:192.168.1.105:7539,result:true
+2025-02-09T01:19:14.341+0800 ERROR Connection traffic error: {"code":1501,"message":"no such user connection"}
+2025-02-09T01:19:14.341+0800 INFO [127.0.0.1:63695#] HeartbeatTask closed
+2025-02-09T01:19:18.781+0800 ERROR Connection traffic error: {"code":1501,"message":"no such user connection"}
+2025-02-09T01:19:18.781+0800 INFO [127.0.0.1:63695#] HeartbeatTask done
+2025-02-09T01:19:18.787+0800 ERROR Connection traffic error: {"code":1501,"message":"no such user connection"}
+2025-02-09T01:21:29.423+0800 DEBUG HeartbeatHandler init
+2025-02-09T01:21:29.424+0800 INFO BrokerOption:{"name":"192.168.1.105:7539","serverInterval":30000000000,"heartbeatInterval":30000000000}
+2025-02-09T01:21:29.424+0800 DEBUG default logging level is INFO
+2025-02-09T01:21:29.424+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-02-09T01:21:29.424+0800 INFO BrokerInstance started
+2025-02-09T01:21:29.427+0800 DEBUG BrokerInfo setup,key:im:broker:192.168.1.105:7539,result:OK
+2025-02-09T01:21:29.427+0800 DEBUG BrokerInfo refresh,key:im:broker:192.168.1.105:7539,result:true
+2025-02-09T01:21:44.122+0800 INFO [127.0.0.1:63872#] Connection open
+2025-02-09T01:21:44.122+0800 INFO [127.0.0.1:63872#] HeartbeatTask started
+2025-02-09T01:22:03.252+0800 DEBUG BrokerInfo refresh,key:im:broker:192.168.1.105:7539,result:true
+2025-02-09T01:23:15.303+0800 DEBUG HeartbeatHandler init
+2025-02-09T01:23:15.303+0800 INFO BrokerOption:{"name":"192.168.1.105:7539","serverInterval":30000000000,"heartbeatInterval":30000000000}
+2025-02-09T01:23:15.303+0800 DEBUG default logging level is INFO
+2025-02-09T01:23:15.304+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-02-09T01:23:15.304+0800 INFO BrokerInstance started
+2025-02-09T01:23:15.307+0800 DEBUG BrokerInfo setup,key:im:broker:192.168.1.105:7539,result:OK
+2025-02-09T01:23:15.307+0800 DEBUG BrokerInfo refresh,key:im:broker:192.168.1.105:7539,result:true
+2025-02-09T01:23:23.715+0800 INFO [127.0.0.1:63924#] Connection open
+2025-02-09T01:23:23.716+0800 INFO [127.0.0.1:63924#] HeartbeatTask started
+2025-02-09T01:24:25.146+0800 INFO [127.0.0.1:63924#] HeartbeatTask timeout,now:2025-02-09 01:23:54.2354,last:2025-02-09 01:23:23.2323,interval:30000(ms)
+2025-02-09T01:24:25.146+0800 INFO [127.0.0.1:63924#] HeartbeatTask closed
+2025-02-09T01:24:25.146+0800 INFO [127.0.0.1:63924#] HeartbeatTask timeout,now:2025-02-09 01:24:25.2425,last:2025-02-09 01:23:23.2323,interval:30000(ms)
+2025-02-09T01:24:25.146+0800 INFO [127.0.0.1:63924#] HeartbeatTask done
+2025-02-09T01:26:12.029+0800 DEBUG HeartbeatHandler init
+2025-02-09T01:26:12.030+0800 INFO BrokerOption:{"name":"192.168.1.105:7539","serverInterval":30000000000,"heartbeatInterval":30000000000}
+2025-02-09T01:26:12.030+0800 DEBUG default logging level is INFO
+2025-02-09T01:26:12.030+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-02-09T01:26:12.030+0800 INFO BrokerInstance started
+2025-02-09T01:26:12.032+0800 DEBUG BrokerInfo setup,key:im:broker:192.168.1.105:7539,result:OK
+2025-02-09T01:26:12.033+0800 DEBUG BrokerInfo refresh,key:im:broker:192.168.1.105:7539,result:true
+2025-02-09T01:26:40.024+0800 INFO [127.0.0.1:64112#] Connection open
+2025-02-09T01:30:21.737+0800 DEBUG HeartbeatHandler init
+2025-02-09T01:30:21.738+0800 INFO BrokerOption:{"name":"192.168.1.105:7539","serverInterval":30000000000,"heartbeatInterval":30000000000}
+2025-02-09T01:30:21.738+0800 DEBUG default logging level is INFO
+2025-02-09T01:30:21.738+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-02-09T01:30:21.738+0800 INFO BrokerInstance started
+2025-02-09T01:30:21.741+0800 DEBUG BrokerInfo setup,key:im:broker:192.168.1.105:7539,result:OK
+2025-02-09T01:30:21.742+0800 DEBUG BrokerInfo refresh,key:im:broker:192.168.1.105:7539,result:true
+2025-02-09T01:30:57.705+0800 INFO [127.0.0.1:64676#] Connection open
+2025-02-09T01:30:57.705+0800 DEBUG BrokerInfo refresh,key:im:broker:192.168.1.105:7539,result:true
+2025-02-09T01:30:57.705+0800 INFO [127.0.0.1:64676#] HeartbeatTask started
+2025-02-09T01:32:07.373+0800 DEBUG HeartbeatHandler init
+2025-02-09T01:32:07.374+0800 INFO BrokerOption:{"name":"192.168.1.105:7539","serverInterval":30000000000,"heartbeatInterval":30000000000}
+2025-02-09T01:32:07.374+0800 DEBUG default logging level is INFO
+2025-02-09T01:32:07.374+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-02-09T01:32:07.374+0800 INFO BrokerInstance started
+2025-02-09T01:32:07.378+0800 DEBUG BrokerInfo setup,key:im:broker:192.168.1.105:7539,result:OK
+2025-02-09T01:32:07.378+0800 DEBUG BrokerInfo refresh,key:im:broker:192.168.1.105:7539,result:true
+2025-02-09T01:32:18.612+0800 INFO [127.0.0.1:64812#] Connection open
+2025-02-09T01:32:18.613+0800 INFO [127.0.0.1:64812#] HeartbeatTask started
+2025-02-09T01:33:38.992+0800 DEBUG HeartbeatHandler init
+2025-02-09T01:33:38.993+0800 INFO BrokerOption:{"name":"192.168.1.105:7539","serverInterval":30000000000,"heartbeatInterval":30000000000}
+2025-02-09T01:33:38.994+0800 DEBUG default logging level is INFO
+2025-02-09T01:33:38.994+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-02-09T01:33:38.994+0800 INFO BrokerInstance started
+2025-02-09T01:33:38.996+0800 DEBUG BrokerInfo setup,key:im:broker:192.168.1.105:7539,result:OK
+2025-02-09T01:33:38.997+0800 DEBUG BrokerInfo refresh,key:im:broker:192.168.1.105:7539,result:true
+2025-02-09T01:33:48.426+0800 INFO [127.0.0.1:64872#] Connection open
+2025-02-09T01:33:49.919+0800 INFO [127.0.0.1:64872#] HeartbeatTask started
+2025-02-09T01:34:06.419+0800 INFO [127.0.0.1:64872#] Connection traffic
+2025-02-09T01:34:12.213+0800 INFO [127.0.0.1:64872#] Decode heartbeat,buffer:24,length:4,value:12
+2025-02-09T01:34:12.213+0800 DEBUG BrokerInfo refresh,key:im:broker:192.168.1.105:7539,result:true
+2025-02-09T01:39:31.789+0800 DEBUG HeartbeatHandler init
+2025-02-09T01:39:31.790+0800 INFO BrokerOption:{"name":"192.168.1.105:7539","serverInterval":30000000000,"heartbeatInterval":30000000000}
+2025-02-09T01:39:31.790+0800 DEBUG default logging level is INFO
+2025-02-09T01:39:31.790+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-02-09T01:39:31.790+0800 INFO BrokerInstance started
+2025-02-09T01:39:31.793+0800 DEBUG BrokerInfo setup,key:im:broker:192.168.1.105:7539,result:OK
+2025-02-09T01:39:31.794+0800 DEBUG BrokerInfo refresh,key:im:broker:192.168.1.105:7539,result:true
+2025-02-09T01:39:33.615+0800 INFO [127.0.0.1:65275#] Connection open
+2025-02-09T01:39:33.615+0800 INFO [127.0.0.1:65275#] HeartbeatTask started
+2025-02-09T01:39:34.617+0800 INFO [127.0.0.1:65275#] Connection traffic
+2025-02-09T01:39:34.618+0800 INFO [127.0.0.1:65275#] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:39:34.618+0800 DEBUG [127.0.0.1:65275#] Encode heartbeat,buffer:8,length:4,value:%!s(uint32=0)
+2025-02-09T01:39:35.617+0800 INFO [127.0.0.1:65275#] Connection traffic
+2025-02-09T01:39:35.617+0800 INFO [127.0.0.1:65275#] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:39:35.617+0800 DEBUG [127.0.0.1:65275#] Encode heartbeat,buffer:8,length:4,value:%!s(uint32=0)
+2025-02-09T01:39:36.617+0800 INFO [127.0.0.1:65275#] Connection traffic
+2025-02-09T01:39:36.617+0800 INFO [127.0.0.1:65275#] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:39:36.617+0800 DEBUG [127.0.0.1:65275#] Encode heartbeat,buffer:8,length:4,value:%!s(uint32=0)
+2025-02-09T01:39:37.616+0800 INFO [127.0.0.1:65275#] Connection traffic
+2025-02-09T01:39:37.617+0800 INFO [127.0.0.1:65275#] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:39:37.617+0800 DEBUG [127.0.0.1:65275#] Encode heartbeat,buffer:8,length:4,value:%!s(uint32=0)
+2025-02-09T01:39:38.616+0800 INFO [127.0.0.1:65275#] Connection traffic
+2025-02-09T01:39:38.616+0800 INFO [127.0.0.1:65275#] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:39:38.616+0800 DEBUG [127.0.0.1:65275#] Encode heartbeat,buffer:8,length:4,value:%!s(uint32=0)
+2025-02-09T01:39:39.617+0800 INFO [127.0.0.1:65275#] Connection traffic
+2025-02-09T01:39:39.617+0800 INFO [127.0.0.1:65275#] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:39:39.617+0800 DEBUG [127.0.0.1:65275#] Encode heartbeat,buffer:8,length:4,value:%!s(uint32=0)
+2025-02-09T01:39:40.616+0800 INFO [127.0.0.1:65275#] Connection traffic
+2025-02-09T01:39:40.616+0800 INFO [127.0.0.1:65275#] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:39:40.616+0800 DEBUG [127.0.0.1:65275#] Encode heartbeat,buffer:8,length:4,value:%!s(uint32=0)
+2025-02-09T01:39:41.617+0800 INFO [127.0.0.1:65275#] Connection traffic
+2025-02-09T01:39:41.617+0800 INFO [127.0.0.1:65275#] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:39:41.618+0800 DEBUG [127.0.0.1:65275#] Encode heartbeat,buffer:8,length:4,value:%!s(uint32=0)
+2025-02-09T01:39:42.617+0800 INFO [127.0.0.1:65275#] Connection traffic
+2025-02-09T01:39:42.617+0800 INFO [127.0.0.1:65275#] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:39:42.617+0800 DEBUG [127.0.0.1:65275#] Encode heartbeat,buffer:8,length:4,value:%!s(uint32=0)
+2025-02-09T01:39:43.616+0800 INFO [127.0.0.1:65275#] Connection traffic
+2025-02-09T01:39:43.616+0800 INFO [127.0.0.1:65275#] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:39:43.616+0800 DEBUG [127.0.0.1:65275#] Encode heartbeat,buffer:8,length:4,value:%!s(uint32=0)
+2025-02-09T01:39:44.617+0800 INFO [127.0.0.1:65275#] Connection traffic
+2025-02-09T01:39:44.617+0800 INFO [127.0.0.1:65275#] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:39:44.617+0800 DEBUG [127.0.0.1:65275#] Encode heartbeat,buffer:8,length:4,value:%!s(uint32=0)
+2025-02-09T01:39:45.617+0800 INFO [127.0.0.1:65275#] Connection traffic
+2025-02-09T01:39:45.617+0800 INFO [127.0.0.1:65275#] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:39:45.617+0800 DEBUG [127.0.0.1:65275#] Encode heartbeat,buffer:8,length:4,value:%!s(uint32=0)
+2025-02-09T01:39:46.616+0800 INFO [127.0.0.1:65275#] Connection traffic
+2025-02-09T01:39:46.617+0800 INFO [127.0.0.1:65275#] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:39:46.617+0800 DEBUG [127.0.0.1:65275#] Encode heartbeat,buffer:8,length:4,value:%!s(uint32=0)
+2025-02-09T01:39:47.617+0800 INFO [127.0.0.1:65275#] Connection traffic
+2025-02-09T01:39:47.617+0800 INFO [127.0.0.1:65275#] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:39:47.617+0800 DEBUG [127.0.0.1:65275#] Encode heartbeat,buffer:8,length:4,value:%!s(uint32=0)
+2025-02-09T01:39:48.615+0800 INFO [127.0.0.1:65275#] Connection traffic
+2025-02-09T01:39:48.616+0800 INFO [127.0.0.1:65275#] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:39:48.616+0800 DEBUG [127.0.0.1:65275#] Encode heartbeat,buffer:8,length:4,value:%!s(uint32=0)
+2025-02-09T01:39:49.616+0800 INFO [127.0.0.1:65275#] Connection traffic
+2025-02-09T01:39:49.616+0800 INFO [127.0.0.1:65275#] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:39:49.616+0800 DEBUG [127.0.0.1:65275#] Encode heartbeat,buffer:8,length:4,value:%!s(uint32=0)
+2025-02-09T01:39:50.617+0800 INFO [127.0.0.1:65275#] Connection traffic
+2025-02-09T01:39:50.617+0800 INFO [127.0.0.1:65275#] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:39:50.617+0800 DEBUG [127.0.0.1:65275#] Encode heartbeat,buffer:8,length:4,value:%!s(uint32=0)
+2025-02-09T01:39:51.616+0800 INFO [127.0.0.1:65275#] Connection traffic
+2025-02-09T01:39:51.617+0800 INFO [127.0.0.1:65275#] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:39:51.617+0800 DEBUG [127.0.0.1:65275#] Encode heartbeat,buffer:8,length:4,value:%!s(uint32=0)
+2025-02-09T01:39:52.617+0800 INFO [127.0.0.1:65275#] Connection traffic
+2025-02-09T01:39:52.617+0800 INFO [127.0.0.1:65275#] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:39:52.617+0800 DEBUG [127.0.0.1:65275#] Encode heartbeat,buffer:8,length:4,value:%!s(uint32=0)
+2025-02-09T01:39:53.616+0800 INFO [127.0.0.1:65275#] Connection traffic
+2025-02-09T01:39:53.617+0800 INFO [127.0.0.1:65275#] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:39:53.617+0800 DEBUG [127.0.0.1:65275#] Encode heartbeat,buffer:8,length:4,value:%!s(uint32=0)
+2025-02-09T01:39:54.616+0800 INFO [127.0.0.1:65275#] Connection traffic
+2025-02-09T01:39:54.616+0800 INFO [127.0.0.1:65275#] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:39:54.617+0800 DEBUG [127.0.0.1:65275#] Encode heartbeat,buffer:8,length:4,value:%!s(uint32=0)
+2025-02-09T01:39:55.616+0800 INFO [127.0.0.1:65275#] Connection traffic
+2025-02-09T01:39:55.617+0800 INFO [127.0.0.1:65275#] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:39:55.617+0800 DEBUG [127.0.0.1:65275#] Encode heartbeat,buffer:8,length:4,value:%!s(uint32=0)
+2025-02-09T01:39:56.617+0800 INFO [127.0.0.1:65275#] Connection traffic
+2025-02-09T01:39:56.617+0800 INFO [127.0.0.1:65275#] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:39:56.617+0800 DEBUG [127.0.0.1:65275#] Encode heartbeat,buffer:8,length:4,value:%!s(uint32=0)
+2025-02-09T01:39:57.617+0800 INFO [127.0.0.1:65275#] Connection traffic
+2025-02-09T01:39:57.617+0800 INFO [127.0.0.1:65275#] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:39:57.617+0800 DEBUG [127.0.0.1:65275#] Encode heartbeat,buffer:8,length:4,value:%!s(uint32=0)
+2025-02-09T01:39:58.617+0800 INFO [127.0.0.1:65275#] Connection traffic
+2025-02-09T01:39:58.617+0800 INFO [127.0.0.1:65275#] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:39:58.617+0800 DEBUG [127.0.0.1:65275#] Encode heartbeat,buffer:8,length:4,value:%!s(uint32=0)
+2025-02-09T01:39:59.616+0800 INFO [127.0.0.1:65275#] Connection traffic
+2025-02-09T01:39:59.617+0800 INFO [127.0.0.1:65275#] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:39:59.617+0800 DEBUG [127.0.0.1:65275#] Encode heartbeat,buffer:8,length:4,value:%!s(uint32=0)
+2025-02-09T01:40:00.617+0800 INFO [127.0.0.1:65275#] Connection traffic
+2025-02-09T01:40:00.617+0800 INFO [127.0.0.1:65275#] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:40:00.617+0800 DEBUG [127.0.0.1:65275#] Encode heartbeat,buffer:8,length:4,value:%!s(uint32=0)
+2025-02-09T01:40:01.616+0800 INFO [127.0.0.1:65275#] Connection traffic
+2025-02-09T01:40:01.616+0800 INFO [127.0.0.1:65275#] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:40:01.617+0800 DEBUG [127.0.0.1:65275#] Encode heartbeat,buffer:8,length:4,value:%!s(uint32=0)
+2025-02-09T01:40:01.794+0800 DEBUG BrokerInfo refresh,key:im:broker:192.168.1.105:7539,result:true
+2025-02-09T01:40:02.616+0800 INFO [127.0.0.1:65275#] Connection traffic
+2025-02-09T01:40:02.616+0800 INFO [127.0.0.1:65275#] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:40:02.616+0800 DEBUG [127.0.0.1:65275#] Encode heartbeat,buffer:8,length:4,value:%!s(uint32=0)
+2025-02-09T01:40:03.617+0800 INFO [127.0.0.1:65275#] Connection traffic
+2025-02-09T01:40:03.617+0800 INFO [127.0.0.1:65275#] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:40:03.618+0800 DEBUG [127.0.0.1:65275#] Encode heartbeat,buffer:8,length:4,value:%!s(uint32=0)
+2025-02-09T01:40:04.616+0800 INFO [127.0.0.1:65275#] Connection traffic
+2025-02-09T01:40:04.616+0800 INFO [127.0.0.1:65275#] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:40:04.616+0800 DEBUG [127.0.0.1:65275#] Encode heartbeat,buffer:8,length:4,value:%!s(uint32=0)
+2025-02-09T01:40:05.616+0800 INFO [127.0.0.1:65275#] Connection traffic
+2025-02-09T01:40:05.616+0800 INFO [127.0.0.1:65275#] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:40:05.616+0800 DEBUG [127.0.0.1:65275#] Encode heartbeat,buffer:8,length:4,value:%!s(uint32=0)
+2025-02-09T01:40:06.616+0800 INFO [127.0.0.1:65275#] Connection traffic
+2025-02-09T01:40:06.616+0800 INFO [127.0.0.1:65275#] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:40:06.616+0800 DEBUG [127.0.0.1:65275#] Encode heartbeat,buffer:8,length:4,value:%!s(uint32=0)
+2025-02-09T01:40:07.615+0800 INFO [127.0.0.1:65275#] Connection traffic
+2025-02-09T01:40:07.615+0800 INFO [127.0.0.1:65275#] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:40:07.616+0800 DEBUG [127.0.0.1:65275#] Encode heartbeat,buffer:8,length:4,value:%!s(uint32=0)
+2025-02-09T01:40:08.616+0800 INFO [127.0.0.1:65275#] Connection traffic
+2025-02-09T01:40:08.617+0800 INFO [127.0.0.1:65275#] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:40:08.618+0800 DEBUG [127.0.0.1:65275#] Encode heartbeat,buffer:8,length:4,value:%!s(uint32=0)
+2025-02-09T01:41:52.832+0800 DEBUG HeartbeatHandler init
+2025-02-09T01:41:52.833+0800 INFO BrokerOption:{"name":"192.168.1.105:7539","serverInterval":30000000000,"heartbeatInterval":30000000000}
+2025-02-09T01:41:52.833+0800 DEBUG default logging level is INFO
+2025-02-09T01:41:52.833+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-02-09T01:41:52.833+0800 INFO BrokerInstance started
+2025-02-09T01:41:52.836+0800 DEBUG BrokerInfo setup,key:im:broker:192.168.1.105:7539,result:OK
+2025-02-09T01:41:52.837+0800 DEBUG BrokerInfo refresh,key:im:broker:192.168.1.105:7539,result:true
+2025-02-09T01:42:22.837+0800 DEBUG BrokerInfo refresh,key:im:broker:192.168.1.105:7539,result:true
+2025-02-09T01:42:29.291+0800 INFO [127.0.0.1:65388#] Connection open
+2025-02-09T01:42:29.291+0800 INFO [127.0.0.1:65388#] HeartbeatTask started
+2025-02-09T01:42:49.293+0800 INFO [127.0.0.1:65388#] Connection traffic
+2025-02-09T01:42:49.294+0800 INFO [127.0.0.1:65388#] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:42:49.294+0800 DEBUG [127.0.0.1:65388#] Encode heartbeat,buffer:8,length:4,value:%!s(uint32=0)
+2025-02-09T01:42:52.838+0800 DEBUG BrokerInfo refresh,key:im:broker:192.168.1.105:7539,result:true
+2025-02-09T01:43:09.291+0800 INFO [127.0.0.1:65388#] Connection traffic
+2025-02-09T01:43:09.292+0800 INFO [127.0.0.1:65388#] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:43:09.292+0800 DEBUG [127.0.0.1:65388#] Encode heartbeat,buffer:8,length:4,value:%!s(uint32=0)
+2025-02-09T01:43:22.840+0800 DEBUG BrokerInfo refresh,key:im:broker:192.168.1.105:7539,result:true
+2025-02-09T01:43:29.291+0800 INFO [127.0.0.1:65388#] Connection traffic
+2025-02-09T01:43:29.291+0800 INFO [127.0.0.1:65388#] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:43:29.291+0800 DEBUG [127.0.0.1:65388#] Encode heartbeat,buffer:8,length:4,value:%!s(uint32=0)
+2025-02-09T01:43:49.291+0800 INFO [127.0.0.1:65388#] Connection traffic
+2025-02-09T01:43:49.291+0800 INFO [127.0.0.1:65388#] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:43:49.291+0800 DEBUG [127.0.0.1:65388#] Encode heartbeat,buffer:8,length:4,value:%!s(uint32=0)
+2025-02-09T01:46:19.938+0800 DEBUG HeartbeatHandler init
+2025-02-09T01:46:19.939+0800 INFO BrokerOption:{"name":"192.168.1.105:7539","serverInterval":30000000000,"heartbeatInterval":30000000000}
+2025-02-09T01:46:19.939+0800 DEBUG default logging level is INFO
+2025-02-09T01:46:19.939+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-02-09T01:46:19.939+0800 INFO BrokerInstance started
+2025-02-09T01:46:19.943+0800 DEBUG BrokerInfo setup,key:im:broker:192.168.1.105:7539,result:OK
+2025-02-09T01:46:22.268+0800 INFO [127.0.0.1:49204#] Connection open
+2025-02-09T01:46:22.268+0800 DEBUG [127.0.0.1:49204#] HeartbeatTask started
+2025-02-09T01:46:27.270+0800 DEBUG [127.0.0.1:49204#] Connection traffic
+2025-02-09T01:46:27.270+0800 DEBUG [127.0.0.1:49204#] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:46:27.270+0800 DEBUG [127.0.0.1:49204#] Encode heartbeat,buffer:8,length:4,value:0
+2025-02-09T01:46:32.269+0800 DEBUG [127.0.0.1:49204#] Connection traffic
+2025-02-09T01:46:32.269+0800 DEBUG [127.0.0.1:49204#] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:46:32.269+0800 DEBUG [127.0.0.1:49204#] Encode heartbeat,buffer:8,length:4,value:0
+2025-02-09T01:46:37.269+0800 DEBUG [127.0.0.1:49204#] Connection traffic
+2025-02-09T01:46:37.269+0800 DEBUG [127.0.0.1:49204#] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:46:37.270+0800 DEBUG [127.0.0.1:49204#] Encode heartbeat,buffer:8,length:4,value:0
+2025-02-09T01:46:42.271+0800 DEBUG [127.0.0.1:49204#] Connection traffic
+2025-02-09T01:46:42.272+0800 DEBUG [127.0.0.1:49204#] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:46:42.272+0800 DEBUG [127.0.0.1:49204#] Encode heartbeat,buffer:8,length:4,value:0
+2025-02-09T01:46:47.270+0800 DEBUG [127.0.0.1:49204#] Connection traffic
+2025-02-09T01:46:47.270+0800 DEBUG [127.0.0.1:49204#] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:46:47.270+0800 DEBUG [127.0.0.1:49204#] Encode heartbeat,buffer:8,length:4,value:0
+2025-02-09T01:46:52.270+0800 DEBUG [127.0.0.1:49204#] Connection traffic
+2025-02-09T01:46:52.270+0800 DEBUG [127.0.0.1:49204#] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:46:52.270+0800 DEBUG [127.0.0.1:49204#] Encode heartbeat,buffer:8,length:4,value:0
+2025-02-09T01:46:57.269+0800 DEBUG [127.0.0.1:49204#] Connection traffic
+2025-02-09T01:46:57.269+0800 DEBUG [127.0.0.1:49204#] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:46:57.269+0800 DEBUG [127.0.0.1:49204#] Encode heartbeat,buffer:8,length:4,value:0
+2025-02-09T01:47:43.924+0800 DEBUG HeartbeatHandler init
+2025-02-09T01:47:43.925+0800 INFO BrokerOption:{"name":"192.168.1.105:7539","serverInterval":30000000000,"heartbeatInterval":30000000000}
+2025-02-09T01:47:43.925+0800 DEBUG default logging level is INFO
+2025-02-09T01:47:43.925+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-02-09T01:47:43.925+0800 INFO BrokerInstance started
+2025-02-09T01:47:43.928+0800 DEBUG BrokerInfo setup,key:im:broker:192.168.1.105:7539,result:OK
+2025-02-09T01:47:47.988+0800 INFO [127.0.0.1:49247#] Connection open
+2025-02-09T01:47:47.988+0800 DEBUG [127.0.0.1:49247#] HeartbeatTask started
+2025-02-09T01:47:48.990+0800 DEBUG [127.0.0.1:49247#] Connection traffic
+2025-02-09T01:47:48.991+0800 DEBUG [127.0.0.1:49247#] Decode packet,buffer:0,length:202,id:cujphh61a37lku2qjh2g
+2025-02-09T01:47:48.992+0800 DEBUG [127.0.0.1:49247#] Encode packet,buffer:159,length:155,id:cujphh61a37lku2qjh2g
+2025-02-09T01:47:52.988+0800 DEBUG [127.0.0.1:49247#] Connection traffic
+2025-02-09T01:47:52.989+0800 DEBUG [127.0.0.1:49247#] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:47:52.989+0800 DEBUG [127.0.0.1:49247#] Encode heartbeat,buffer:8,length:4,value:0
+2025-02-09T01:47:57.989+0800 DEBUG [127.0.0.1:49247#] Connection traffic
+2025-02-09T01:47:57.989+0800 DEBUG [127.0.0.1:49247#] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:47:57.989+0800 DEBUG [127.0.0.1:49247#] Encode heartbeat,buffer:8,length:4,value:0
+2025-02-09T01:48:02.989+0800 DEBUG [127.0.0.1:49247#] Connection traffic
+2025-02-09T01:48:02.989+0800 DEBUG [127.0.0.1:49247#] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:48:02.989+0800 DEBUG [127.0.0.1:49247#] Encode heartbeat,buffer:8,length:4,value:0
+2025-02-09T01:48:07.989+0800 DEBUG [127.0.0.1:49247#] Connection traffic
+2025-02-09T01:48:07.990+0800 DEBUG [127.0.0.1:49247#] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:48:07.990+0800 DEBUG [127.0.0.1:49247#] Encode heartbeat,buffer:8,length:4,value:0
+2025-02-09T01:48:12.990+0800 DEBUG [127.0.0.1:49247#] Connection traffic
+2025-02-09T01:48:12.990+0800 DEBUG [127.0.0.1:49247#] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:48:12.990+0800 DEBUG [127.0.0.1:49247#] Encode heartbeat,buffer:8,length:4,value:0
+2025-02-09T01:48:17.988+0800 DEBUG [127.0.0.1:49247#] Connection traffic
+2025-02-09T01:48:17.988+0800 DEBUG [127.0.0.1:49247#] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:48:17.988+0800 DEBUG [127.0.0.1:49247#] Encode heartbeat,buffer:8,length:4,value:0
+2025-02-09T01:48:22.991+0800 DEBUG [127.0.0.1:49247#] Connection traffic
+2025-02-09T01:48:22.992+0800 DEBUG [127.0.0.1:49247#] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:48:22.992+0800 DEBUG [127.0.0.1:49247#] Encode heartbeat,buffer:8,length:4,value:0
+2025-02-09T01:48:27.988+0800 DEBUG [127.0.0.1:49247#] Connection traffic
+2025-02-09T01:48:27.988+0800 DEBUG [127.0.0.1:49247#] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:48:27.988+0800 DEBUG [127.0.0.1:49247#] Encode heartbeat,buffer:8,length:4,value:0
+2025-02-09T01:48:32.989+0800 DEBUG [127.0.0.1:49247#] Connection traffic
+2025-02-09T01:48:32.989+0800 DEBUG [127.0.0.1:49247#] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:48:32.989+0800 DEBUG [127.0.0.1:49247#] Encode heartbeat,buffer:8,length:4,value:0
+2025-02-09T01:49:13.228+0800 DEBUG HeartbeatHandler init
+2025-02-09T01:49:13.229+0800 INFO BrokerOption:{"name":"192.168.1.105:7539","serverInterval":30000000000,"heartbeatInterval":30000000000}
+2025-02-09T01:49:13.229+0800 DEBUG default logging level is INFO
+2025-02-09T01:49:13.229+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-02-09T01:49:13.229+0800 INFO BrokerInstance started
+2025-02-09T01:49:13.231+0800 DEBUG BrokerInfo setup,key:im:broker:192.168.1.105:7539,result:OK
+2025-02-09T01:49:19.109+0800 INFO [127.0.0.1:49435#] Connection open
+2025-02-09T01:49:19.109+0800 DEBUG [127.0.0.1:49435#] HeartbeatTask started
+2025-02-09T01:49:29.868+0800 DEBUG [127.0.0.1:49435#] Connection traffic
+2025-02-09T01:49:33.340+0800 DEBUG [127.0.0.1:49435#] Decode packet,buffer:0,length:202,id:cujpi6u1a37llau815ig
+2025-02-09T01:49:53.976+0800 INFO [127.0.0.1:49435#] HeartbeatTask timeout,now:2025-02-09 01:49:49.4949,last:2025-02-09 01:49:19.4919,interval:30000(ms)
+2025-02-09T01:50:14.067+0800 INFO [127.0.0.1:49435#] HeartbeatTask closed
+2025-02-09T01:50:14.067+0800 INFO [127.0.0.1:49435#] HeartbeatTask done
+2025-02-09T01:53:37.560+0800 DEBUG HeartbeatHandler init
+2025-02-09T01:53:37.562+0800 INFO BrokerOption:{"name":"192.168.1.105:7539","serverInterval":30000000000,"heartbeatInterval":30000000000}
+2025-02-09T01:53:37.562+0800 DEBUG default logging level is INFO
+2025-02-09T01:53:37.562+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-02-09T01:53:37.562+0800 INFO BrokerInstance started
+2025-02-09T01:53:37.565+0800 DEBUG BrokerInfo setup,key:im:broker:192.168.1.105:7539,result:OK
+2025-02-09T01:53:39.241+0800 INFO [127.0.0.1:49607#] Connection open
+2025-02-09T01:53:39.241+0800 DEBUG [127.0.0.1:49607#] HeartbeatTask started
+2025-02-09T01:53:40.247+0800 DEBUG [127.0.0.1:49607#] Connection traffic
+2025-02-09T01:53:40.249+0800 DEBUG [127.0.0.1:49607#] Decode packet,buffer:0,length:202,id:cujpk961a37llul251f0
+2025-02-09T01:53:40.250+0800 DEBUG [127.0.0.1:49607#1200120#Mobile] Encode packet,buffer:159,length:155,id:cujpk961a37llul251f0
+2025-02-09T01:53:44.242+0800 DEBUG [127.0.0.1:49607#1200120#Mobile] Connection traffic
+2025-02-09T01:53:44.243+0800 DEBUG [127.0.0.1:49607#1200120#Mobile] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:53:44.243+0800 DEBUG [127.0.0.1:49607#1200120#Mobile] Encode heartbeat,buffer:8,length:4,value:0
+2025-02-09T01:53:49.241+0800 DEBUG [127.0.0.1:49607#1200120#Mobile] Connection traffic
+2025-02-09T01:53:49.242+0800 DEBUG [127.0.0.1:49607#1200120#Mobile] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:53:49.242+0800 DEBUG [127.0.0.1:49607#1200120#Mobile] Encode heartbeat,buffer:8,length:4,value:0
+2025-02-09T01:53:54.241+0800 DEBUG [127.0.0.1:49607#1200120#Mobile] Connection traffic
+2025-02-09T01:53:54.242+0800 DEBUG [127.0.0.1:49607#1200120#Mobile] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:53:54.242+0800 DEBUG [127.0.0.1:49607#1200120#Mobile] Encode heartbeat,buffer:8,length:4,value:0
+2025-02-09T01:53:59.242+0800 DEBUG [127.0.0.1:49607#1200120#Mobile] Connection traffic
+2025-02-09T01:53:59.243+0800 DEBUG [127.0.0.1:49607#1200120#Mobile] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:53:59.243+0800 DEBUG [127.0.0.1:49607#1200120#Mobile] Encode heartbeat,buffer:8,length:4,value:0
+2025-02-09T01:54:04.243+0800 DEBUG [127.0.0.1:49607#1200120#Mobile] Connection traffic
+2025-02-09T01:54:04.243+0800 DEBUG [127.0.0.1:49607#1200120#Mobile] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:54:04.243+0800 DEBUG [127.0.0.1:49607#1200120#Mobile] Encode heartbeat,buffer:8,length:4,value:0
+2025-02-09T01:54:09.241+0800 DEBUG [127.0.0.1:49607#1200120#Mobile] Connection traffic
+2025-02-09T01:54:09.242+0800 DEBUG [127.0.0.1:49607#1200120#Mobile] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:54:09.242+0800 DEBUG [127.0.0.1:49607#1200120#Mobile] Encode heartbeat,buffer:8,length:4,value:0
+2025-02-09T01:54:14.242+0800 DEBUG [127.0.0.1:49607#1200120#Mobile] Connection traffic
+2025-02-09T01:54:14.242+0800 DEBUG [127.0.0.1:49607#1200120#Mobile] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:54:14.243+0800 DEBUG [127.0.0.1:49607#1200120#Mobile] Encode heartbeat,buffer:8,length:4,value:0
+2025-02-09T01:54:19.243+0800 DEBUG [127.0.0.1:49607#1200120#Mobile] Connection traffic
+2025-02-09T01:54:19.244+0800 DEBUG [127.0.0.1:49607#1200120#Mobile] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-09T01:54:19.244+0800 DEBUG [127.0.0.1:49607#1200120#Mobile] Encode heartbeat,buffer:8,length:4,value:0

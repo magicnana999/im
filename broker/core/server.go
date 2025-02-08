@@ -98,8 +98,10 @@ func (s *BrokerServer) OnShutdown(eng gnet.Engine) {
 
 func (s *BrokerServer) OnOpen(c gnet.Conn) (out []byte, action gnet.Action) {
 	uc := state.OpenUserConnection(c)
-	subCtx := context.WithValue(context.Background(), state.CurrentUser, &uc)
+	subCtx := context.WithValue(context.Background(), state.CurrentUser, uc)
 	c.SetContext(subCtx)
+
+	//fmt.Printf("OnOpen - c: %p\n", c)
 
 	logger.InfoF("[%s#%s] Connection open", c.RemoteAddr().String(), uc.Label())
 
@@ -111,6 +113,7 @@ func (s *BrokerServer) OnOpen(c gnet.Conn) (out []byte, action gnet.Action) {
 }
 
 func (s *BrokerServer) OnClose(c gnet.Conn, err error) (action gnet.Action) {
+
 	user, err := state.CurrentUserFromConn(c)
 	if err != nil {
 		logger.ErrorF("Connection close error: %v", err)
@@ -133,7 +136,7 @@ func (s *BrokerServer) OnTraffic(c gnet.Conn) (action gnet.Action) {
 		return gnet.None
 	}
 
-	logger.InfoF("[%s#%s] Connection traffic", c.RemoteAddr().String(), user.Label())
+	logger.DebugF("[%s#%s] Connection traffic", c.RemoteAddr().String(), user.Label())
 
 	packets, e := DefaultCodec.Decode(c)
 	if e != nil {

@@ -67,7 +67,7 @@ func (c *CommandHandler) HandleCommand(ctx context.Context, cType string, conten
 			return nil, err
 		}
 
-		if err = uc.Store(ctx, rep.AppId, rep.UserId); err != nil {
+		if err = uc.Store(ctx, rep.AppId, rep.UserId, src.Os); err != nil {
 			return nil, err
 		}
 

@@ -7,12 +7,17 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
-	"github.com/magicnana999/im/broker/core"
 	"github.com/magicnana999/im/common/pb"
 	"github.com/magicnana999/im/common/protocol"
+	"github.com/magicnana999/im/errors"
 	"github.com/magicnana999/im/logger"
 	"github.com/magicnana999/im/util/id"
+	"github.com/panjf2000/ants/v2"
+	goPool "github.com/panjf2000/gnet/v2/pkg/pool/goroutine"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/wrapperspb"
+	"io"
+	"math"
 	"net"
 	"os"
 	"sync"
@@ -20,14 +25,162 @@ import (
 )
 
 const (
+	userSig = "cuf5ofe1a37nfi3p4b5g"
+	//userSig           = "cuf5ofe1a37nfi3p4b6g"
+	//userSig           = "cuf5ofe1a37nfi3p4b60"
+
 	serverAddress     = "127.0.0.1:7539" // IM 服务器地址和端口
-	heartbeatInterval = 25 * time.Second // 心跳间隔
+	heartbeatInterval = 5 * time.Second  // 心跳间隔
 )
 
 var (
-	CurrentUserId int64
-	CurrentAppId  string
+	CurrentUserId        int64
+	CurrentAppId         string
+	lastHeartbeatReceive int64 = 0
 )
+
+type resendTask struct {
+	ctx      context.Context
+	cancel   context.CancelFunc
+	id       string
+	interval int
+	packet   *pb.Packet
+	ticker   *time.Ticker
+	conn     net.Conn
+}
+
+func newResendTask(ctx context.Context, cancel context.CancelFunc, interval int, packet *pb.Packet, conn net.Conn) *resendTask {
+	return &resendTask{
+		ctx:      ctx,
+		cancel:   cancel,
+		id:       packet.Id,
+		interval: interval,
+		packet:   packet,
+		ticker:   time.NewTicker(time.Duration(interval) * time.Second),
+		conn:     conn,
+	}
+}
+
+type sender struct {
+	ctx      context.Context
+	conn     net.Conn
+	packets  chan *pb.Packet
+	executor *goPool.Pool
+	m        map[string]*resendTask
+	lock     sync.RWMutex
+}
+
+func initSender(conn net.Conn, ctx context.Context) *sender {
+	pool, err := ants.NewPool(100)
+	if err != nil {
+		panic(err)
+	}
+
+	return &sender{
+		ctx:      ctx,
+		conn:     conn,
+		packets:  make(chan *pb.Packet),
+		executor: pool,
+		m:        make(map[string]*resendTask),
+	}
+}
+
+func (s *sender) closeAll() {
+	s.lock.Lock()
+	defer s.lock.Unlock()
+
+	for id, _ := range s.m {
+		s.close(id)
+	}
+}
+
+func (s *sender) send(packet *pb.Packet) {
+
+	if packet.BType != pb.BTypeHeartbeat {
+		fmt.Println("发送 ", packet.Id, packet.BType)
+	}
+
+	s.packets <- packet
+}
+
+func (s *sender) close(id string) {
+	s.lock.Lock()
+	defer s.lock.Unlock()
+	task := s.m[id]
+	if task != nil {
+		task.cancel()
+		delete(s.m, id)
+	}
+}
+
+func (s *sender) sendPacket(packet *pb.Packet) {
+	write(s.conn, packet)
+}
+
+func (s *sender) sendMessage(packet *pb.Packet) {
+	s.lock.RLock()
+	_, exist := s.m[packet.Id]
+	s.lock.RUnlock()
+	if !exist {
+		subCtx, cancel := context.WithCancel(s.ctx)
+		task := newResendTask(subCtx, cancel, 1, packet, s.conn)
+
+		s.lock.Lock()
+		if _, doubleCheck := s.m[packet.Id]; doubleCheck { // Double-check 防止并发问题
+			s.lock.Unlock()
+			return
+		}
+		s.m[task.id] = task
+		s.lock.Unlock()
+
+		s.executor.Submit(func() {
+			for {
+				select {
+				case <-task.ctx.Done():
+					return
+
+				case <-task.ticker.C:
+					write(task.conn, packet)
+					next := fibonacci(task.interval)
+					if next >= 8 {
+
+						fmt.Println("重试超过限制，关闭连接:", packet.Id)
+						s.close(packet.Id)
+						s.conn.Close()
+						return
+
+					}
+					task.interval = next
+					task.ticker.Reset(time.Duration(next) * time.Second)
+				}
+			}
+		})
+	}
+}
+
+func (s *sender) start() {
+	for {
+		select {
+		case <-s.ctx.Done():
+			s.closeAll()
+			return
+		case packet, ok := <-s.packets:
+			if !ok {
+				return // 退出 Goroutine
+			}
+
+			if pb.IsResponse(packet) {
+				s.close(packet.Id)
+			}
+
+			if pb.IsMessage(packet) {
+				s.sendMessage(packet)
+			} else {
+				s.sendPacket(packet)
+			}
+		}
+	}
+}
 
 func main() {
 	conn, err := net.Dial("tcp", serverAddress)
@@ -37,18 +190,24 @@ func main() {
 	defer conn.Close()
 
 	var wg sync.WaitGroup
-	wg.Add(3)
+
+	wg.Add(1)
 
 	ctx, cancel := context.WithCancel(context.Background())
 
-	go sendHeartbeat(ctx, conn, &wg)
+	sender := initSender(conn, ctx)
+	go sender.start()
 
-	go readMessages(ctx, conn, &wg)
+	go startHeartbeat(ctx, sender, cancel)
+
+	go startRead(ctx, conn, sender)
 
 	go sendMessage(ctx, cancel, conn, &wg)
 
+	login(sender, userSig)
+
 	wg.Wait()
-	fmt.Println("OK")
+	fmt.Println("exit")
 }
 
 func sendMessage(ctx context.Context, cancel context.CancelFunc, conn net.Conn, wg *sync.WaitGroup) {
@@ -69,17 +228,6 @@ func sendMessage(ctx context.Context, cancel context.CancelFunc, conn net.Conn, 
 			message := scanner.Text()
 			if message == "exit" {
 				cancel()
-			} else if message == "login" {
-				fmt.Println("请输入UserSig: ")
-				if !scanner.Scan() {
-					continue
-				}
-				userSig := scanner.Text()
-
-				writeLogin(conn, userSig)
-
-				//} else {
-				//	writeMessage(conn, message)
 			} else if message == "logout" {
 
 			}
@@ -87,8 +235,7 @@ func sendMessage(ctx context.Context, cancel context.CancelFunc, conn net.Conn, 
 	}
 }
 
-func writeLogin(conn net.Conn, userSig string) {
-
+func login(sender *sender, userSig string) {
 	loginRequest := pb.LoginRequest{
 		AppId:        "19860220",
 		UserSig:      userSig,
@@ -102,88 +249,51 @@ func writeLogin(conn net.Conn, userSig string) {
 		panic(err)
 	}
 
-	bs, err := core.DefaultCodec.Encode(request)
-	if err != nil {
-		panic(err)
-	}
-
-	buffer := new(bytes.Buffer)
-	buffer.Write(bs[0])
-	buffer.Write(bs[1])
-
-	conn.Write(buffer.Bytes())
+	sender.send(request)
 }
 
-//func writeMessage(conn net.Conn, message string) {
-//	text := protocol2.TextContent{
-//		Text: message,
-//	}
-//
-//	body := protocol2.MessageBody{
-//		MType:    protocol2.MText,
-//		CId:      "sdfsdf",
-//		To:       "sdfsdf",
-//		GroupId:  "",
-//		TType:    protocol2.TSingle,
-//		Sequence: 100,
-//		Content:  text,
-//		At:       nil,
-//		Refer:    nil,
-//	}
-//
-//	packet := &protocol2.Packet{
-//		Id:      id.GenerateXId(),
-//		AppId:   "STARTSPACE",
-//		UserId:  10012,
-//		Flow:    protocol2.FlowRequest,
-//		NeedAck: protocol2.YES,
-//		Type:    protocol2.TypeMessage,
-//		CTime:   12123123,
-//		STime:   12123123,
-//		Body:    body,
-//	}
-//
-//	p, e := pb.ConvertPacket(packet)
-//	if e != nil {
-//		panic(e)
-//	}
-//
-//	b, ee := proto.Marshal(p)
-//	if ee != nil {
-//		panic(e)
-//	}
-//
-//	buffer1 := make([]byte, 4)
-//	buffer2 := bytes.NewBuffer(b)
-//
-//	binary.BigEndian.PutUint32(buffer1, uint32(len(b)))
-//
-//	buffer := new(bytes.Buffer)
-//	buffer.Write(buffer1)
-//	buffer.Write(buffer2.Bytes())
-//
-//	conn.Write(buffer.Bytes())
-//
-//	var pbp pb.Packet
-//	if e4 := proto.Unmarshal(b, &pbp); e4 != nil {
-//		panic(e4)
-//	}
-//
-//	ret, e5 := pb.RevertPacket(&pbp)
-//	if e5 != nil {
-//		panic(e5)
-//	}
-//
-//	js, e7 := json.Marshal(ret)
-//	if e7 != nil {
-//		panic(e7)
-//	}
-//
-//	fmt.Println(string(js))
-//}
+func encode(p *pb.Packet) (buffer *bytes.Buffer, err error) {
 
-func sendHeartbeat(ctx context.Context, conn net.Conn, wg *sync.WaitGroup) {
-	defer wg.Done()
+	if pb.IsHeartbeat(p) {
+
+		var hb wrapperspb.UInt32Value
+		if err := p.Body.UnmarshalTo(&hb); err != nil {
+			return nil, errors.ConnectionEncodeError.Fill("failed to unmarshal length field," + err.Error())
+		}
+
+		if hb.Value < 0 || hb.Value >= math.MaxInt32 {
+			return nil, errors.ConnectionEncodeError.Fill("invalid heartbeat value")
+		}
+
+		buffer := new(bytes.Buffer)
+		binary.Write(buffer, binary.BigEndian, uint32(4))
+		binary.Write(buffer, binary.BigEndian, hb.Value)
+		return buffer, nil
+	} else {
+
+		var err error
+
+		bs := make([][]byte, 2)
+		bs[0] = make([]byte, 4)
+		bs[1], err = proto.Marshal(p)
+
+		if err != nil {
+			return nil, errors.ConnectionDecodeError.Fill("failed to marshal packet," + err.Error())
+		}
+
+		if len(bs[1]) <= 0 || len(bs[1]) >= math.MaxInt32 {
+			return nil, errors.ConnectionEncodeError.Fill("invalid packet length")
+		}
+
+		buffer := new(bytes.Buffer)
+		binary.Write(buffer, binary.BigEndian, uint32(len(bs[1])))
+		binary.Write(buffer, binary.BigEndian, bs[1])
+
+		return buffer, nil
+	}
+}
+
+func startHeartbeat(ctx context.Context, sender *sender, stop context.CancelFunc) {
 
 	ticker := time.NewTicker(heartbeatInterval)
 	defer ticker.Stop()
@@ -192,26 +302,21 @@ func sendHeartbeat(ctx context.Context, conn net.Conn, wg *sync.WaitGroup) {
 		select {
 		case <-ticker.C:
 
-			buffer := new(bytes.Buffer)
-
-			binary.Write(buffer, binary.BigEndian, uint32(4))
-
-			binary.Write(buffer, binary.BigEndian, uint32(12))
-
-			_, err := conn.Write(buffer.Bytes())
-			if err != nil {
-				fmt.Println(err)
+			if lastHeartbeatReceive > 0 && time.Now().UnixMilli()-lastHeartbeatReceive >= time.Minute.Milliseconds() {
+				stop()
+				return
 			}
-			//fmt.Println("发送心跳 4 12")
+
+			packet, _ := pb.NewHeartbeatRequest(12)
+			sender.send(packet)
+
 		case <-ctx.Done():
 			return
 		}
 	}
 }
 
-func readMessages(ctx context.Context, conn net.Conn, wg *sync.WaitGroup) {
-
-	defer wg.Done()
+func startRead(ctx context.Context, conn net.Conn, sender *sender) {
 
 	reader := bufio.NewReader(conn)
 	for {
@@ -221,30 +326,34 @@ func readMessages(ctx context.Context, conn net.Conn, wg *sync.WaitGroup) {
 			return
 		default:
 
-			bs, err := reader.Peek(4)
-			reader.Discard(4)
-			if err != nil {
+			bs := make([]byte, 4)
+			l, err := io.ReadFull(reader, bs)
+			if err != nil || l != 4 {
 				panic(err)
 			}
 
 			length := int(binary.BigEndian.Uint32(bs))
 
 			if length == 4 && reader.Buffered() >= length {
-				b, e := reader.Peek(length)
-				reader.Discard(length)
-				if e != nil {
-					panic(e)
+
+				hb := make([]byte, length)
+				hbl, hberr := io.ReadFull(reader, hb)
+				if hberr != nil || hbl != 4 {
+					panic(err)
 				}
 
-				heartbeat := binary.BigEndian.Uint32(b)
-				fmt.Println("Read heartbeat:", heartbeat)
+				heartbeat := binary.BigEndian.Uint32(hb)
+				p, _ := pb.NewHeartbeatRequest(int32(heartbeat))
+				handleMessage(ctx, p, sender)
+
 			}
 
 			if length > 4 && reader.Buffered() >= length {
-				bb, ee := reader.Peek(length)
-				reader.Discard(length)
-				if ee != nil {
-					panic(ee)
+
+				bb := make([]byte, length)
+				bbl, bberr := io.ReadFull(reader, bb)
+				if bberr != nil || bbl != length {
+					panic(bberr)
 				}
 
 				var p pb.Packet
@@ -252,58 +361,107 @@ func readMessages(ctx context.Context, conn net.Conn, wg *sync.WaitGroup) {
 					panic(e4)
 				}
 
-				ret, e5 := pb.RevertPacket(&p)
-				if e5 != nil {
-					panic(e5)
-				}
-
-				js, e7 := json.Marshal(ret)
-				if e7 != nil {
-					panic(e7)
-				}
-
-				fmt.Println(string(js))
-
-				handleMessage(ctx, ret)
+				handleMessage(ctx, &p, sender)
 			}
 		}
 	}
 }
 
-func handleMessage(ctx context.Context, packet *protocol.Packet) {
+func handleMessage(ctx context.Context, packet *pb.Packet, sender *sender) {
 	switch packet.BType {
 	case pb.BTypeHeartbeat:
-		heartbeat := packet.Body.(uint32)
-		fmt.Printf("收到服务端心跳:%d\n", heartbeat)
+
+		var hb wrapperspb.UInt32Value
+		if err := packet.Body.UnmarshalTo(&hb); err != nil {
+			panic(err)
+		}
+
+		lastHeartbeatReceive = time.Now().UnixMilli()
 		return
+	case pb.BTypeMessage:
+		if pb.IsResponse(packet) {
+			sender.close(packet.Id)
+		} else {
+			receiveMessage(ctx, packet, sender)
+		}
 	case pb.BTypeCommand:
-		command := packet.Body.(*protocol.CommandBody)
-		cType := command.CType
-		if command.Code != 0 {
-			fmt.Printf("%s 失败 %d %v\n", cType, command.Code, command.Message)
+
+		if pb.IsResponse(packet) {
+			receiveCommand(ctx, packet, sender)
+		} else {
+			panic(errors.New(0, "为什么收到一个request command"))
 		}
-
-		switch cType {
-		case pb.CTypeUserLogin:
-
-			if command.Code != 0 {
-				fmt.Printf("%s 失败 %d %v\n", cType, command.Code, command.Message)
-			} else {
-				CurrentAppId = command.Reply.(*protocol.LoginReply).AppId
-				CurrentUserId = command.Reply.(*protocol.LoginReply).UserId
-				fmt.Printf("%s 成功 %s %d\n", cType, CurrentAppId, CurrentUserId)
-			}
-		case pb.CTypeUserLogout:
-			if command.Code != 0 {
-				fmt.Printf("%s 失败 %d %v\n", cType, command.Code, command.Message)
-			} else {
-				CurrentAppId = ""
-				CurrentUserId = 0
-				fmt.Printf("%s 成功 %s %d\n", cType, CurrentAppId, CurrentUserId)
-			}
-		}
-
 	default:
 		fmt.Printf("不知道啥Type: %d\n", packet.BType)
 	}
+}
+
+func receiveCommand(ctx context.Context, packet *pb.Packet, s *sender) {
+	p, _ := pb.RevertPacket(packet)
+
+	if p.BType == pb.BTypeCommand {
+
+		if body, ok := p.Body.(*protocol.CommandBody); ok {
+			handleCommandResponse(body)
+		} else {
+			panic(errors.New(0, "怎么不是一个commandBody呢"))
+		}
+
+	} else {
+		panic(errors.New(0, "收到的BType不是command"))
+	}
+}
+
+func handleCommandResponse(body *protocol.CommandBody) {
+	switch body.CType {
+	case pb.CTypeUserLogin:
+		if reply, ok := body.Reply.(*protocol.LoginReply); ok && body.Code == 0 {
+			CurrentAppId = reply.AppId
+			CurrentUserId = reply.UserId
+			fmt.Println("登录成功")
+		} else {
+			js, _ := json.Marshal(body)
+			fmt.Println("登录失败,", string(js))
+			panic(errors.New(0, "登录失败"))
+		}
+	default:
+		return
+	}
+}
+
+func receiveMessage(ctx context.Context, packet *pb.Packet, s *sender) {
+	p, _ := pb.RevertPacket(packet)
+	js, _ := json.Marshal(p)
+	fmt.Println(string(js))
+}
+
+func fibonacci(n int) int {
+	if n <= 1 {
+		return n
+	}
+	a, b := 0, 1
+	for i := 2; i <= n; i++ {
+		a, b = b, a+b
+	}
+	return b
+}
+
+func write(conn net.Conn, packet *pb.Packet) (int, error) {
+
+	buffer, err := encode(packet)
+	if err != nil {
+		panic(err)
+	}
+
+	total := buffer.Len()
+	sent := 0
+	for sent < total {
+		n, err := conn.Write(buffer.Bytes()[sent:])
+		if err != nil {
+			return 0, err
+		}
+		sent += n
+	}
+
+	return total, nil
 }
