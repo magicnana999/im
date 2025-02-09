@@ -17,7 +17,6 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
-	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -26,8 +25,7 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	UserApi_Login_FullMethodName  = "/pb.UserApi/Login"
-	UserApi_Logout_FullMethodName = "/pb.UserApi/Logout"
+	UserApi_Login_FullMethodName = "/pb.UserApi/Login"
 )
 
 // UserApiClient is the client API for UserApi service.
@@ -35,7 +33,6 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UserApiClient interface {
 	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginReply, error)
-	Logout(ctx context.Context, in *LogoutRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type userApiClient struct {
@@ -56,22 +53,11 @@ func (c *userApiClient) Login(ctx context.Context, in *LoginRequest, opts ...grp
 	return out, nil
 }
 
-func (c *userApiClient) Logout(ctx context.Context, in *LogoutRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, UserApi_Logout_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // UserApiServer is the server API for UserApi service.
 // All implementations must embed UnimplementedUserApiServer
 // for forward compatibility.
 type UserApiServer interface {
 	Login(context.Context, *LoginRequest) (*LoginReply, error)
-	Logout(context.Context, *LogoutRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedUserApiServer()
 }
 
@@ -84,9 +70,6 @@ type UnimplementedUserApiServer struct{}
 
 func (UnimplementedUserApiServer) Login(context.Context, *LoginRequest) (*LoginReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
-}
-func (UnimplementedUserApiServer) Logout(context.Context, *LogoutRequest) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Logout not implemented")
 }
 func (UnimplementedUserApiServer) mustEmbedUnimplementedUserApiServer() {}
 func (UnimplementedUserApiServer) testEmbeddedByValue()                 {}
@@ -127,24 +110,6 @@ func _UserApi_Login_Handler(srv interface{}, ctx context.Context, dec func(inter
 	return interceptor(ctx, in, info, handler)
 }
 
-func _UserApi_Logout_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(LogoutRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(UserApiServer).Logout(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: UserApi_Logout_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserApiServer).Logout(ctx, req.(*LogoutRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // UserApi_ServiceDesc is the grpc.ServiceDesc for UserApi service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -155,10 +120,6 @@ var UserApi_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Login",
 			Handler:    _UserApi_Login_Handler,
-		},
-		{
-			MethodName: "Logout",
-			Handler:    _UserApi_Logout_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

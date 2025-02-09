@@ -10,7 +10,7 @@ syntax = "proto3";
 package pb;
 
 import "google/protobuf/any.proto";
-import "google/protobuf/empty.proto";
+//import "google/protobuf/empty.proto";
 
 
 option go_package = "../pb";
@@ -40,6 +40,7 @@ message Packet{
   int64 sTime = 7;
   int32 bType = 8;
   google.protobuf.Any body = 9;  // for the "any" type field
+  Status status = 10;
 }
 
 
@@ -53,18 +54,17 @@ message MessageBody {
   google.protobuf.Any content = 7;
   repeated At at = 8;
   repeated Refer refer = 9;
-  int32 code = 10;
-  string message = 11;
+
 }
 
 message At {
-  string userId = 1;
+  int64 userId = 1;
   string name = 2;
   string avatar = 3;
 }
 
 message Refer {
-  string userId = 1;
+  int64 userId = 1;
   string name = 2;
   string avatar = 3;
   string cType = 4;
@@ -101,8 +101,6 @@ message CommandBody {
   string cType = 1;
   google.protobuf.Any Request = 2;
   google.protobuf.Any Reply = 3;
-  int32 code = 4;
-  string message = 5;
 }
 
 message LoginRequest {
@@ -118,15 +116,14 @@ message LoginReply{
   int64 userId = 2;
 }
 
-message LogoutRequest {
-  string appId = 1;
-  int64 userId = 2;
-}
-
 
 service UserApi {
   rpc Login (LoginRequest) returns (LoginReply) {}
-  rpc Logout (LogoutRequest) returns (google.protobuf.Empty) {}
 }
 
+
+message Status{
+  int32 code = 1;
+  string message = 2;
+}
 

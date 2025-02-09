@@ -21,11 +21,7 @@ const (
 )
 
 const (
-	CTypeUserLogin      string = "USER_LOGIN"
-	CTypeUserLogout     string = "USER_LOGOUT"
-	CTypeFriendAdd      string = "FRIEND_ADD"
-	CTypeFriendRemove   string = "FRIEND_REMOVE"
-	CTypeMessageHistory string = "MESSAGE_HISTORY"
+	CTypeUserLogin string = "USER_LOGIN"
 )
 
 const (
@@ -36,6 +32,6 @@ const (
 )
 
 const (
-	TargetTypeSingle int32 = iota + 1
-	TargetTypeGroup
+	TTypeSingle int32 = iota + 1
+	TTypeGroup
 )

@@ -8,6 +8,7 @@ import (
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/anypb"
 	"google.golang.org/protobuf/types/known/wrapperspb"
+	"strings"
 	"time"
 )
 
@@ -76,40 +77,7 @@ func NewCommandRequest(userId int64, ct string, content proto.Message) (*Packet,
 
 func NewCommandResponse(packet *Packet, ct string, content proto.Message, err error) (*Packet, error) {
 
-	var body *anypb.Any
-
-	if err != nil {
-
-		c, m := formatCommandError(err)
-
-		b, e := anypb.New(&CommandBody{
-			CType:   ct,
-			Code:    int32(c),
-			Message: m,
-		})
-
-		if e != nil {
-			return nil, imerror.HandleWrapReplyError.Fill(e.Error())
-		}
-
-		body = b
-
-	} else {
-		c, e := anypb.New(content)
-		if e != nil {
-			return nil, imerror.HandleWrapReplyError.Fill(e.Error())
-		}
-
-		body, e = anypb.New(&CommandBody{
-			CType: ct,
-			Reply: c,
-		})
-		if e != nil {
-			return nil, imerror.HandleWrapReplyError.Fill(e.Error())
-		}
-	}
-
-	response := Packet{
+	normal := &Packet{
 		Id:      packet.Id,
 		AppId:   packet.AppId,
 		UserId:  packet.UserId,
@@ -118,10 +86,41 @@ func NewCommandResponse(packet *Packet, ct string, content proto.Message, err er
 		CTime:   packet.CTime,
 		STime:   time.Now().UnixMilli(),
 		BType:   BTypeCommand,
-		Body:    body,
 	}
 
-	return &response, nil
+	if err != nil {
+		c, m := formatCommandError(err)
+
+		status := &Status{
+			Code:    int32(c),
+			Message: m,
+		}
+
+		normal.Status = status
+		return normal, nil
+	}
+
+	var body *anypb.Any
+
+	c, e := anypb.New(content)
+	if e != nil {
+		return nil, imerror.HandleWrapReplyError.Fill(e.Error())
+	}
+
+	body, e = anypb.New(&CommandBody{
+		CType: ct,
+		Reply: c,
+	})
+	if e != nil {
+		return nil, imerror.HandleWrapReplyError.Fill(e.Error())
+	}
+	status := &Status{
+		Code:    int32(0),
+		Message: "",
+	}
+	normal.Status = status
+	normal.Body = body
+	return normal, nil
 }
 
 func formatCommandError(err error) (int, string) {
@@ -136,7 +135,7 @@ func formatCommandError(err error) (int, string) {
 
 	var e imerror.Error
 	if b := errors.Is(err, &e); b {
-		return imerror.HandleGrpcError.Code, e.Error()
+		return imerror.HandleGrpcError.Code, strings.TrimRight(e.Message+" "+e.Details, " ")
 	}
 
 	return imerror.HandleInternalError.Code, err.Error()

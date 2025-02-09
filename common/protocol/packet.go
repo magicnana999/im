@@ -14,6 +14,8 @@ type Packet struct {
 	STime   int64  `json:"sTime"`
 	BType   int32  `json:"bType"`
 	Body    any    `json:"body"`
+	Code    int32  `json:"code"`
+	Message string `json:"message"`
 }
 
 type MessageBody struct {
@@ -26,18 +28,16 @@ type MessageBody struct {
 	Content    any      `json:"content"`
 	At         []*At    `json:"at"`
 	Refer      []*Refer `json:"refer"`
-	Code       int32    `json:"code"`
-	Message    string   `json:"message"`
 }
 
 type At struct {
-	UserId string `json:"userId"`
+	UserId int64  `json:"userId"`
 	Name   string `json:"name"`
 	Avatar string `json:"avatar"`
 }
 
 type Refer struct {
-	UserId  string `json:"userId"`
+	UserId  int64  `json:"userId"`
 	Name    string `json:"name"`
 	Avatar  string `json:"avatar"`
 	CType   string `json:"mType"`
@@ -71,8 +71,6 @@ type CommandBody struct {
 	CType   string `json:"cType"`
 	Request any    `json:"request"`
 	Reply   any    `json:"reply"`
-	Code    int32  `json:"code"`
-	Message string `json:"message"`
 }
 
 type LoginRequest struct {
@@ -84,11 +82,6 @@ type LoginRequest struct {
 }
 
 type LoginReply struct {
-	AppId  string `json:"appId"`
-	UserId int64  `json:"userId"`
-}
-
-type LogoutRequest struct {
 	AppId  string `json:"appId"`
 	UserId int64  `json:"userId"`
 }

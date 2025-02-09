@@ -19,6 +19,10 @@ func ConvertPacket(src *protocol.Packet) (*Packet, error) {
 		BType:   src.BType,
 		CTime:   src.CTime,
 		STime:   src.STime,
+		Status: &Status{
+			Code:    src.Code,
+			Message: src.Message,
+		},
 	}
 
 	if body, err := ConvertPacketBody(src.BType, src.Body); err == nil {
@@ -66,9 +70,7 @@ func ConvertPacketBody(pType int32, body any) (*anypb.Any, error) {
 		src := body.(protocol.CommandBody)
 
 		dest := &CommandBody{
-			CType:   src.CType,
-			Code:    src.Code,
-			Message: src.Message,
+			CType: src.CType,
 		}
 
 		if req, res, err := ConvertCommandContent(src.CType, src.Request, src.Reply); err == nil {
@@ -174,25 +176,6 @@ func ConvertCommandContent(mType string, request any, reply any) (*anypb.Any, *a
 
 		return req, res, nil
 
-	case CTypeUserLogout:
-		var req *anypb.Any
-
-		if request != nil {
-
-			input := request.(protocol.LogoutRequest)
-			ret, err := anypb.New(&LogoutRequest{
-				AppId:  input.AppId,
-				UserId: input.UserId,
-			})
-
-			if err != nil {
-				return nil, nil, err
-			}
-
-			req = ret
-		}
-
-		return req, nil, nil
 	default:
 		return nil, nil, fmt.Errorf("unsupported message type: %v", mType)
 	}
@@ -251,6 +234,8 @@ func RevertPacket(src *Packet) (*protocol.Packet, error) {
 		BType:   src.BType,
 		CTime:   src.CTime,
 		STime:   src.STime,
+		Code:    src.Status.Code,
+		Message: src.Status.Message,
 	}
 
 	if body, err := RevertPacketBody(src.BType, src.Body); err == nil {
@@ -305,9 +290,7 @@ func RevertPacketBody(pType int32, body *anypb.Any) (any, error) {
 		}
 
 		dest := &protocol.CommandBody{
-			CType:   src.CType,
-			Code:    src.Code,
-			Message: src.Message,
+			CType: src.CType,
 		}
 
 		if req, res, err := RevertCommandContent(src.CType, src.Request, src.Reply); err == nil {
@@ -421,24 +404,6 @@ func RevertCommandContent(mType string, request *anypb.Any, reply *anypb.Any) (a
 		}
 
 		return req, res, nil
-
-	case CTypeUserLogout:
-
-		var req *protocol.LogoutRequest
-
-		if request != nil {
-			var input LogoutRequest
-			if err := request.UnmarshalTo(&input); err != nil {
-				return nil, nil, err
-			}
-
-			req = &protocol.LogoutRequest{
-				AppId:  input.AppId,
-				UserId: input.UserId,
-			}
-		}
-
-		return req, nil, nil
 
 	default:
 		return nil, nil, fmt.Errorf("unsupported message type: %v", mType)
