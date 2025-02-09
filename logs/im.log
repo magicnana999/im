@@ -33174,3 +33174,26 @@
 2025-02-09T01:54:19.243+0800 DEBUG [127.0.0.1:49607#1200120#Mobile] Connection traffic
 2025-02-09T01:54:19.244+0800 DEBUG [127.0.0.1:49607#1200120#Mobile] Decode heartbeat,buffer:0,length:4,value:12
 2025-02-09T01:54:19.244+0800 DEBUG [127.0.0.1:49607#1200120#Mobile] Encode heartbeat,buffer:8,length:4,value:0
+2025-02-10T04:55:55.091+0800 DEBUG HeartbeatHandler init
+2025-02-10T04:55:55.092+0800 INFO BrokerOption:{"name":"172.20.10.2:7539","serverInterval":30000000000,"heartbeatInterval":30000000000}
+2025-02-10T04:55:55.092+0800 DEBUG default logging level is INFO
+2025-02-10T04:55:55.092+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-02-10T04:55:55.092+0800 INFO BrokerInstance started
+2025-02-10T04:55:55.098+0800 DEBUG BrokerInfo setup,key:im:broker:172.20.10.2:7539,result:OK
+2025-02-10T04:57:21.911+0800 INFO [127.0.0.1:52483#] Connection open
+2025-02-10T04:57:21.911+0800 DEBUG [127.0.0.1:52483#] HeartbeatTask started
+2025-02-10T04:57:21.912+0800 DEBUG [127.0.0.1:52483#] Connection traffic
+2025-02-10T04:57:21.912+0800 DEBUG [127.0.0.1:52483#] Decode packet,buffer:0,length:202,id:cukhdce1a37r9q79r45g
+2025-02-10T04:57:21.914+0800 DEBUG [127.0.0.1:52483#1200120#Mobile] Encode packet,buffer:161,length:157,id:cukhdce1a37r9q79r45g
+2025-02-10T04:57:26.912+0800 DEBUG [127.0.0.1:52483#1200120#Mobile] Connection traffic
+2025-02-10T04:57:26.912+0800 DEBUG [127.0.0.1:52483#1200120#Mobile] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-10T04:57:26.912+0800 DEBUG [127.0.0.1:52483#1200120#Mobile] Encode heartbeat,buffer:8,length:4,value:0
+2025-02-10T04:57:31.911+0800 DEBUG [127.0.0.1:52483#1200120#Mobile] Connection traffic
+2025-02-10T04:57:31.912+0800 DEBUG [127.0.0.1:52483#1200120#Mobile] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-10T04:57:31.912+0800 DEBUG [127.0.0.1:52483#1200120#Mobile] Encode heartbeat,buffer:8,length:4,value:0
+2025-02-10T04:57:36.912+0800 DEBUG [127.0.0.1:52483#1200120#Mobile] Connection traffic
+2025-02-10T04:57:36.912+0800 DEBUG [127.0.0.1:52483#1200120#Mobile] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-10T04:57:36.912+0800 DEBUG [127.0.0.1:52483#1200120#Mobile] Encode heartbeat,buffer:8,length:4,value:0
+2025-02-10T04:57:41.912+0800 DEBUG [127.0.0.1:52483#1200120#Mobile] Connection traffic
+2025-02-10T04:57:41.912+0800 DEBUG [127.0.0.1:52483#1200120#Mobile] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-10T04:57:41.912+0800 DEBUG [127.0.0.1:52483#1200120#Mobile] Encode heartbeat,buffer:8,length:4,value:0

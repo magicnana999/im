@@ -402,7 +402,7 @@ func receiveCommand(ctx context.Context, packet *pb.Packet, s *sender) {
 	if p.BType == pb.BTypeCommand {
 
 		if body, ok := p.Body.(*protocol.CommandBody); ok {
-			handleCommandResponse(body)
+			handleCommandResponse(packet, body)
 		} else {
 			panic(errors.New(0, "怎么不是一个commandBody呢"))
 		}
@@ -412,10 +412,10 @@ func receiveCommand(ctx context.Context, packet *pb.Packet, s *sender) {
 	}
 }
 
-func handleCommandResponse(body *protocol.CommandBody) {
+func handleCommandResponse(packet *pb.Packet, body *protocol.CommandBody) {
 	switch body.CType {
 	case pb.CTypeUserLogin:
-		if reply, ok := body.Reply.(*protocol.LoginReply); ok && body.Code == 0 {
+		if reply, ok := body.Reply.(*protocol.LoginReply); ok && packet.Status.Code == 0 {
 			CurrentAppId = reply.AppId
 			CurrentUserId = reply.UserId
 			fmt.Println("登录成功")
