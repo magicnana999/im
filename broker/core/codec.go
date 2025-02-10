@@ -24,6 +24,8 @@ type LengthFieldBasedFrameCodec struct {
 
 func (l LengthFieldBasedFrameCodec) Encode(c gnet.Conn, p *pb.Packet) (*bb.ByteBuffer, error) {
 
+	buffer := bb.Get()
+
 	user, err := state.CurrentUserFromConn(c)
 	if err != nil {
 		return nil, errors.ConnectionEncodeError.Fill("failed to get current user," + err.Error())
@@ -31,13 +33,7 @@ func (l LengthFieldBasedFrameCodec) Encode(c gnet.Conn, p *pb.Packet) (*bb.ByteB
 
 	if p.IsHeartbeat() {
 
-		buffer := bb.Get()
-
 		hb := p.GetHeartbeatBody().Value
-
-		if hb < 0 || hb >= math.MaxInt32 {
-			return nil, errors.ConnectionEncodeError.Fill("invalid heartbeat value")
-		}
 
 		binary.Write(buffer, binary.BigEndian, int32(4))
 		binary.Write(buffer, binary.BigEndian, int32(hb))
@@ -51,8 +47,6 @@ func (l LengthFieldBasedFrameCodec) Encode(c gnet.Conn, p *pb.Packet) (*bb.ByteB
 
 		return buffer, nil
 	} else {
-
-		buffer := bb.Get()
 
 		bs, e := proto.Marshal(p)
 
@@ -108,11 +102,6 @@ func (l LengthFieldBasedFrameCodec) Decode(c gnet.Conn) ([]*pb.Packet, error) {
 				c.InboundBuffered(),
 				length,
 				heartbeat)
-
-			if heartbeat <= 0 || heartbeat >= math.MaxInt32 {
-				ee := errors.ConnectionDecodeError.Fill("invalid heartbeat")
-				return nil, ee
-			}
 
 			packet := pb.NewHeartbeat(int32(heartbeat))
 			result = append(result, packet)

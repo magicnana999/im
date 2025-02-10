@@ -8,6 +8,8 @@ import (
 	"github.com/magicnana999/im/logger"
 	"github.com/panjf2000/gnet/v2"
 	"github.com/panjf2000/gnet/v2/pkg/logging"
+	bb "github.com/panjf2000/gnet/v2/pkg/pool/bytebuffer"
+
 	//bbPool "github.com/panjf2000/gnet/v2/pkg/pool/bytebuffer"
 	goPool "github.com/panjf2000/gnet/v2/pkg/pool/goroutine"
 
@@ -177,6 +179,7 @@ func (s *BrokerServer) OnTraffic(c gnet.Conn) (action gnet.Action) {
 				return err
 			})
 
+			bb.Put(bs)
 		}
 	}
 
