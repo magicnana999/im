@@ -3,13 +3,13 @@ package handler
 import (
 	"context"
 	"github.com/magicnana999/im/broker/state"
-	"github.com/magicnana999/im/common/pb"
+	"github.com/magicnana999/im/enum"
 	"github.com/magicnana999/im/errors"
 	"github.com/magicnana999/im/logger"
+	"github.com/magicnana999/im/pb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/protobuf/proto"
-	"google.golang.org/protobuf/types/known/anypb"
 )
 
 var DefaultCommandHandler = &CommandHandler{}
@@ -20,20 +20,14 @@ type CommandHandler struct {
 }
 
 func (c *CommandHandler) HandlePacket(ctx context.Context, packet *pb.Packet) (*pb.Packet, error) {
+	reply, err := c.HandleCommand(ctx, packet.GetCommandBody())
 
-	var body pb.CommandBody
-	if err := packet.Body.UnmarshalTo(&body); err != nil {
-		return nil, errors.HandleUnmarshalError.Fill(err.Error())
-	}
-
-	reply, err := c.HandleCommand(ctx, body.CType, body.Request)
-
-	return pb.NewCommandResponse(packet, body.CType, reply, err)
+	return pb.NewCommandResponse(reply, err)
 
 }
 
 func (c *CommandHandler) IsSupport(ctx context.Context, packetType int32) bool {
-	return pb.BTypeCommand == packetType
+	return pb.TypeCommand == packetType
 }
 
 func (c *CommandHandler) InitHandler() error {
@@ -47,27 +41,23 @@ func (c *CommandHandler) InitHandler() error {
 	return nil
 }
 
-func (c *CommandHandler) HandleCommand(ctx context.Context, cType string, content *anypb.Any) (proto.Message, error) {
+func (c *CommandHandler) HandleCommand(ctx context.Context, cmd *pb.CommandBody) (proto.Message, error) {
 
 	uc, e := state.CurrentUserFromCtx(ctx)
 	if e != nil {
 		return nil, e
 	}
 
-	switch cType {
+	switch cmd.CType {
 	case pb.CTypeUserLogin:
-		var src pb.LoginRequest
-		if err := content.UnmarshalTo(&src); err != nil {
-			return nil, errors.HandleUnmarshalError.Fill(err.Error())
-		}
-		//return c.userApiClient.Login(ctx, &src)
+		src := cmd.GetLoginRequest()
 
-		rep, err := login(ctx, &src)
+		rep, err := login(ctx, src)
 		if err != nil {
 			return nil, err
 		}
 
-		if err = uc.Store(ctx, rep.AppId, rep.UserId, src.Os); err != nil {
+		if err = uc.Store(ctx, rep.AppId, rep.UserId, enum.OSType(src.Os)); err != nil {
 			return nil, err
 		}
 

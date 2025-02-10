@@ -2,9 +2,9 @@ package handler
 
 import (
 	"context"
-	"github.com/magicnana999/im/common/pb"
 	"github.com/magicnana999/im/errors"
 	"github.com/magicnana999/im/logger"
+	"github.com/magicnana999/im/pb"
 )
 
 type PacketHandler interface {
@@ -30,7 +30,7 @@ func init() {
 
 func (p *PacketHandlerImpl) HandlePacket(ctx context.Context, packet *pb.Packet) (*pb.Packet, error) {
 	for _, handler := range p.handlers {
-		if handler.IsSupport(ctx, packet.BType) {
+		if handler.IsSupport(ctx, packet.Type) {
 			return handler.HandlePacket(ctx, packet)
 		}
 	}

@@ -4,8 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/magicnana999/im/common/enum"
-	"github.com/magicnana999/im/common/pb"
+	"github.com/magicnana999/im/enum"
 	"github.com/magicnana999/im/errors"
 	"github.com/magicnana999/im/logger"
 	"github.com/magicnana999/im/redis"
@@ -96,12 +95,12 @@ func (u *UserConnection) Label() string {
 	return strconv.FormatInt(u.UserId, 10) + "#" + dt.String()
 }
 
-func (u *UserConnection) Store(ctx context.Context, appId string, userId int64, os pb.OSType) error {
+func (u *UserConnection) Store(ctx context.Context, appId string, userId int64, os enum.OSType) error {
 	mu.Lock()
 	defer mu.Unlock()
 	u.AppId = appId
 	u.UserId = userId
-	u.OS = enum.OSType(os)
+	u.OS = os
 	u.IsLogin = true
 	m[u.Label()] = u
 

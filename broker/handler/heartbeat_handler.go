@@ -3,9 +3,9 @@ package handler
 import (
 	"context"
 	"github.com/magicnana999/im/broker/state"
-	"github.com/magicnana999/im/common/pb"
 	"github.com/magicnana999/im/errors"
 	"github.com/magicnana999/im/logger"
+	"github.com/magicnana999/im/pb"
 	"github.com/panjf2000/ants/v2"
 	"github.com/panjf2000/gnet/v2"
 	"github.com/panjf2000/gnet/v2/pkg/logging"
@@ -33,11 +33,11 @@ func (h *HeartbeatHandler) HandlePacket(ctx context.Context, packet *pb.Packet) 
 	}
 	h.SetLastHeartbeat(uc)
 
-	return pb.NewHeartbeatResponse()
+	return pb.NewHeartbeat(int32(1)), nil
 }
 
 func (h *HeartbeatHandler) IsSupport(ctx context.Context, packetType int32) bool {
-	return packetType == pb.BTypeHeartbeat
+	return packetType == pb.TypeHeartbeat
 }
 
 func (h *HeartbeatHandler) InitHandler() error {

@@ -169,7 +169,7 @@ func (s *BrokerServer) OnTraffic(c gnet.Conn) (action gnet.Action) {
 				return gnet.None
 			}
 
-			c.AsyncWritev(bs, func(c gnet.Conn, err error) error {
+			c.AsyncWrite(bs.Bytes(), func(c gnet.Conn, err error) error {
 				if err != nil {
 					logging.Fatalf("[%s#%s] Connection traffic,write error:%v", c.RemoteAddr().String(), user.Label(), err)
 					handler.DefaultHeartbeatHandler.StopTicker(c)

@@ -1,0 +1,141 @@
+/*
+
+╰$ cd broker/pb
+╰$ protoc --go_out=. packet.proto
+╰$ protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative packet.proto
+*/
+
+syntax = "proto3";
+
+package pb;
+
+//import "google/protobuf/any.proto";
+//import "google/protobuf/empty.proto";
+
+
+option go_package = "../pb";
+
+
+message Packet{
+  int32 type = 1;
+  oneof body{
+    HeartbeatBody heartbeatBody = 2;
+    CommandBody commandBody = 3;
+    MessageBody messageBody = 4;
+  }
+}
+
+message HeartbeatBody{
+  int32 value = 1;
+}
+
+message CommandBody {
+  string cType = 1;
+  int32 code = 2;
+  string message = 3;
+  oneof request {
+    LoginRequest loginRequest = 4;
+  }
+  oneof reply {
+    LoginReply loginReply = 5;
+  }
+}
+
+message MessageBody{
+  string id = 1;
+  string appId = 2;
+  int64 userId = 3;
+  string cId = 4;
+  int64 to = 5;
+  int64 groupId = 6;
+  int64 sequence = 7;
+  int32 flow = 8;
+  int32 needAck = 9;
+  int64 cTime = 10;
+  int64 sTime = 11;
+  string cType = 12;
+  repeated At at = 13;
+  repeated Refer refer = 14;
+  int32 code = 15;
+  string message = 16;
+  oneof content {
+    TextContent textContent = 17;
+    ImageContent imageContent = 18;
+    AudioContent audioContent = 19;
+    VideoContent videoContent = 20;
+  }
+}
+
+
+message At {
+  int64 userId = 1;
+  string name = 2;
+  string avatar = 3;
+}
+
+message Refer {
+  int64 userId = 1;
+  string name = 2;
+  string avatar = 3;
+  string cType = 4;
+  oneof content {
+    TextContent textContent = 5;
+    ImageContent imageContent = 6;
+    AudioContent audioContent = 7;
+    VideoContent videoContent = 8;
+  }
+}
+
+message TextContent {
+  string text = 1;
+}
+
+message ImageContent {
+  string url = 1;
+  int32 width = 2;
+  int32 height = 3;
+}
+
+message AudioContent {
+  string url = 1;
+  int32 length = 2;
+}
+
+message VideoContent {
+  string url = 1;
+  string cover = 2;
+  int32 length = 3;
+  int32 width = 4;
+  int32 height = 5;
+}
+
+
+
+
+
+
+
+
+
+
+message LoginRequest {
+  string appId = 1;
+  string userSig = 2;
+  string version = 3;
+  int32 os = 4;
+  string pushDeviceId = 5;
+}
+
+message LoginReply{
+  string appId = 1;
+  int64 userId = 2;
+}
+
+
+
+
+
+
+service UserApi {
+  rpc Login (LoginRequest) returns (LoginReply) {}
+}
