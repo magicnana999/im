@@ -81,7 +81,7 @@ func (c *CommandHandler) HandleCommand(ctx context.Context, cType string, conten
 func login(ctx context.Context, request *pb.LoginRequest) (*pb.LoginReply, error) {
 
 	switch request.UserSig {
-	case "cuf5ofe1a37nfi3p4b5g":
+	case "cukpovu1a37hpofg6sj0":
 		return &pb.LoginReply{
 			AppId:  "19860220",
 			UserId: 1200120,
@@ -89,11 +89,6 @@ func login(ctx context.Context, request *pb.LoginRequest) (*pb.LoginReply, error
 	case "cuf5ofe1a37nfi3p4b6g":
 		return &pb.LoginReply{
 			AppId:  "19860220",
-			UserId: 1200122,
-		}, nil
-	case "cuf5ofe1a37nfi3p4b60":
-		return &pb.LoginReply{
-			AppId:  "19860221",
 			UserId: 1200122,
 		}, nil
 	default:

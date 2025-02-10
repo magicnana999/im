@@ -25,9 +25,8 @@ import (
 )
 
 const (
-	userSig = "cuf5ofe1a37nfi3p4b5g"
+	userSig = "cukpovu1a37hpofg6sj0"
 	//userSig           = "cuf5ofe1a37nfi3p4b6g"
-	//userSig           = "cuf5ofe1a37nfi3p4b60"
 
 	serverAddress     = "127.0.0.1:7539" // IM 服务器地址和端口
 	heartbeatInterval = 5 * time.Second  // 心跳间隔
