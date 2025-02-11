@@ -1,6 +1,6 @@
 package repository
 
-import "github.com/magicnana999/im/common/entity"
+import "github.com/magicnana999/im/entity"
 
 func SelectUserByUserId(appId string, userId int64) (*entity.User, error) {
 	var user entity.User

@@ -1,3 +1,0 @@
-2025-01-13T16:25:32.187+0800 INFO 92633acb703984b80a77edee6ed345b1 2217a845e0021c5e %!(EXTRA []interface {}=[sql: Scan error on column index 1, name "nick_name": converting NULL to string is unsupported])
-2025-01-13T16:25:43.701+0800 INFO 1c3535d6bd6228991dfe62ae092249ca 3f0d065edd44d2c8 %!(EXTRA []interface {}=[sql: Scan error on column index 1, name "nick_name": converting NULL to string is unsupported])
-2025-01-13T16:25:50.851+0800 INFO 8d5ed5afd340f241253bd1becf0db230 cc6b225bbb00c243 %!(EXTRA []interface {}=[sql: Scan error on column index 1, name "nick_name": converting NULL to string is unsupported])
