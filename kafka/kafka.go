@@ -7,7 +7,6 @@ import (
 	"github.com/magicnana999/im/logger"
 	"github.com/magicnana999/im/pb"
 	"github.com/panjf2000/ants/v2"
-	"github.com/panjf2000/gnet/v2/pkg/logging"
 	goPool "github.com/panjf2000/gnet/v2/pkg/pool/goroutine"
 	"github.com/segmentio/kafka-go"
 	"github.com/timandy/routine"
@@ -16,34 +15,16 @@ import (
 	"time"
 )
 
-const (
-	kafkaBroker = "localhost:9092"
-	maxWorkers  = 24 // worker pool 中的最大并发数
-)
-
 var (
-	TopicRoute topicInfo
-
 	executor *goPool.Pool
 	lock     sync.RWMutex
 )
 
 type handle func(message *pb.MessageBody) error
 
-func init() {
-
-	TopicRoute = topicInfo{
-		topic: "im-message-route",
-		group: "im-message-route-group"}
-}
-
-type topicInfo struct {
-	topic string
-	group string
-}
-
 type Consumer struct {
-	topicInfo topicInfo
+	brokers   []string
+	topicInfo TopicInfo
 	executor  *goPool.Pool
 	handle    handle
 }
@@ -57,7 +38,7 @@ func (c *Consumer) Start(ctx context.Context) error {
 		logger.InfoF("%d start consumer,topic:%s", routine.Goid(), c.topicInfo)
 
 		reader := kafka.NewReader(kafka.ReaderConfig{
-			Brokers: []string{kafkaBroker},
+			Brokers: c.brokers,
 			GroupID: c.topicInfo.group,
 			Topic:   c.topicInfo.topic,
 		})
@@ -98,7 +79,7 @@ func handleMessageRoute(h handle, m *kafka.Message) error {
 	return h(&msg)
 }
 
-func initExecutor() *goPool.Pool {
+func initExecutor(maxWorkers int) *goPool.Pool {
 
 	lock.Lock()
 	defer lock.Unlock()
@@ -107,35 +88,22 @@ func initExecutor() *goPool.Pool {
 		return executor
 	}
 
-	var (
-		DefaultAntsPoolSize = maxWorkers
-		ExpiryDuration      = 10 * time.Second
-		Nonblocking         = true
-	)
+	executor, _ = ants.NewPool(maxWorkers)
 
-	options := ants.Options{
-		ExpiryDuration: ExpiryDuration,
-		Nonblocking:    Nonblocking,
-		Logger:         logger.Logger,
-		PanicHandler: func(a any) {
-			logging.Errorf("goroutine pool panic: %v", a)
-		},
-	}
-	executor, _ = ants.NewPool(DefaultAntsPoolSize, ants.WithOptions(options))
-
-	logger.InfoF("%d init executor,size:%d,executor:%p", routine.Goid(), DefaultAntsPoolSize, executor)
+	logger.InfoF("%d init executor,max:%d", routine.Goid(), maxWorkers)
 
 	return executor
 }
 
-func InitConsumer(tg topicInfo, handle handle) (*Consumer, error) {
+func InitConsumer(brokers []string, maxWorkers int, topic TopicInfo, handle handle) (*Consumer, error) {
 
-	e := initExecutor()
+	e := initExecutor(maxWorkers)
 
 	c := &Consumer{
-		topicInfo: tg,
+		topicInfo: topic,
 		executor:  e,
 		handle:    handle,
+		brokers:   brokers,
 	}
 
 	logger.InfoF("%d init consumer,executor:%p", routine.Goid(), e)
@@ -143,9 +111,9 @@ func InitConsumer(tg topicInfo, handle handle) (*Consumer, error) {
 	return c, nil
 }
 
-func InitProducer() *Producer {
+func InitProducer(brokers []string) *Producer {
 	writer := &kafka.Writer{
-		Addr: kafka.TCP("localhost:9092"), //TCP函数参数为不定长参数，可以传多个地址组成集群
+		Addr: kafka.TCP(brokers...), //TCP函数参数为不定长参数，可以传多个地址组成集群
 		//Topic:                  TopicRoute.topic,
 		Balancer:               &kafka.Hash{}, // 用于对key进行hash，决定消息发送到哪个分区
 		MaxAttempts:            0,
@@ -187,7 +155,7 @@ func (p *Producer) sendMessageRoute(ctx context.Context, packet *pb.Packet) erro
 		return k
 	}
 	m := kafka.Message{
-		Topic:      TopicRoute.topic,
+		Topic:      Route.topic,
 		Value:      bs,
 		Headers:    nil,
 		WriterData: nil,

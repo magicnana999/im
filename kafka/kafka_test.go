@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/magicnana999/im/pb"
 	"github.com/magicnana999/im/util/id"
+	"runtime"
 	"strings"
 	"sync"
 	"testing"
@@ -15,7 +16,7 @@ func TestProducer(t *testing.T) {
 	var wg sync.WaitGroup
 	wg.Add(1)
 
-	producer := InitProducer()
+	producer := InitProducer([]string{"localhost:9092"})
 	go func() {
 		for {
 			select {
@@ -36,7 +37,7 @@ func TestConsumer(t *testing.T) {
 	var wg sync.WaitGroup
 	wg.Add(1)
 
-	c1, _ := InitConsumer(TopicRoute, process)
+	c1, _ := InitConsumer([]string{"localhost:9092"}, runtime.NumCPU()*2, Route, process)
 	c1.Start(ctx)
 
 	wg.Wait()

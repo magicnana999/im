@@ -3,9 +3,9 @@ package impl
 import (
 	"context"
 	"encoding/json"
-	"github.com/magicnana999/im/common/entity"
-	"github.com/magicnana999/im/common/pb"
+	"github.com/magicnana999/im/entity"
 	"github.com/magicnana999/im/logger"
+	"github.com/magicnana999/im/pb"
 	"github.com/magicnana999/im/service/storage"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
