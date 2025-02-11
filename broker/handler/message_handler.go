@@ -29,11 +29,11 @@ func (m *MessageHandler) IsSupport(ctx context.Context, packetType int32) bool {
 }
 
 func (m *MessageHandler) InitHandler() error {
-	//m.deliver = DefaultMessageDeliveryHandler
-	//m.receiver = DefaultMessageReceivingHandler
-	//
-	//m.deliver.InitHandler()
-	//m.receiver.InitHandler()
+	m.deliver = DefaultMessageDeliveryHandler
+	m.receiver = DefaultMessageReceivingHandler
+
+	m.deliver.InitHandler()
+	m.receiver.InitHandler()
 
 	return nil
 }
