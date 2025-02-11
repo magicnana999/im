@@ -40,10 +40,7 @@ func TestNewCommandResponse(t *testing.T) {
 }
 
 func TestNewHeartbeat(t *testing.T) {
-	packet, err := NewHeartbeat(12)
-	if err != nil {
-		t.Errorf("NewHeartbeatRequest() error = %v", err)
-	}
+	packet := NewHeartbeat(12)
 	fmt.Println(packet.IsHeartbeat())
 	fmt.Println(packet.GetHeartbeatBody())
 }
@@ -96,7 +93,7 @@ func TestMessage(t *testing.T) {
 	js, _ := json.Marshal(mb)
 	fmt.Println(string(js))
 
-	j1, _ := json.Marshal(mb.reply())
+	j1, _ := json.Marshal(mb.Reply())
 	fmt.Println(string(j1))
 
 	j2, _ := json.Marshal(mb.Wrap())

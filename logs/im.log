@@ -33264,3 +33264,11 @@
 2025-02-10T23:01:39.287+0800 DEBUG [127.0.0.1:53832#1200120#Mobile] Connection traffic
 2025-02-10T23:01:39.288+0800 DEBUG [127.0.0.1:53832#1200120#Mobile] Decode heartbeat,buffer:0,length:4,value:12
 2025-02-10T23:01:39.288+0800 DEBUG [127.0.0.1:53832#1200120#Mobile] Encode heartbeat,buffer:8,length:4,value:1
+2025-02-11T22:28:06.012+0800 DEBUG HeartbeatHandler init
+2025-02-11T22:28:06.013+0800 FATAL Failed to get local IP address: no ip address found
+2025-02-11T23:58:24.940+0800 DEBUG HeartbeatHandler init
+2025-02-11T23:58:24.940+0800 INFO BrokerOption:{"name":"172.20.10.2:7539","serverInterval":30000000000,"heartbeatInterval":30000000000}
+2025-02-11T23:58:24.940+0800 DEBUG default logging level is INFO
+2025-02-11T23:58:24.941+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-02-11T23:58:24.941+0800 INFO BrokerInstance started
+2025-02-11T23:58:24.946+0800 DEBUG BrokerInfo setup,key:im:broker:172.20.10.2:7539,result:OK
