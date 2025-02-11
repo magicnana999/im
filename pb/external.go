@@ -1,9 +1,8 @@
 package pb
 
 import (
-	"errors"
 	imerror "github.com/magicnana999/im/errors"
-	"google.golang.org/grpc/status"
+	"github.com/magicnana999/im/util/id"
 	"google.golang.org/protobuf/proto"
 	"strings"
 	"time"
@@ -16,79 +15,35 @@ func NewHeartbeat(v int32) *Packet {
 	}
 }
 
-func NewCommandRequest(data proto.Message) (*Packet, error) {
-	var request isCommandBody_Request
-	var cType string
-	switch req := data.(type) {
-	case *LoginRequest:
-		cType = CTypeUserLogin
-		request = &CommandBody_LoginRequest{
-			LoginRequest: req,
-		}
-	default:
-		return nil, imerror.HandleWrapRequestError.Fill("invalid request type")
+func NewCommand(data proto.Message) *Packet {
+
+	mb := &CommandBody{
+		Id: strings.ToLower(id.GenerateXId()),
 	}
 
-	return &Packet{
-		Type: TypeCommand,
-		Body: &Packet_CommandBody{CommandBody: &CommandBody{CType: cType, Request: request}},
-	}, nil
-
+	mb.SetRequest(data)
+	return mb.Wrap()
 }
 
-func NewCommandResponse(data proto.Message, err error) (*Packet, error) {
+func NewMessage(
+	userId, to, groupId, sequence int64,
+	appId, cId string,
+	c proto.Message) *MessageBody {
 
-	body := &Packet_CommandBody{
-		CommandBody: &CommandBody{},
+	mb := &MessageBody{
+		Id:       strings.ToLower(id.GenerateXId()),
+		AppId:    appId,
+		UserId:   userId,
+		CId:      cId,
+		To:       to,
+		GroupId:  groupId,
+		Sequence: sequence,
+		Flow:     FlowRequest,
+		NeedAck:  YES,
+		CTime:    time.Now().UnixMilli(),
 	}
-
-	packet := &Packet{
-		Type: TypeCommand,
-		Body: body,
-	}
-
-	if err != nil {
-		c, m := formatCommandError(err)
-		body.CommandBody.Code = int32(c)
-		body.CommandBody.Message = m
-		return packet, nil
-	}
-
-	var reply isCommandBody_Reply
-	var cType string
-	switch rep := data.(type) {
-	case *LoginReply:
-		cType = CTypeUserLogin
-		reply = &CommandBody_LoginReply{
-			LoginReply: rep,
-		}
-	default:
-		return nil, imerror.HandleWrapRequestError.Fill("invalid request type")
-	}
-
-	body.CommandBody.Code = 0
-	body.CommandBody.Message = ""
-	body.CommandBody.Reply = reply
-	body.CommandBody.CType = cType
-	return packet, nil
-}
-
-func formatCommandError(err error) (int, string) {
-
-	if err == nil {
-		return 0, ""
-	}
-
-	if _, ok := status.FromError(err); ok {
-		return imerror.HandleGrpcError.Code, err.Error()
-	}
-
-	var e imerror.Error
-	if b := errors.Is(err, &e); b {
-		return imerror.HandleGrpcError.Code, strings.TrimRight(e.Message+" "+e.Details, " ")
-	}
-
-	return imerror.HandleInternalError.Code, err.Error()
+	mb.SetContent(c)
+	return mb
 }
 
 func (p *Packet) IsRequest() bool {
@@ -117,12 +72,73 @@ func (p *Packet) IsMessage() bool {
 	return p.Type == TypeMessage
 }
 
-func (mb *MessageBody) Reply() *MessageBody {
+func (p *Packet) Failure(e error) *Packet {
+	switch p.Type {
+	case TypeHeartbeat:
+		return nil
+	case TypeCommand:
+		return p.GetCommandBody().Failure(e).Wrap()
+	case TypeMessage:
+		return p.GetMessageBody().Failure(e).Wrap()
+	default:
+		return nil
+	}
+}
+
+func (p *Packet) Success(c proto.Message) *Packet {
+	switch p.Type {
+	case TypeHeartbeat:
+		return nil
+	case TypeCommand:
+		return p.GetCommandBody().Success(c).Wrap()
+	case TypeMessage:
+		return p.GetMessageBody().Success(c).Wrap()
+	default:
+		return nil
+	}
+}
+
+func (mb *CommandBody) Response(reply proto.Message, e error) *CommandBody {
+	if e == nil {
+		return mb.Success(reply)
+	} else {
+		return mb.Failure(e)
+	}
+}
+
+func (mb *CommandBody) Success(reply proto.Message) *CommandBody {
+
+	ack := &CommandBody{
+		Id:    mb.Id,
+		CType: mb.CType,
+		Code:  0,
+	}
+
+	ack.SetReply(reply)
+
+	return ack
+}
+
+func (mb *CommandBody) Failure(e error) *CommandBody {
+
+	ack := mb.Success(nil)
+
+	ee := imerror.Format2ImError(e)
+	if ee != nil {
+		ack.Code = int32(ee.Code)
+		ack.Message = ee.Message
+	}
+
+	return ack
+}
+
+func (mb *MessageBody) Success(content proto.Message) *MessageBody {
 
 	if mb.Flow == FlowResponse {
 		return mb
 	}
-	return &MessageBody{
+
+	ack := &MessageBody{
 		Id:       mb.Id,
 		AppId:    mb.AppId,
 		UserId:   mb.UserId,
@@ -135,33 +151,32 @@ func (mb *MessageBody) Reply() *MessageBody {
 		CTime:    mb.CTime,
 		STime:    time.Now().UnixMilli(),
 		CType:    mb.CType,
-		Content:  mb.Content,
+		Code:     0,
+		//Content:  mb.Content,
 	}
+
+	return ack
 }
 
-func (mb *MessageBody) Set(content proto.Message) {
-	switch content := content.(type) {
-	case *TextContent:
-		mb.CType = CTypeText
-		mb.Content = &MessageBody_TextContent{
-			TextContent: content,
-		}
-	case *ImageContent:
-		mb.CType = CTypeImage
-		mb.Content = &MessageBody_ImageContent{
-			ImageContent: content,
-		}
-	case *AudioContent:
-		mb.CType = CTypeAudio
-		mb.Content = &MessageBody_AudioContent{
-			AudioContent: content,
-		}
-	case *VideoContent:
-		mb.CType = CTypeVideo
-		mb.Content = &MessageBody_VideoContent{
-			VideoContent: content,
-		}
-	default:
+func (mb *MessageBody) Failure(e error) *MessageBody {
+
+	ack := mb.Success(nil)
+
+	ee := imerror.Format2ImError(e)
+	if ee != nil {
+		ack.Code = int32(ee.Code)
+		ack.Message = ee.Message
+	}
+
+	return ack
+}
+
+func (mb *CommandBody) Wrap() *Packet {
+	return &Packet{
+		Type: TypeCommand,
+		Body: &Packet_CommandBody{
+			CommandBody: mb,
+		},
 	}
 }
 
@@ -171,5 +186,56 @@ func (mb *MessageBody) Wrap() *Packet {
 		Body: &Packet_MessageBody{
 			MessageBody: mb,
 		},
+	}
+}
+
+func (mb *CommandBody) SetRequest(content proto.Message) {
+
+	if content == nil {
+		return
+	}
+
+	switch c := content.(type) {
+	case *LoginRequest:
+		mb.CType = CTypeUserLogin
+		mb.Request = &CommandBody_LoginRequest{LoginRequest: c}
+	default:
+	}
+}
+
+func (mb *CommandBody) SetReply(content proto.Message) {
+
+	if content == nil {
+		return
+	}
+
+	switch c := content.(type) {
+	case *LoginReply:
+		mb.CType = CTypeUserLogin
+		mb.Reply = &CommandBody_LoginReply{LoginReply: c}
+	default:
+	}
+}
+
+func (mb *MessageBody) SetContent(content proto.Message) {
+
+	if content == nil {
+		return
+	}
+
+	switch content := content.(type) {
+	case *TextContent:
+		mb.CType = CTypeText
+		mb.Content = &MessageBody_TextContent{TextContent: content}
+	case *ImageContent:
+		mb.CType = CTypeImage
+		mb.Content = &MessageBody_ImageContent{ImageContent: content}
+	case *AudioContent:
+		mb.CType = CTypeAudio
+		mb.Content = &MessageBody_AudioContent{AudioContent: content}
+	case *VideoContent:
+		mb.CType = CTypeVideo
+		mb.Content = &MessageBody_VideoContent{VideoContent: content}
+	default:
 	}
 }

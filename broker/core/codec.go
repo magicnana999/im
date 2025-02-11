@@ -9,7 +9,6 @@ import (
 	"github.com/panjf2000/gnet/v2"
 	bb "github.com/panjf2000/gnet/v2/pkg/pool/bytebuffer"
 	"google.golang.org/protobuf/proto"
-	"math"
 )
 
 type Codec interface {
@@ -54,10 +53,6 @@ func (l LengthFieldBasedFrameCodec) Encode(c gnet.Conn, p *pb.Packet) (*bb.ByteB
 			return nil, errors.ConnectionDecodeError.Fill("failed to marshal packet," + e.Error())
 		}
 
-		if len(bs) <= 0 || len(bs) >= math.MaxInt32 {
-			return nil, errors.ConnectionEncodeError.Fill("invalid packet length")
-		}
-
 		binary.Write(buffer, binary.BigEndian, int32(len(bs)))
 		binary.Write(buffer, binary.BigEndian, bs)
 
@@ -86,10 +81,6 @@ func (l LengthFieldBasedFrameCodec) Decode(c gnet.Conn) ([]*pb.Packet, error) {
 
 		var length int32
 		binary.Read(c, binary.BigEndian, &length)
-
-		if length <= 0 || length >= math.MaxInt32 {
-			return nil, errors.ConnectionDecodeError.Fill("invalid packet length")
-		}
 
 		if length == 4 && c.InboundBuffered() >= int(length) {
 

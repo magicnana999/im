@@ -35,3 +35,17 @@ func FormatError(err error) error {
 
 	return status.Errorf(codes.Internal, err.Error())
 }
+
+func Format2ImError(e error) *Error {
+	if e == nil {
+		return nil
+	}
+
+	var ime Error
+	if ok := errors.As(e, &ime); ok {
+		return &ime
+	}
+
+	ime = New(-1, e.Error())
+	return &ime
+}

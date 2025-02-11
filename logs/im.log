@@ -33272,3 +33272,38 @@
 2025-02-11T23:58:24.941+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
 2025-02-11T23:58:24.941+0800 INFO BrokerInstance started
 2025-02-11T23:58:24.946+0800 DEBUG BrokerInfo setup,key:im:broker:172.20.10.2:7539,result:OK
+2025-02-12T03:29:28.230+0800 DEBUG HeartbeatHandler init
+2025-02-12T03:29:28.231+0800 INFO BrokerOption:{"name":"172.20.10.2:7539","serverInterval":30000000000,"heartbeatInterval":30000000000}
+2025-02-12T03:29:28.231+0800 DEBUG default logging level is INFO
+2025-02-12T03:29:28.231+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-02-12T03:29:28.231+0800 INFO BrokerInstance started
+2025-02-12T03:29:28.234+0800 DEBUG BrokerInfo setup,key:im:broker:172.20.10.2:7539,result:OK
+2025-02-12T03:30:43.358+0800 INFO [127.0.0.1:62646#] Connection open
+2025-02-12T03:30:43.358+0800 DEBUG [127.0.0.1:62646#] HeartbeatTask started
+2025-02-12T03:30:43.359+0800 DEBUG [127.0.0.1:62646#] Connection traffic
+2025-02-12T03:30:43.359+0800 DEBUG [127.0.0.1:62646#] Decode packet,buffer:0,length:103,packet:{{{} [] [] 0x140000d0008} 2 0x1400059e110 [] 0}
+2025-02-12T03:30:43.361+0800 DEBUG [127.0.0.1:62646#1200120#Mobile] Encode packet,buffer:58,length:54,id:type:2  commandBody:{id:"culqaou1a37op6gfnji0"  cType:"USER_LOGIN"  loginReply:{appId:"19860220"  userId:1200120}}
+2025-02-12T03:30:48.358+0800 DEBUG [127.0.0.1:62646#1200120#Mobile] Connection traffic
+2025-02-12T03:30:48.358+0800 DEBUG [127.0.0.1:62646#1200120#Mobile] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-12T03:30:48.358+0800 DEBUG [127.0.0.1:62646#1200120#Mobile] Encode heartbeat,buffer:8,length:4,value:1
+2025-02-12T03:30:53.358+0800 DEBUG [127.0.0.1:62646#1200120#Mobile] Connection traffic
+2025-02-12T03:30:53.359+0800 DEBUG [127.0.0.1:62646#1200120#Mobile] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-12T03:30:53.359+0800 DEBUG [127.0.0.1:62646#1200120#Mobile] Encode heartbeat,buffer:8,length:4,value:1
+2025-02-12T03:30:58.359+0800 DEBUG [127.0.0.1:62646#1200120#Mobile] Connection traffic
+2025-02-12T03:30:58.360+0800 DEBUG [127.0.0.1:62646#1200120#Mobile] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-12T03:30:58.360+0800 DEBUG [127.0.0.1:62646#1200120#Mobile] Encode heartbeat,buffer:8,length:4,value:1
+2025-02-12T03:31:03.359+0800 DEBUG [127.0.0.1:62646#1200120#Mobile] Connection traffic
+2025-02-12T03:31:03.359+0800 DEBUG [127.0.0.1:62646#1200120#Mobile] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-12T03:31:03.359+0800 DEBUG [127.0.0.1:62646#1200120#Mobile] Encode heartbeat,buffer:8,length:4,value:1
+2025-02-12T03:31:08.360+0800 DEBUG [127.0.0.1:62646#1200120#Mobile] Connection traffic
+2025-02-12T03:31:08.360+0800 DEBUG [127.0.0.1:62646#1200120#Mobile] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-12T03:31:08.360+0800 DEBUG [127.0.0.1:62646#1200120#Mobile] Encode heartbeat,buffer:8,length:4,value:1
+2025-02-12T03:31:13.359+0800 DEBUG [127.0.0.1:62646#1200120#Mobile] Connection traffic
+2025-02-12T03:31:13.359+0800 DEBUG [127.0.0.1:62646#1200120#Mobile] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-12T03:31:13.359+0800 DEBUG [127.0.0.1:62646#1200120#Mobile] Encode heartbeat,buffer:8,length:4,value:1
+2025-02-12T03:31:18.359+0800 DEBUG [127.0.0.1:62646#1200120#Mobile] Connection traffic
+2025-02-12T03:31:18.360+0800 DEBUG [127.0.0.1:62646#1200120#Mobile] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-12T03:31:18.360+0800 DEBUG [127.0.0.1:62646#1200120#Mobile] Encode heartbeat,buffer:8,length:4,value:1
+2025-02-12T03:31:23.358+0800 DEBUG [127.0.0.1:62646#1200120#Mobile] Connection traffic
+2025-02-12T03:31:23.358+0800 DEBUG [127.0.0.1:62646#1200120#Mobile] Decode heartbeat,buffer:0,length:4,value:12
+2025-02-12T03:31:23.358+0800 DEBUG [127.0.0.1:62646#1200120#Mobile] Encode heartbeat,buffer:8,length:4,value:1

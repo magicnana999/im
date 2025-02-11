@@ -30,14 +30,15 @@ message HeartbeatBody{
 }
 
 message CommandBody {
-  string cType = 1;
-  int32 code = 2;
-  string message = 3;
+  string id = 1;
+  string cType = 2;
+  int32 code = 3;
+  string message = 4;
   oneof request {
-    LoginRequest loginRequest = 4;
+    LoginRequest loginRequest = 5;
   }
   oneof reply {
-    LoginReply loginReply = 5;
+    LoginReply loginReply = 6;
   }
 }
 

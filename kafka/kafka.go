@@ -141,7 +141,7 @@ func InitProducer(brokers []string) *Producer {
 	}
 }
 
-func (p *Producer) sendMessageRoute(ctx context.Context, packet *pb.Packet) error {
+func (p *Producer) SendMessageRoute(ctx context.Context, packet *pb.Packet) error {
 
 	msg := packet.GetMessageBody()
 	bs, e := proto.Marshal(msg)

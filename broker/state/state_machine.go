@@ -33,8 +33,7 @@ const (
 )
 
 var (
-	m  map[string]*UserConnection
-	mu sync.RWMutex
+	m sync.Map
 )
 
 type BrokerInfo struct {
@@ -47,10 +46,6 @@ func NewBrokerInfo(addr string) BrokerInfo {
 		Addr:    addr,
 		StartAt: time.Now().Unix(),
 	}
-}
-
-func init() {
-	m = make(map[string]*UserConnection)
 }
 
 type UserConnection struct {
@@ -96,13 +91,12 @@ func (u *UserConnection) Label() string {
 }
 
 func (u *UserConnection) Store(ctx context.Context, appId string, userId int64, os enum.OSType) error {
-	mu.Lock()
-	defer mu.Unlock()
 	u.AppId = appId
 	u.UserId = userId
 	u.OS = os
 	u.IsLogin = true
-	m[u.Label()] = u
+
+	m.Store(u.Label(), u)
 
 	return StoreUserToRedis(ctx, u)
 }
@@ -112,14 +106,13 @@ func (u *UserConnection) Refresh(ctx context.Context) error {
 }
 
 func Load(ucLabel string) (*UserConnection, error) {
-	mu.RLock()
-	defer mu.RUnlock()
-	uc := m[ucLabel]
-	if uc == nil {
+
+	uc, ok := m.Load(ucLabel)
+	if uc == nil || !ok {
 		return nil, errors.UserNotLogin.Fill(ucLabel)
 	}
 
-	return uc, nil
+	return uc.(*UserConnection), nil
 
 }
 

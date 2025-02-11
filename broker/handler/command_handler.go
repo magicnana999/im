@@ -22,7 +22,7 @@ type CommandHandler struct {
 func (c *CommandHandler) HandlePacket(ctx context.Context, packet *pb.Packet) (*pb.Packet, error) {
 	reply, err := c.HandleCommand(ctx, packet.GetCommandBody())
 
-	return pb.NewCommandResponse(reply, err)
+	return packet.GetCommandBody().Response(reply, err).Wrap(), nil
 
 }
 

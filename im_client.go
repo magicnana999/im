@@ -68,10 +68,7 @@ func login(sender *sender, userSig string) {
 		PushDeviceId: id.GenerateXId(),
 	}
 
-	request, err := pb.NewCommandRequest(&loginRequest)
-	if err != nil {
-		panic(err)
-	}
+	request := pb.NewCommand(&loginRequest)
 
 	sender.send(request)
 }
@@ -182,7 +179,7 @@ func receiveCommand(ctx context.Context, packet *pb.Packet, s *sender) {
 }
 
 func receiveMessage(ctx context.Context, packet *pb.Packet, s *sender) {
-	s.send(packet.GetMessageBody().Reply().Wrap())
+	s.send(packet.GetMessageBody().Success(nil).Wrap())
 }
 
 func fibonacci(n int) int {
