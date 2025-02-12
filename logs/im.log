@@ -33307,3 +33307,9 @@
 2025-02-12T03:31:23.358+0800 DEBUG [127.0.0.1:62646#1200120#Mobile] Connection traffic
 2025-02-12T03:31:23.358+0800 DEBUG [127.0.0.1:62646#1200120#Mobile] Decode heartbeat,buffer:0,length:4,value:12
 2025-02-12T03:31:23.358+0800 DEBUG [127.0.0.1:62646#1200120#Mobile] Encode heartbeat,buffer:8,length:4,value:1
+2025-02-12T22:20:28.688+0800 DEBUG HeartbeatHandler init
+2025-02-12T22:20:28.689+0800 INFO BrokerOption:{"name":"172.20.10.2:7539","serverInterval":30000000000,"heartbeatInterval":30000000000}
+2025-02-12T22:20:28.689+0800 DEBUG default logging level is INFO
+2025-02-12T22:20:28.689+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-02-12T22:20:28.689+0800 INFO BrokerInstance started
+2025-02-12T22:20:28.756+0800 FATAL BrokerInstance start error: dial tcp :0: connect: can't assign requested address

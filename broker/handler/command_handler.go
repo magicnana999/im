@@ -17,6 +17,7 @@ var DefaultCommandHandler = &CommandHandler{}
 type CommandHandler struct {
 	conn          *grpc.ClientConn
 	userApiClient pb.UserApiClient
+	userState     *state.UserState
 }
 
 func (c *CommandHandler) HandlePacket(ctx context.Context, packet *pb.Packet) (*pb.Packet, error) {
@@ -37,6 +38,7 @@ func (c *CommandHandler) InitHandler() error {
 	}
 	c.conn = conn
 	c.userApiClient = pb.NewUserApiClient(conn)
+	c.userState = state.InitUserState()
 
 	return nil
 }
@@ -57,14 +59,14 @@ func (c *CommandHandler) HandleCommand(ctx context.Context, cmd *pb.CommandBody)
 			return nil, err
 		}
 
-		if err = uc.Store(ctx, rep.AppId, rep.UserId, enum.OSType(src.Os)); err != nil {
+		if err = c.userState.StoreUser(ctx, uc, rep.AppId, rep.UserId, enum.OSType(src.Os)); err != nil {
 			return nil, err
 		}
 
 		return rep, nil
 
 	default:
-		return nil, errors.HandleInvalidCType
+		return nil, errors.PacketProcessError
 	}
 }
 

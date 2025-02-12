@@ -2,62 +2,48 @@ package errors
 
 import (
 	"encoding/json"
-	"github.com/magicnana999/im/util/str"
+	"errors"
 )
 
 const (
-	brokerSetup = iota + 1101
-	brokerRefresh
-
-	connectionHeartbeatInit
-	connectionDecode
-	connectionEncode
+	decode = iota + 1101
+	encode
+	heartbeat
+	packetProcess
 )
 
 var (
-	BrokerSetupError   = New(brokerSetup, "broker setup error")
-	BrokerRefreshError = New(brokerRefresh, "broker refresh error")
-
-	ConnectionHeartbeatInitError = New(connectionHeartbeatInit, "connection heartbeat init error")
-	ConnectionDecodeError        = New(connectionDecode, "connection decode error")
-	ConnectionEncodeError        = New(connectionEncode, "connection encode error")
+	DecodeError        = New(decode, "decode failed")
+	EncodeError        = New(encode, "encode failed")
+	HeartbeatError     = New(heartbeat, "heartbeat failed")
+	PacketProcessError = New(packetProcess, "process packet failed")
 )
 
 const (
-	internal = iota + 1201
-	handlerNoSupport
-	UnmarshalPacket
-	invalidCType
-	grpcError
-	wrapRequest
-	wrapReply
+	stateStoreBroker = iota + 1151
+	stateStoreUser
+	stateGetCtx
+	stateGetUser
 )
 
 var (
-	HandleInternalError    = New(internal, "internal error")
-	HandlerNoSupportError  = New(handlerNoSupport, "no handler is support")
-	HandleUnmarshalError   = New(UnmarshalPacket, "unmarshal error")
-	HandleInvalidCType     = New(invalidCType, "invalid cType")
-	HandleGrpcError        = New(grpcError, "grpc error")
-	HandleWrapRequestError = New(wrapRequest, "wrap request error")
-	HandleWrapReplyError   = New(wrapReply, "wrap reply error")
+	BrokerStoreError = New(stateStoreBroker, "store broker failed")
+	UserStoreError   = New(stateStoreUser, "store user failed")
+	GetCtxError      = New(stateGetCtx, "get context failed")
+	GetUserError     = New(stateGetUser, "get user failed")
 )
 
 const (
-	ucNotExists = iota + 1501
-	ctxNotExists
-	userNotLogin
-	userStore
-	userRefresh
+	seqIncrError = iota + 1601
+	seqInitError
 )
 
 var (
-	UcNotExists      = New(ucNotExists, "no such user connection")
-	CtxNotExists     = New(ctxNotExists, "no such user context")
-	UserNotLogin     = New(userNotLogin, "user is not login")
-	UserStoreError   = New(userStore, "user store error")
-	UserRefreshError = New(userRefresh, "user refresh error")
+	SeqIncrError = New(seqIncrError, "increase sequence failed")
+	SeqInitError = New(seqInitError, "initialize sequence failed")
 )
+
+///////////////////////////////
 
 type Error struct {
 	Code    int    `json:"code"`
@@ -74,9 +60,17 @@ func (e Error) Error() string {
 	return string(js)
 }
 
-func (e Error) Fill(detail string) Error {
-	if str.IsNotBlank(detail) {
-		e.Details = detail
+func (e Error) DetailString(str string) Error {
+	e.Details = str
+	return e
+}
+
+func (e Error) Detail(err error) Error {
+	var ime Error
+	if errors.As(err, &ime) {
+		e.Details = ime.Details
+	} else {
+		e.Details = err.Error()
 	}
 	return e
 }

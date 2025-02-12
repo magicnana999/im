@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"github.com/magicnana999/im/broker/handler"
 	"github.com/magicnana999/im/broker/state"
+	"github.com/magicnana999/im/domain"
+	"github.com/magicnana999/im/enum"
 	"github.com/magicnana999/im/logger"
 	"github.com/panjf2000/gnet/v2"
 	"github.com/panjf2000/gnet/v2/pkg/logging"
@@ -29,7 +31,7 @@ type Option struct {
 type BrokerServer struct {
 	*gnet.BuiltinEventEngine
 	eng               gnet.Engine
-	name              string
+	addr              string
 	multicore         bool
 	async             bool
 	writev            bool
@@ -42,11 +44,13 @@ type BrokerServer struct {
 	ctx               context.Context
 	interval          time.Duration
 	heartbeatInterval time.Duration
+	brokerState       *state.BrokerState
+	userState         *state.UserState
 }
 
 func Start(ctx context.Context, option *Option) {
 	ts := &BrokerServer{
-		name:              option.Name,
+		addr:              option.Name,
 		multicore:         true,
 		async:             true,
 		writev:            true,
@@ -56,6 +60,8 @@ func Start(ctx context.Context, option *Option) {
 		ctx:               ctx,
 		interval:          option.ServerInterval,
 		heartbeatInterval: option.HeartbeatInterval,
+		userState:         state.DefaultUserState,
+		brokerState:       state.DefaultBrokerState,
 	}
 	err := gnet.Run(ts, fmt.Sprintf("tcp://0.0.0.0:%s", DefaultPort),
 		gnet.WithMulticore(true),
@@ -85,10 +91,10 @@ func (s *BrokerServer) OnBoot(eng gnet.Engine) (action gnet.Action) {
 
 	s.eng = eng
 
-	broker := state.NewBrokerInfo(s.name)
+	brokerInfo := domain.BrokerInfo{Addr: s.addr, StartAt: time.Now().UnixMilli()}
+	if _, e := s.brokerState.StoreBroker(s.ctx, brokerInfo); e != nil {
 
-	if _, err := state.SetupBroker(s.ctx, broker); err != nil {
-		logger.FatalF("BrokerInstance start error: %v", err)
+		logger.FatalF("BrokerInstance start error: %v", e)
 	}
 
 	return gnet.None
@@ -99,11 +105,19 @@ func (s *BrokerServer) OnShutdown(eng gnet.Engine) {
 }
 
 func (s *BrokerServer) OnOpen(c gnet.Conn) (out []byte, action gnet.Action) {
-	uc := state.OpenUserConnection(c)
-	subCtx := context.WithValue(context.Background(), state.CurrentUser, uc)
-	c.SetContext(subCtx)
+	uc := &domain.UserConnection{
+		Fd:          c.Fd(),
+		AppId:       "",
+		UserId:      0,
+		ClientAddr:  c.RemoteAddr().String(),
+		BrokerAddr:  c.LocalAddr().String(),
+		OS:          enum.OSType(0),
+		ConnectTime: time.Now().UnixMilli(),
+		C:           c,
+	}
 
-	//fmt.Printf("OnOpen - c: %p\n", c)
+	subCtx := context.WithValue(s.ctx, state.CurrentUser, uc)
+	c.SetContext(subCtx)
 
 	logger.InfoF("[%s#%s] Connection open", c.RemoteAddr().String(), uc.Label())
 
@@ -188,11 +202,11 @@ func (s *BrokerServer) OnTraffic(c gnet.Conn) (action gnet.Action) {
 
 func (s *BrokerServer) OnTick() (delay time.Duration, action gnet.Action) {
 
-	broker := state.BrokerInfo{
-		Addr:    s.name,
+	broker := domain.BrokerInfo{
+		Addr:    s.addr,
 		StartAt: time.Now().UnixMilli(),
 	}
-	_, err := state.RefreshBroker(s.ctx, broker)
+	_, err := s.brokerState.RefreshBroker(s.ctx, broker)
 	if err != nil {
 		logger.FatalF("BrokerInstance ticking error: %v", err)
 	}

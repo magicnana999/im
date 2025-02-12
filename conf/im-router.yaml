@@ -1,0 +1,17 @@
+mysql:
+    user: root
+    password: root1234
+    host: localhost
+    port: 3306
+    schema: im
+    charset: utf8mb4
+    parseTime: True
+    location: Asia%2FShanghai
+redis:
+    host: localhost
+    port: 6379
+    password:
+    db: 0
+kafka:
+    host: localhost
+    port: 9092

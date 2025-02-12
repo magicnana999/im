@@ -27,7 +27,7 @@ func (l LengthFieldBasedFrameCodec) Encode(c gnet.Conn, p *pb.Packet) (*bb.ByteB
 
 	user, err := state.CurrentUserFromConn(c)
 	if err != nil {
-		return nil, errors.ConnectionEncodeError.Fill("failed to get current user," + err.Error())
+		return nil, errors.EncodeError.Detail(err)
 	}
 
 	if p.IsHeartbeat() {
@@ -50,7 +50,7 @@ func (l LengthFieldBasedFrameCodec) Encode(c gnet.Conn, p *pb.Packet) (*bb.ByteB
 		bs, e := proto.Marshal(p)
 
 		if e != nil {
-			return nil, errors.ConnectionDecodeError.Fill("failed to marshal packet," + e.Error())
+			return nil, errors.EncodeError.Detail(e)
 		}
 
 		binary.Write(buffer, binary.BigEndian, int32(len(bs)))
@@ -73,7 +73,7 @@ func (l LengthFieldBasedFrameCodec) Decode(c gnet.Conn) ([]*pb.Packet, error) {
 
 	user, err := state.CurrentUserFromConn(c)
 	if err != nil {
-		return nil, errors.ConnectionDecodeError.Fill("failed to get current user," + err.Error())
+		return nil, errors.DecodeError.Detail(err)
 
 	}
 
@@ -104,16 +104,16 @@ func (l LengthFieldBasedFrameCodec) Decode(c gnet.Conn) ([]*pb.Packet, error) {
 			bs := make([]byte, int(length))
 			n, e := c.Read(bs)
 			if e != nil {
-				return nil, errors.ConnectionDecodeError.Fill("failed to read packet," + e.Error())
+				return nil, errors.DecodeError.Detail(e)
 			}
 
 			if n != int(length) {
-				return nil, errors.ConnectionDecodeError.Fill("failed to read packet," + e.Error())
+				return nil, errors.DecodeError.DetailString("failed to read packet")
 			}
 
 			var p pb.Packet
 			if e4 := proto.Unmarshal(bs, &p); e4 != nil {
-				return nil, errors.ConnectionDecodeError.Fill("failed to unmarshal packet," + e4.Error())
+				return nil, errors.DecodeError.Detail(e4)
 			}
 
 			logger.DebugF("[%s#%s] Decode packet,buffer:%d,length:%d,packet:%v",

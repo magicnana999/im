@@ -3,7 +3,7 @@ package storage
 import (
 	"context"
 	"encoding/json"
-	"github.com/magicnana999/im/common/entity"
+	"github.com/magicnana999/im/entity"
 	"github.com/magicnana999/im/redis"
 	"github.com/magicnana999/im/util/id"
 )

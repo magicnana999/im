@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"github.com/magicnana999/im/broker/state"
+	"github.com/magicnana999/im/domain"
 	"github.com/magicnana999/im/errors"
 	"github.com/magicnana999/im/logger"
 	"github.com/magicnana999/im/pb"
@@ -24,6 +25,7 @@ type HeartbeatHandler struct {
 	heartbeatPool *goPool.Pool
 	m             map[int]*HeartbeatTask
 	mu            sync.RWMutex
+	userState     *state.UserState
 }
 
 func (h *HeartbeatHandler) HandlePacket(ctx context.Context, packet *pb.Packet) (*pb.Packet, error) {
@@ -63,6 +65,7 @@ func (h *HeartbeatHandler) InitHandler() error {
 
 	DefaultHeartbeatHandler.heartbeatPool = defaultAntsPool
 	DefaultHeartbeatHandler.m = make(map[int]*HeartbeatTask)
+	DefaultHeartbeatHandler.userState = state.InitUserState()
 
 	logger.DebugF("HeartbeatHandler init")
 
@@ -73,7 +76,7 @@ func (h *HeartbeatHandler) Count() int {
 	return len(h.m)
 }
 
-func (h *HeartbeatHandler) StartTicker(ctx context.Context, c gnet.Conn, uc *state.UserConnection) error {
+func (h *HeartbeatHandler) StartTicker(ctx context.Context, c gnet.Conn, uc *domain.UserConnection) error {
 	ct, cancel := context.WithCancel(ctx)
 
 	task := &HeartbeatTask{
@@ -119,14 +122,14 @@ func (h *HeartbeatHandler) StartTicker(ctx context.Context, c gnet.Conn, uc *sta
 						heartbeatInterval.Milliseconds())
 					h.StopTicker(task.c)
 				} else {
-					task.uc.Refresh(task.ctx)
+					h.userState.RefreshUser(task.ctx, task.uc)
 				}
 			}
 		}
 	})
 
 	if err != nil {
-		return errors.ConnectionHeartbeatInitError.Fill(err.Error())
+		return errors.HeartbeatError.Detail(err)
 	}
 
 	logger.DebugF("[%s#%s] HeartbeatTask started", task.remoteAddr, task.uc.Label())
@@ -164,7 +167,7 @@ func (h *HeartbeatHandler) StopTicker(c gnet.Conn) error {
 	return nil
 }
 
-func (h *HeartbeatHandler) SetLastHeartbeat(c *state.UserConnection) {
+func (h *HeartbeatHandler) SetLastHeartbeat(c *domain.UserConnection) {
 	h.mu.RLock()
 	task, flag := h.m[c.Fd]
 	h.mu.RUnlock()
@@ -176,7 +179,7 @@ func (h *HeartbeatHandler) SetLastHeartbeat(c *state.UserConnection) {
 }
 
 type HeartbeatTask struct {
-	uc            *state.UserConnection
+	uc            *domain.UserConnection
 	fd            int
 	remoteAddr    string
 	lastHeartbeat int64

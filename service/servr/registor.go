@@ -2,8 +2,8 @@ package servr
 
 import (
 	"flag"
-	"github.com/magicnana999/im/common/pb"
 	"github.com/magicnana999/im/logger"
+	"github.com/magicnana999/im/pb"
 	"github.com/magicnana999/im/service/impl"
 	"google.golang.org/grpc"
 	"log"

@@ -3,7 +3,7 @@ package impl
 import (
 	"context"
 	"fmt"
-	"github.com/magicnana999/im/common/pb"
+	"github.com/magicnana999/im/pb"
 	"testing"
 )
 
