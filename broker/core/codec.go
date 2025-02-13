@@ -16,13 +16,13 @@ type Codec interface {
 	Decode(c gnet.Conn) ([]*pb.Packet, error)
 }
 
-var DefaultCodec = &LengthFieldBasedFrameCodec{}
+var defaultCodec = &LengthFieldBasedFrameCodec{}
 
 type LengthFieldBasedFrameCodec struct {
 }
 
 func InitCodec() Codec {
-	return DefaultCodec
+	return defaultCodec
 }
 
 func (l LengthFieldBasedFrameCodec) Encode(c gnet.Conn, p *pb.Packet) (*bb.ByteBuffer, error) {

@@ -11,7 +11,6 @@ import (
 	"github.com/panjf2000/gnet/v2"
 	"github.com/panjf2000/gnet/v2/pkg/logging"
 	bb "github.com/panjf2000/gnet/v2/pkg/pool/bytebuffer"
-
 	//bbPool "github.com/panjf2000/gnet/v2/pkg/pool/bytebuffer"
 	goPool "github.com/panjf2000/gnet/v2/pkg/pool/goroutine"
 
@@ -47,6 +46,7 @@ type BrokerServer struct {
 	handler           handler.PacketHandler
 	heartbeatHandler  *handler.HeartbeatHandler
 	brokerState       *state.BrokerState
+	codec             Codec
 }
 
 func Start(ctx context.Context, option *Option) {
@@ -64,6 +64,7 @@ func Start(ctx context.Context, option *Option) {
 		handler:           handler.InitHandler(),
 		brokerState:       state.InitBrokerState(),
 		heartbeatHandler:  handler.InitHeartbeatHandler(),
+		codec:             InitCodec(),
 	}
 	err := gnet.Run(ts, fmt.Sprintf("tcp://0.0.0.0:%s", DefaultPort),
 		gnet.WithMulticore(true),
@@ -123,9 +124,9 @@ func (s *BrokerServer) OnOpen(c gnet.Conn) (out []byte, action gnet.Action) {
 
 	logger.InfoF("[%s#%s] Connection open", c.RemoteAddr().String(), uc.Label())
 
-	if err := handler.DefaultHeartbeatHandler.StartTicker(subCtx, c, uc); err != nil {
+	if err := s.heartbeatHandler.StartTicker(subCtx, c, uc); err != nil {
 		logger.ErrorF("Connection open error: %v", err)
-		handler.DefaultHeartbeatHandler.StopTicker(c)
+		s.heartbeatHandler.StopTicker(c)
 	}
 	return nil, gnet.None
 }
@@ -137,7 +138,7 @@ func (s *BrokerServer) OnClose(c gnet.Conn, err error) (action gnet.Action) {
 		logger.ErrorF("Connection close error: %v", err)
 	}
 
-	handler.DefaultHeartbeatHandler.StopTicker(c)
+	s.heartbeatHandler.StopTicker(c)
 
 	logger.InfoF("[%s#%s] Connection close", c.RemoteAddr().String(), user.Label())
 	return
@@ -150,20 +151,20 @@ func (s *BrokerServer) OnTraffic(c gnet.Conn) (action gnet.Action) {
 	user, err := state.CurrentUserFromConn(c)
 	if err != nil {
 		logger.ErrorF("Connection traffic error: %v", err)
-		handler.DefaultHeartbeatHandler.StopTicker(c)
+		s.heartbeatHandler.StopTicker(c)
 		return gnet.None
 	}
 
 	logger.DebugF("[%s#%s] Connection traffic", c.RemoteAddr().String(), user.Label())
 
-	packets, e := DefaultCodec.Decode(c)
+	packets, e := s.codec.Decode(c)
 	if e != nil {
 
 		logger.ErrorF("[%s#%s] Connection traffic error:%v",
 			c.RemoteAddr().String(),
 			user.Label(),
 			e)
-		handler.DefaultHeartbeatHandler.StopTicker(c)
+		s.heartbeatHandler.StopTicker(c)
 		return gnet.None
 	}
 
@@ -172,7 +173,7 @@ func (s *BrokerServer) OnTraffic(c gnet.Conn) (action gnet.Action) {
 			response, err11 := s.handler.HandlePacket(ctx, packet)
 			if err11 != nil {
 				logger.ErrorF("[%s#%s] Connection traffic error:%v", c.RemoteAddr().String(), user.Label(), err11)
-				handler.DefaultHeartbeatHandler.StopTicker(c)
+				s.heartbeatHandler.StopTicker(c)
 				return gnet.None
 			}
 
@@ -180,17 +181,17 @@ func (s *BrokerServer) OnTraffic(c gnet.Conn) (action gnet.Action) {
 				continue
 			}
 
-			bs, err12 := DefaultCodec.Encode(c, response)
+			bs, err12 := s.codec.Encode(c, response)
 			if err12 != nil {
 				logger.ErrorF("[%s#%s] Connection traffic error:%v", c.RemoteAddr().String(), user.Label(), err12)
-				handler.DefaultHeartbeatHandler.StopTicker(c)
+				s.heartbeatHandler.StopTicker(c)
 				return gnet.None
 			}
 
 			c.AsyncWrite(bs.Bytes(), func(c gnet.Conn, err error) error {
 				if err != nil {
 					logging.Fatalf("[%s#%s] Connection traffic,write error:%v", c.RemoteAddr().String(), user.Label(), err)
-					handler.DefaultHeartbeatHandler.StopTicker(c)
+					s.heartbeatHandler.StopTicker(c)
 				}
 				return err
 			})
