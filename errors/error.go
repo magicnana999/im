@@ -8,15 +8,25 @@ import (
 const (
 	decode = iota + 1101
 	encode
+	noHandler
 	heartbeat
-	commandHandle
+	heartbeatTask
+	command
+	cmdUnknownType
+	msgMQProduce
+	msgDeliverTask
 )
 
 var (
-	DecodeError        = New(decode, "decode failed")
-	EncodeError        = New(encode, "encode failed")
-	HeartbeatError     = New(heartbeat, "heartbeat failed")
-	CommandHandleError = New(commandHandle, "command failed")
+	DecodeError         = New(decode, "decode failed")
+	EncodeError         = New(encode, "encode failed")
+	NoHandlerSupport    = New(noHandler, "no handler support")
+	HeartbeatError      = New(heartbeat, "heartbeat failed")
+	HeartbeatTaskError  = New(heartbeatTask, "heartbeatTask failed")
+	CommandHandleError  = New(command, "command failed")
+	CmdUnknownTypeError = New(cmdUnknownType, "unknown command type")
+	MsgMQProduceError   = New(msgMQProduce, "message produce failed")
+	MsgDeliverTaskError = New(msgDeliverTask, "message deliver task failed")
 )
 
 const (

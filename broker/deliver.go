@@ -2,7 +2,9 @@ package broker
 
 import (
 	"context"
+	"github.com/magicnana999/im/conf"
 	"github.com/magicnana999/im/domain"
+	"github.com/magicnana999/im/kafka"
 	"github.com/magicnana999/im/logger"
 	"github.com/magicnana999/im/pb"
 	"github.com/panjf2000/ants/v2"
@@ -34,7 +36,8 @@ type deliver struct {
 	m                sync.Map
 	codec            codec
 	heartbeatHandler *heartbeatHandler
-	deliverFailed    func(packet *pb.Packet)
+	deliverFailed    func(delivery *delivery)
+	mqProducer       *kafka.Producer
 }
 
 func initDeliver(ctx context.Context, codec codec) *deliver {
@@ -56,6 +59,16 @@ func initDeliver(ctx context.Context, codec codec) *deliver {
 	defaultDeliver.heartbeatHandler = initHeartbeatHandler()
 	defaultDeliver.codec = codec
 	defaultDeliver.executor = pool
+	defaultDeliver.mqProducer = kafka.InitProducer([]string{conf.Global.Kafka.String()})
+	defaultDeliver.deliverFailed = func(delivery *delivery) {
+		eee := defaultDeliver.mqProducer.SendOffline(ctx, delivery.packet.GetMessageBody(), 1)
+		if eee != nil {
+			logger.ErrorF("[%s#%s] deliver task creation error:%v", delivery.uc.ClientAddr, delivery.uc.Label(), err)
+
+			defaultInstance.eng.Stop(defaultInstance.ctx)
+
+		}
+	}
 
 	return defaultDeliver
 }
@@ -76,7 +89,6 @@ func (s *deliver) stopPacketRetry(id string) {
 		t := task.(*deliverTask)
 		t.cancel()
 		s.m.Delete(id)
-		logger.DebugF("deliver stop retry task id: %s,label:%s", id, t.delivery.uc.Label())
 	}
 }
 
@@ -86,17 +98,17 @@ func (s *deliver) start() {
 		case <-s.ctx.Done():
 			s.stopAll()
 			return
-		case delivery, ok := <-s.delivery:
+		case d, ok := <-s.delivery:
 			if !ok {
 				continue
 			}
 
-			switch delivery.packet.Type {
+			switch d.packet.Type {
 			case pb.TypeMessage:
-				if delivery.packet.IsResponse() {
-					s.stopPacketRetry(delivery.packet.GetMessageBody().GetId())
+				if d.packet.IsResponse() {
+					s.stopPacketRetry(d.packet.GetMessageBody().GetId())
 				} else {
-					s.sendMessage(delivery)
+					s.sendMessage(d)
 				}
 			}
 		}
@@ -104,7 +116,11 @@ func (s *deliver) start() {
 }
 
 func (s *deliver) sendMessage(delivery *delivery) {
-	_, exist := s.m.Load(delivery.packet.GetMessageBody().GetId())
+
+	uc := delivery.uc
+	packet := delivery.packet
+
+	_, exist := s.m.Load(packet.GetMessageBody().GetId())
 
 	if exist {
 		return
@@ -112,18 +128,22 @@ func (s *deliver) sendMessage(delivery *delivery) {
 
 	subCtx, cancel := context.WithCancel(s.ctx)
 
-	task := &deliverTask{id: delivery.packet.GetMessageBody().GetId()}
+	task := &deliverTask{id: packet.GetMessageBody().GetId()}
 	_, loaded := s.m.LoadOrStore(task.id, task)
 	if loaded {
 		task = nil
 		return
 	}
 
+	s.write(uc.C, packet, uc)
+	logger.InfoF("[%s#%s] deliver,id:%s",
+		uc.ClientAddr, uc.Label(), packet.GetMessageBody().GetId())
+
 	task.ctx = subCtx
 	task.cancel = cancel
-	task.interval = 1
+	task.interval = 2
 	task.delivery = delivery
-	task.ticker = time.NewTicker(time.Duration(1) * time.Second)
+	task.ticker = time.NewTicker(time.Duration(task.interval) * time.Second)
 	task.codec = s.codec
 	task.conn = delivery.uc.C
 
@@ -136,18 +156,21 @@ func (s *deliver) sendMessage(delivery *delivery) {
 			case <-task.ticker.C:
 
 				if !s.heartbeatHandler.isRunning(task.conn.Fd()) {
-					s.deliverFailed(task.delivery.packet)
-					s.stopPacketRetry(delivery.packet.GetMessageBody().GetId())
+					s.deliverFailed(task.delivery)
+					s.stopPacketRetry(packet.GetMessageBody().GetId())
 				}
 
 				next := exponentialBackoff(task.interval)
 				if next >= 8 {
-					s.deliverFailed(task.delivery.packet)
-					s.stopPacketRetry(delivery.packet.GetMessageBody().GetId())
+					s.deliverFailed(task.delivery)
+					s.stopPacketRetry(packet.GetMessageBody().GetId())
 					return
 
 				}
-				s.write(task.conn, delivery.packet, delivery.uc)
+				s.write(task.conn, packet, uc)
+				logger.InfoF("[%s#%s] deliver retry,id:%s",
+					uc.ClientAddr, uc.Label(), packet.GetMessageBody().GetId())
+
 				task.interval = next
 				task.ticker.Reset(time.Duration(next) * time.Second)
 			}
@@ -155,16 +178,19 @@ func (s *deliver) sendMessage(delivery *delivery) {
 	})
 
 	if err != nil {
-
+		logger.ErrorF("[%s#%s] deliver task creation error:%v", uc.ClientAddr, uc.Label(), err)
+		defaultInstance.eng.Stop(defaultInstance.ctx)
 	}
 }
 
-func (s *deliver) write(conn gnet.Conn, packet *pb.Packet, uc *domain.UserConnection) (int, error) {
+func (s *deliver) write(conn gnet.Conn, packet *pb.Packet, uc *domain.UserConnection) {
 
 	buffer, err := s.codec.encode(conn, packet)
 	defer bb.Put(buffer)
 
 	if err != nil {
+
+		logger.ErrorF("[%s#%s] deliver encode error:%v", uc.ClientAddr, uc.Label())
 		s.stopPacketRetry(packet.GetMessageBody().Id)
 		s.heartbeatHandler.stopTicker(conn)
 	}
@@ -174,14 +200,17 @@ func (s *deliver) write(conn gnet.Conn, packet *pb.Packet, uc *domain.UserConnec
 	for sent < total {
 		n, err := conn.Write(buffer.Bytes()[sent:])
 		if err != nil {
-			return 0, err
+			logger.ErrorF("[%s#%s] deliver write error:%v", uc.ClientAddr, uc.Label())
+			s.stopPacketRetry(packet.GetMessageBody().Id)
+			s.heartbeatHandler.stopTicker(conn)
 		}
 		sent += n
 	}
+}
 
-	logger.DebugF("deliver retry id:%s,label:%s", packet.GetMessageBody().Id, uc.Label())
-
-	return total, nil
+func (s *deliver) ack(d *delivery) error {
+	s.send(d)
+	return nil
 }
 
 func exponentialBackoff(retryCount int) int {

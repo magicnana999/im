@@ -25,6 +25,8 @@ type Option struct {
 	HeartbeatInterval time.Duration `json:"heartbeatInterval"`
 }
 
+var defaultInstance *Instance
+
 type Instance struct {
 	*gnet.BuiltinEventEngine
 	eng               gnet.Engine
@@ -62,12 +64,15 @@ func Start(ctx context.Context, cancel context.CancelFunc, option *Option) {
 		cancel:            cancel,
 		interval:          option.ServerInterval,
 		heartbeatInterval: option.HeartbeatInterval,
-		handler:           InitHandler(),
+		handler:           initHandler(),
 		brokerState:       initBrokerState(),
 		heartbeatHandler:  initHeartbeatHandler(),
 		codec:             initCodec(),
 		deliver:           initDeliver(ctx, initCodec()),
 	}
+
+	defaultInstance = ts
+
 	err := gnet.Run(ts, fmt.Sprintf("tcp://0.0.0.0:%s", DefaultPort),
 		gnet.WithMulticore(true),
 		gnet.WithLockOSThread(true),

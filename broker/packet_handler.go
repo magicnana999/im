@@ -5,6 +5,7 @@ import (
 	"github.com/magicnana999/im/errors"
 	"github.com/magicnana999/im/logger"
 	"github.com/magicnana999/im/pb"
+	"strconv"
 	"sync"
 )
 
@@ -27,7 +28,7 @@ func (p *packetHandlerImpl) handlePacket(ctx context.Context, packet *pb.Packet)
 			return handler.handlePacket(ctx, packet)
 		}
 	}
-	return nil, errors.PacketProcessError
+	return nil, errors.NoHandlerSupport.DetailString("type:" + strconv.Itoa(int(packet.Type)))
 }
 
 func (p *packetHandlerImpl) isSupport(ctx context.Context, packetType int32) bool {
@@ -45,7 +46,7 @@ func (p *packetHandlerImpl) HeartbeatHandler() *heartbeatHandler {
 	return defaultHeartbeatHandler
 }
 
-func InitHandler() *packetHandlerImpl {
+func initHandler() *packetHandlerImpl {
 
 	handlerMu.Lock()
 	defer handlerMu.Unlock()
@@ -55,7 +56,7 @@ func InitHandler() *packetHandlerImpl {
 	}
 	defaultHandler.handlers = append(defaultHandler.handlers, initHeartbeatHandler())
 	defaultHandler.handlers = append(defaultHandler.handlers, initCommandHandler())
-	defaultHandler.handlers = append(defaultHandler.handlers, InitMessageHandler())
+	defaultHandler.handlers = append(defaultHandler.handlers, initMessageHandler())
 
 	return defaultHandler
 }

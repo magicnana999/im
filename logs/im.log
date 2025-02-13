@@ -1,0 +1,41 @@
+2025-02-14T03:43:00.963+0800 INFO BrokerOption:{"name":"172.20.10.2:7539","serverInterval":30000000000,"heartbeatInterval":30000000000}
+2025-02-14T03:43:00.964+0800 DEBUG heartbeatHandler init
+2025-02-14T03:43:00.964+0800 DEBUG commandHandler init
+2025-02-14T03:43:00.964+0800 INFO 1 init producer
+2025-02-14T03:43:00.964+0800 DEBUG messageReceiver init
+2025-02-14T03:43:00.964+0800 DEBUG messageHandler init
+2025-02-14T03:43:00.964+0800 INFO 1 init producer
+2025-02-14T03:43:00.964+0800 DEBUG default logging level is INFO
+2025-02-14T03:43:00.964+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-02-14T03:43:00.964+0800 INFO BrokerInstance started
+2025-02-14T03:43:01.032+0800 FATAL failed to store broker info: dial tcp :0: connect: can't assign requested address
+2025-02-14T03:47:37.527+0800 INFO BrokerOption:{"name":"172.20.10.2:7539","serverInterval":30000000000,"heartbeatInterval":30000000000}
+2025-02-14T03:47:37.528+0800 DEBUG heartbeatHandler init
+2025-02-14T03:47:37.528+0800 DEBUG commandHandler init
+2025-02-14T03:47:37.528+0800 INFO 1 init producer
+2025-02-14T03:47:37.528+0800 DEBUG messageReceiver init
+2025-02-14T03:47:37.528+0800 DEBUG messageHandler init
+2025-02-14T03:47:37.528+0800 DEBUG default logging level is INFO
+2025-02-14T03:47:37.528+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-02-14T03:47:37.528+0800 INFO BrokerInstance started
+2025-02-14T03:47:37.596+0800 FATAL failed to store broker info: dial tcp :0: connect: can't assign requested address
+2025-02-14T03:48:43.733+0800 INFO BrokerOption:{"name":"172.20.10.2:7539","serverInterval":30000000000,"heartbeatInterval":30000000000}
+2025-02-14T03:48:43.733+0800 DEBUG heartbeatHandler init
+2025-02-14T03:48:43.733+0800 DEBUG commandHandler init
+2025-02-14T03:48:43.733+0800 INFO 1 init producer
+2025-02-14T03:48:43.733+0800 DEBUG messageReceiver init
+2025-02-14T03:48:43.733+0800 DEBUG messageHandler init
+2025-02-14T03:48:43.733+0800 DEBUG default logging level is INFO
+2025-02-14T03:48:43.734+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-02-14T03:48:43.734+0800 INFO BrokerInstance started
+2025-02-14T03:48:43.801+0800 FATAL failed to store broker info: dial tcp :0: connect: can't assign requested address
+2025-02-14T03:49:21.357+0800 INFO BrokerOption:{"name":"172.20.10.2:7539","serverInterval":30000000000,"heartbeatInterval":30000000000}
+2025-02-14T03:49:21.358+0800 DEBUG heartbeatHandler init
+2025-02-14T03:49:21.358+0800 DEBUG commandHandler init
+2025-02-14T03:49:21.358+0800 INFO 1 init producer
+2025-02-14T03:49:21.358+0800 DEBUG messageReceiver init
+2025-02-14T03:49:21.358+0800 DEBUG messageHandler init
+2025-02-14T03:49:21.358+0800 DEBUG default logging level is INFO
+2025-02-14T03:49:21.358+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-02-14T03:49:21.358+0800 INFO BrokerInstance started
+2025-02-14T03:49:27.652+0800 FATAL failed to store broker info: dial tcp :0: connect: can't assign requested address

@@ -25,20 +25,6 @@ type heartbeatHandler struct {
 	m             sync.Map
 }
 
-func (h *heartbeatHandler) handlePacket(ctx context.Context, packet *pb.Packet) (*pb.Packet, error) {
-	uc, err := currentUserFromCtx(ctx)
-	if err != nil {
-		return nil, err
-	}
-	h.setLastHeartbeat(uc)
-
-	return pb.NewHeartbeat(int32(1)), nil
-}
-
-func (h *heartbeatHandler) isSupport(ctx context.Context, packetType int32) bool {
-	return packetType == pb.TypeHeartbeat
-}
-
 func initHeartbeatHandler() *heartbeatHandler {
 
 	heartbeatMu.Lock()
@@ -80,6 +66,20 @@ func initHeartbeatHandler() *heartbeatHandler {
 	return defaultHeartbeatHandler
 }
 
+func (h *heartbeatHandler) handlePacket(ctx context.Context, packet *pb.Packet) (*pb.Packet, error) {
+	uc, err := currentUserFromCtx(ctx)
+	if err != nil {
+		return nil, errors.HeartbeatError.Detail(err)
+	}
+	h.setLastHeartbeat(uc)
+
+	return pb.NewHeartbeat(int32(1)), nil
+}
+
+func (h *heartbeatHandler) isSupport(ctx context.Context, packetType int32) bool {
+	return packetType == pb.TypeHeartbeat
+}
+
 func (h *heartbeatHandler) startTicker(ctx context.Context, c gnet.Conn, uc *domain.UserConnection) error {
 
 	task := &heartbeatTask{fd: c.Fd()}
@@ -87,9 +87,7 @@ func (h *heartbeatHandler) startTicker(ctx context.Context, c gnet.Conn, uc *dom
 	_, exist := h.m.LoadOrStore(task.fd, task)
 	if exist {
 		task = nil
-		logger.WarnF("heartbeat deliverTask already exist,skipping deliverTask creation, fd:%d,remote:%s",
-			c.Fd(),
-			c.RemoteAddr().String())
+		logger.WarnF("[%s#%s] heartbeatTask exist,skipping", task.remoteAddr, task.uc.Label())
 		return nil
 	}
 
@@ -111,7 +109,6 @@ func (h *heartbeatHandler) startTicker(ctx context.Context, c gnet.Conn, uc *dom
 		for {
 			select {
 			case <-ct.Done():
-
 				logger.InfoF("[%s#%s] heartbeatTask done",
 					task.remoteAddr,
 					task.uc.Label())
@@ -145,7 +142,7 @@ func (h *heartbeatHandler) startTicker(ctx context.Context, c gnet.Conn, uc *dom
 		errorMap["heartbeatPoolFree"] = h.heartbeatPool.Free()
 		errorMap["error"] = err.Error()
 
-		return errors.HeartbeatError.DetailJson(errorMap)
+		return errors.HeartbeatTaskError.DetailJson(errorMap)
 	}
 
 	logger.DebugF("[%s#%s] heartbeatTask started", task.remoteAddr, task.uc.Label())

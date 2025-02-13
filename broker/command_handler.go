@@ -22,17 +22,6 @@ type commandHandler struct {
 	userState     *userState
 }
 
-func (c *commandHandler) handlePacket(ctx context.Context, packet *pb.Packet) (*pb.Packet, error) {
-	reply, err := c.handleCommand(ctx, packet.GetCommandBody())
-
-	return packet.GetCommandBody().Response(reply, err).Wrap(), nil
-
-}
-
-func (c *commandHandler) isSupport(ctx context.Context, packetType int32) bool {
-	return pb.TypeCommand == packetType
-}
-
 func initCommandHandler() *commandHandler {
 
 	commandHandlerMu.Lock()
@@ -54,14 +43,27 @@ func initCommandHandler() *commandHandler {
 	defaultCommandHandler.userApiClient = pb.NewUserApiClient(conn)
 	defaultCommandHandler.userState = initUserState()
 
+	logger.DebugF("commandHandler init")
+
 	return defaultCommandHandler
+}
+
+func (c *commandHandler) handlePacket(ctx context.Context, packet *pb.Packet) (*pb.Packet, error) {
+	reply, err := c.handleCommand(ctx, packet.GetCommandBody())
+
+	return packet.GetCommandBody().Response(reply, err).Wrap(), nil
+
+}
+
+func (c *commandHandler) isSupport(ctx context.Context, packetType int32) bool {
+	return pb.TypeCommand == packetType
 }
 
 func (c *commandHandler) handleCommand(ctx context.Context, cmd *pb.CommandBody) (proto.Message, error) {
 
 	uc, e := currentUserFromCtx(ctx)
 	if e != nil {
-		return nil, e
+		return nil, errors.CommandHandleError.Detail(e)
 	}
 
 	switch cmd.CType {
@@ -80,7 +82,7 @@ func (c *commandHandler) handleCommand(ctx context.Context, cmd *pb.CommandBody)
 		return rep, nil
 
 	default:
-		return nil, errors.CommandHandleError
+		return nil, errors.CmdUnknownTypeError.DetailString("unknown type:" + cmd.CType)
 	}
 }
 

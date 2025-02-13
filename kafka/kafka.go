@@ -4,8 +4,6 @@ import (
 	"context"
 	"github.com/magicnana999/im/logger"
 	"github.com/magicnana999/im/pb"
-	"github.com/panjf2000/ants/v2"
-	goPool "github.com/panjf2000/gnet/v2/pkg/pool/goroutine"
 	"github.com/segmentio/kafka-go"
 	"github.com/timandy/routine"
 	"google.golang.org/protobuf/proto"
@@ -14,8 +12,7 @@ import (
 )
 
 var (
-	executor *goPool.Pool
-	lock     sync.RWMutex
+	lock sync.RWMutex
 )
 
 type MQMessageHandler interface {
@@ -28,8 +25,17 @@ type Consumer struct {
 	handle    MQMessageHandler
 }
 
-type Producer struct {
-	writer *kafka.Writer
+func InitConsumer(brokers []string, topic TopicInfo, handle MQMessageHandler) *Consumer {
+
+	c := &Consumer{
+		topicInfo: topic,
+		handle:    handle,
+		brokers:   brokers,
+	}
+
+	logger.InfoF("%d init consumer", routine.Goid())
+
+	return c
 }
 
 func (c *Consumer) Start(ctx context.Context) error {
@@ -76,36 +82,21 @@ func handleMessageRoute(ctx context.Context, h MQMessageHandler, m *kafka.Messag
 	return h.Consume(ctx, &msg)
 }
 
-func initExecutor(maxWorkers int) *goPool.Pool {
+type Producer struct {
+	writer *kafka.Writer
+}
+
+var defaultProducer *Producer
+
+func InitProducer(brokers []string) *Producer {
 
 	lock.Lock()
 	defer lock.Unlock()
 
-	if executor != nil {
-		return executor
+	if defaultProducer != nil {
+		return defaultProducer
 	}
 
-	executor, _ = ants.NewPool(maxWorkers)
-
-	logger.InfoF("%d init executor,max:%d", routine.Goid(), maxWorkers)
-
-	return executor
-}
-
-func InitConsumer(brokers []string, topic TopicInfo, handle MQMessageHandler) *Consumer {
-
-	c := &Consumer{
-		topicInfo: topic,
-		handle:    handle,
-		brokers:   brokers,
-	}
-
-	logger.InfoF("%d init consumer", routine.Goid())
-
-	return c
-}
-
-func InitProducer(brokers []string) *Producer {
 	writer := &kafka.Writer{
 		Addr: kafka.TCP(brokers...), //TCP函数参数为不定长参数，可以传多个地址组成集群
 		//Topic:                  TopicRoute.Topic,
@@ -128,11 +119,12 @@ func InitProducer(brokers []string) *Producer {
 		AllowAutoTopicCreation: false, // 第一次发消息的时候，如果topic不存在，就自动创建topic，工作中禁止使用
 	}
 
-	logger.InfoF("%d init producer", routine.Goid())
-
-	return &Producer{
+	defaultProducer = &Producer{
 		writer: writer,
 	}
+
+	logger.InfoF("%d init producer", routine.Goid())
+	return defaultProducer
 }
 
 func (p *Producer) send(ctx context.Context, topic string, m *pb.MessageBody, count int32) error {
