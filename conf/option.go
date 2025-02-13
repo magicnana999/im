@@ -70,7 +70,9 @@ func (k Kafka) String() string {
 }
 
 type Broker struct {
-	HeartbeatInterval int `yaml:"heartbeatInterval"`
+	Addr              string `yaml:"addr"`
+	ServerInterval    int    `yaml:"serverInterval"`
+	HeartbeatInterval int    `yaml:"heartbeatInterval"`
 }
 
 type Grpc struct {

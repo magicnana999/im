@@ -2,7 +2,7 @@ package broker
 
 import (
 	"context"
-	"fmt"
+	"github.com/magicnana999/im/conf"
 	"github.com/magicnana999/im/domain"
 	"github.com/magicnana999/im/enum"
 	"github.com/magicnana999/im/logger"
@@ -15,65 +15,59 @@ import (
 	"time"
 )
 
-const (
-	DefaultPort = "7539"
-)
-
-type Option struct {
-	Name              string        `json:"name"`
-	ServerInterval    time.Duration `json:"serverInterval"`
-	HeartbeatInterval time.Duration `json:"heartbeatInterval"`
-}
-
 var defaultInstance *Instance
 
 type Instance struct {
 	*gnet.BuiltinEventEngine
-	eng               gnet.Engine
-	addr              string
-	multicore         bool
-	async             bool
-	writev            bool
-	nclients          int
-	started           int32
-	connected         int32
-	connectionActive  int32
-	workerPool        *goPool.Pool
-	heartbeatPool     *goPool.Pool
-	ctx               context.Context
-	cancel            context.CancelFunc
-	interval          time.Duration
-	heartbeatInterval time.Duration
-	handler           packetHandler
-	heartbeatHandler  *heartbeatHandler
-	brokerState       *brokerState
-	codec             codec
-	deliver           *deliver
+	eng              gnet.Engine
+	addr             string
+	multicore        bool
+	async            bool
+	writev           bool
+	nclients         int
+	started          int32
+	connected        int32
+	connectionActive int32
+	workerPool       *goPool.Pool
+	heartbeatPool    *goPool.Pool
+	ctx              context.Context
+	cancel           context.CancelFunc
+	interval         int
+	handler          packetHandler
+	heartbeatHandler *heartbeatHandler
+	brokerState      *brokerState
+	codec            codec
+	deliver          *deliver
 }
 
-func Start(ctx context.Context, cancel context.CancelFunc, option *Option) {
+func Start(ctx context.Context, cancel context.CancelFunc) {
+
+	i := conf.Global.Broker.ServerInterval
+	if i <= 0 {
+		i = 30
+	}
+
 	ts := &Instance{
-		addr:              option.Name,
-		multicore:         true,
-		async:             true,
-		writev:            true,
-		nclients:          2,
-		workerPool:        goPool.Default(),
-		heartbeatPool:     goPool.Default(),
-		ctx:               ctx,
-		cancel:            cancel,
-		interval:          option.ServerInterval,
-		heartbeatInterval: option.HeartbeatInterval,
-		handler:           initHandler(),
-		brokerState:       initBrokerState(),
-		heartbeatHandler:  initHeartbeatHandler(),
-		codec:             initCodec(),
-		deliver:           initDeliver(ctx, initCodec()),
+		addr:             conf.Global.Broker.Addr,
+		multicore:        true,
+		async:            true,
+		writev:           true,
+		nclients:         2,
+		workerPool:       goPool.Default(),
+		heartbeatPool:    goPool.Default(),
+		ctx:              ctx,
+		cancel:           cancel,
+		interval:         i,
+		handler:          initHandler(),
+		brokerState:      initBrokerState(),
+		heartbeatHandler: initHeartbeatHandler(),
+		codec:            initCodec(),
+		deliver:          initDeliver(ctx, initCodec()),
 	}
 
 	defaultInstance = ts
 
-	err := gnet.Run(ts, fmt.Sprintf("tcp://0.0.0.0:%s", DefaultPort),
+	err := gnet.Run(ts, ts.addr,
 		gnet.WithMulticore(true),
 		gnet.WithLockOSThread(true),
 		gnet.WithReadBufferCap(4096),
@@ -143,14 +137,7 @@ func (s *Instance) OnOpen(c gnet.Conn) (out []byte, action gnet.Action) {
 
 func (s *Instance) OnClose(c gnet.Conn, err error) (action gnet.Action) {
 
-	user, err := currentUserFromConn(c)
-	if err != nil {
-		logger.ErrorF("Connection stopPacketRetry error: %v", err)
-	}
-
 	s.heartbeatHandler.stopTicker(c)
-
-	logger.InfoF("[%s#%s] Connection stopPacketRetry", c.RemoteAddr().String(), user.Label())
 	return
 }
 
@@ -224,5 +211,5 @@ func (s *Instance) OnTick() (delay time.Duration, action gnet.Action) {
 		logger.FatalF("BrokerInstance ticking error: %v", err)
 	}
 
-	return s.interval, gnet.None
+	return time.Duration(s.interval) * time.Second, gnet.None
 }

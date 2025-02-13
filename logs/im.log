@@ -39,3 +39,191 @@
 2025-02-14T03:49:21.358+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
 2025-02-14T03:49:21.358+0800 INFO BrokerInstance started
 2025-02-14T03:49:27.652+0800 FATAL failed to store broker info: dial tcp :0: connect: can't assign requested address
+2025-02-14T03:50:23.095+0800 INFO BrokerOption:{"name":"172.20.10.2:7539","serverInterval":30000000000,"heartbeatInterval":30000000000}
+2025-02-14T03:50:23.095+0800 DEBUG heartbeatHandler init
+2025-02-14T03:50:23.095+0800 DEBUG commandHandler init
+2025-02-14T03:50:23.095+0800 INFO 1 init producer
+2025-02-14T03:50:23.095+0800 DEBUG messageReceiver init
+2025-02-14T03:50:23.095+0800 DEBUG messageHandler init
+2025-02-14T03:50:23.095+0800 DEBUG default logging level is INFO
+2025-02-14T03:50:23.095+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-02-14T03:50:23.095+0800 INFO BrokerInstance started
+2025-02-14T03:50:23.163+0800 FATAL failed to store broker info: dial tcp :0: connect: can't assign requested address
+2025-02-14T03:52:21.459+0800 INFO BrokerOption:{"name":"172.20.10.2:7539","serverInterval":30000000000,"heartbeatInterval":30000000000}
+2025-02-14T03:52:21.460+0800 DEBUG heartbeatHandler init
+2025-02-14T03:52:21.460+0800 DEBUG commandHandler init
+2025-02-14T03:52:21.460+0800 INFO 1 init producer
+2025-02-14T03:52:21.460+0800 DEBUG messageReceiver init
+2025-02-14T03:52:21.460+0800 DEBUG messageHandler init
+2025-02-14T03:52:21.460+0800 DEBUG default logging level is INFO
+2025-02-14T03:52:21.460+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-02-14T03:52:21.460+0800 INFO BrokerInstance started
+2025-02-14T03:52:32.126+0800 INFO [127.0.0.1:62813#] Connection open
+2025-02-14T03:52:32.127+0800 DEBUG [127.0.0.1:62813#] heartbeatTask started
+2025-02-14T03:53:02.128+0800 ERROR [127.0.0.1:62813#] heartbeatTask timeout,now:2025-02-14 03:53:02.532,last:2025-02-14 03:52:32.5232,interval:30000(ms)
+2025-02-14T03:53:02.129+0800 INFO [127.0.0.1:62813#] heartbeatTask closed
+2025-02-14T03:53:02.129+0800 INFO [127.0.0.1:62813#] heartbeatTask done
+2025-02-14T03:53:02.129+0800 INFO [127.0.0.1:62813#] Connection stopPacketRetry
+2025-02-14T03:54:26.195+0800 INFO BrokerOption:{"name":"172.20.10.2:7539","serverInterval":30000000000,"heartbeatInterval":30000000000}
+2025-02-14T03:54:26.196+0800 DEBUG heartbeatHandler init
+2025-02-14T03:54:26.196+0800 DEBUG commandHandler init
+2025-02-14T03:54:26.196+0800 INFO 1 init producer
+2025-02-14T03:54:26.196+0800 DEBUG messageReceiver init
+2025-02-14T03:54:26.196+0800 DEBUG messageHandler init
+2025-02-14T03:54:26.196+0800 DEBUG default logging level is INFO
+2025-02-14T03:54:26.197+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-02-14T03:54:26.197+0800 INFO BrokerInstance started
+2025-02-14T03:54:30.510+0800 INFO [127.0.0.1:62908#] Connection open
+2025-02-14T03:54:30.510+0800 DEBUG [127.0.0.1:62908#] heartbeatTask started
+2025-02-14T03:55:00.512+0800 ERROR [127.0.0.1:62908#] heartbeatTask timeout,now:2025-02-14 03:55:00.550,last:2025-02-14 03:54:30.5430,interval:30000(ms)
+2025-02-14T03:55:00.514+0800 INFO [127.0.0.1:62908#] heartbeatTask closed
+2025-02-14T03:55:00.514+0800 INFO [127.0.0.1:62908#] heartbeatTask done
+2025-02-14T04:28:07.406+0800 DEBUG heartbeatHandler init
+2025-02-14T04:28:07.407+0800 DEBUG commandHandler init
+2025-02-14T04:28:07.407+0800 INFO 1 init producer
+2025-02-14T04:28:07.407+0800 DEBUG messageReceiver init
+2025-02-14T04:28:07.407+0800 DEBUG messageHandler init
+2025-02-14T04:28:07.407+0800 DEBUG default logging level is INFO
+2025-02-14T04:28:07.407+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-02-14T04:28:07.407+0800 INFO BrokerInstance started
+2025-02-14T04:28:37.116+0800 DEBUG heartbeatHandler init
+2025-02-14T04:28:37.116+0800 DEBUG commandHandler init
+2025-02-14T04:28:37.116+0800 INFO 1 init producer
+2025-02-14T04:28:37.116+0800 DEBUG messageReceiver init
+2025-02-14T04:28:37.117+0800 DEBUG messageHandler init
+2025-02-14T04:28:37.117+0800 DEBUG default logging level is INFO
+2025-02-14T04:28:37.117+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-02-14T04:28:37.117+0800 INFO BrokerInstance started
+2025-02-14T04:29:18.930+0800 INFO [127.0.0.1:64128#] Connection open
+2025-02-14T04:29:18.930+0800 DEBUG [127.0.0.1:64128#] heartbeatTask started
+2025-02-14T04:29:18.930+0800 DEBUG [127.0.0.1:64128#] Connection traffic
+2025-02-14T04:29:18.931+0800 DEBUG [127.0.0.1:64128#] decode packet,buffer:0,length:103,packet:{{{} [] [] 0x1400029a008} 2 0x14000200758 [] 0}
+2025-02-14T04:29:18.936+0800 DEBUG [0.0.0.0:7539#19860220#1200120#Mobile] encode packet,buffer:58,length:54,id:type:2  commandBody:{id:"cun5c7m1a37m2s44us9g"  cType:"USER_LOGIN"  loginReply:{appId:"19860220"  userId:1200120}}
+2025-02-14T04:29:23.930+0800 DEBUG [127.0.0.1:64128#19860220#1200120#Mobile] Connection traffic
+2025-02-14T04:29:23.930+0800 DEBUG [127.0.0.1:64128#19860220#1200120#Mobile] decode heartbeat,buffer:0,length:4,value:12
+2025-02-14T04:29:23.930+0800 DEBUG [0.0.0.0:7539#19860220#1200120#Mobile] encode heartbeat,buffer:8,length:4,value:1
+2025-02-14T04:29:28.930+0800 DEBUG [127.0.0.1:64128#19860220#1200120#Mobile] Connection traffic
+2025-02-14T04:29:28.930+0800 DEBUG [127.0.0.1:64128#19860220#1200120#Mobile] decode heartbeat,buffer:0,length:4,value:12
+2025-02-14T04:29:28.930+0800 DEBUG [0.0.0.0:7539#19860220#1200120#Mobile] encode heartbeat,buffer:8,length:4,value:1
+2025-02-14T04:29:33.931+0800 DEBUG [127.0.0.1:64128#19860220#1200120#Mobile] Connection traffic
+2025-02-14T04:29:33.931+0800 DEBUG [127.0.0.1:64128#19860220#1200120#Mobile] decode heartbeat,buffer:0,length:4,value:12
+2025-02-14T04:29:33.932+0800 DEBUG [0.0.0.0:7539#19860220#1200120#Mobile] encode heartbeat,buffer:8,length:4,value:1
+2025-02-14T04:29:38.931+0800 DEBUG [127.0.0.1:64128#19860220#1200120#Mobile] Connection traffic
+2025-02-14T04:29:38.932+0800 DEBUG [127.0.0.1:64128#19860220#1200120#Mobile] decode heartbeat,buffer:0,length:4,value:12
+2025-02-14T04:29:38.932+0800 DEBUG [0.0.0.0:7539#19860220#1200120#Mobile] encode heartbeat,buffer:8,length:4,value:1
+2025-02-14T04:29:43.931+0800 DEBUG [127.0.0.1:64128#19860220#1200120#Mobile] Connection traffic
+2025-02-14T04:29:43.932+0800 DEBUG [127.0.0.1:64128#19860220#1200120#Mobile] decode heartbeat,buffer:0,length:4,value:12
+2025-02-14T04:29:43.932+0800 DEBUG [0.0.0.0:7539#19860220#1200120#Mobile] encode heartbeat,buffer:8,length:4,value:1
+2025-02-14T04:29:48.931+0800 DEBUG [127.0.0.1:64128#19860220#1200120#Mobile] Connection traffic
+2025-02-14T04:29:48.932+0800 DEBUG [127.0.0.1:64128#19860220#1200120#Mobile] decode heartbeat,buffer:0,length:4,value:12
+2025-02-14T04:29:48.932+0800 DEBUG [0.0.0.0:7539#19860220#1200120#Mobile] encode heartbeat,buffer:8,length:4,value:1
+2025-02-14T04:29:53.931+0800 DEBUG [127.0.0.1:64128#19860220#1200120#Mobile] Connection traffic
+2025-02-14T04:29:53.931+0800 DEBUG [127.0.0.1:64128#19860220#1200120#Mobile] decode heartbeat,buffer:0,length:4,value:12
+2025-02-14T04:29:53.931+0800 DEBUG [0.0.0.0:7539#19860220#1200120#Mobile] encode heartbeat,buffer:8,length:4,value:1
+2025-02-14T04:29:58.930+0800 DEBUG [127.0.0.1:64128#19860220#1200120#Mobile] Connection traffic
+2025-02-14T04:29:58.931+0800 DEBUG [127.0.0.1:64128#19860220#1200120#Mobile] decode heartbeat,buffer:0,length:4,value:12
+2025-02-14T04:29:58.931+0800 DEBUG [0.0.0.0:7539#19860220#1200120#Mobile] encode heartbeat,buffer:8,length:4,value:1
+2025-02-14T04:30:03.931+0800 DEBUG [127.0.0.1:64128#19860220#1200120#Mobile] Connection traffic
+2025-02-14T04:30:03.931+0800 DEBUG [127.0.0.1:64128#19860220#1200120#Mobile] decode heartbeat,buffer:0,length:4,value:12
+2025-02-14T04:30:03.931+0800 DEBUG [0.0.0.0:7539#19860220#1200120#Mobile] encode heartbeat,buffer:8,length:4,value:1
+2025-02-14T04:30:08.931+0800 DEBUG [127.0.0.1:64128#19860220#1200120#Mobile] Connection traffic
+2025-02-14T04:30:08.931+0800 DEBUG [127.0.0.1:64128#19860220#1200120#Mobile] decode heartbeat,buffer:0,length:4,value:12
+2025-02-14T04:30:08.931+0800 DEBUG [0.0.0.0:7539#19860220#1200120#Mobile] encode heartbeat,buffer:8,length:4,value:1
+2025-02-14T04:30:13.931+0800 DEBUG [127.0.0.1:64128#19860220#1200120#Mobile] Connection traffic
+2025-02-14T04:30:13.931+0800 DEBUG [127.0.0.1:64128#19860220#1200120#Mobile] decode heartbeat,buffer:0,length:4,value:12
+2025-02-14T04:30:13.932+0800 DEBUG [0.0.0.0:7539#19860220#1200120#Mobile] encode heartbeat,buffer:8,length:4,value:1
+2025-02-14T04:44:06.258+0800 DEBUG heartbeatHandler init
+2025-02-14T04:44:06.259+0800 DEBUG commandHandler init
+2025-02-14T04:44:06.259+0800 INFO 1 init producer
+2025-02-14T04:44:06.259+0800 DEBUG messageReceiver init
+2025-02-14T04:44:06.259+0800 DEBUG messageHandler init
+2025-02-14T04:44:06.259+0800 DEBUG default logging level is INFO
+2025-02-14T04:44:06.259+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-02-14T04:44:06.259+0800 INFO BrokerInstance started
+2025-02-14T04:44:12.979+0800 INFO [127.0.0.1:64635#] Connection open
+2025-02-14T04:44:12.979+0800 DEBUG [127.0.0.1:64635#] heartbeatTask started
+2025-02-14T04:44:12.979+0800 DEBUG [127.0.0.1:64635#] Connection traffic
+2025-02-14T04:44:12.980+0800 DEBUG [127.0.0.1:64635#] decode packet,buffer:0,length:103,packet:{{{} [] [] 0x140002bc008} 2 0x1400059e0c0 [] 0}
+2025-02-14T04:44:12.981+0800 DEBUG [0.0.0.0:7539#19860220#1200120#Mobile] encode packet,buffer:58,length:54,id:type:2  commandBody:{id:"cun5j761a37m4tgq5hc0"  cType:"USER_LOGIN"  loginReply:{appId:"19860220"  userId:1200120}}
+2025-02-14T04:48:06.722+0800 DEBUG heartbeatHandler init
+2025-02-14T04:48:06.723+0800 DEBUG commandHandler init
+2025-02-14T04:48:06.723+0800 INFO 1 init producer
+2025-02-14T04:48:06.723+0800 DEBUG messageReceiver init
+2025-02-14T04:48:06.723+0800 DEBUG messageHandler init
+2025-02-14T04:48:06.723+0800 DEBUG default logging level is INFO
+2025-02-14T04:48:06.723+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-02-14T04:48:06.723+0800 INFO BrokerInstance started
+2025-02-14T04:48:14.529+0800 INFO [127.0.0.1:64795#] Connection open
+2025-02-14T04:48:14.529+0800 DEBUG [127.0.0.1:64795#] heartbeatTask started
+2025-02-14T04:48:14.529+0800 DEBUG [127.0.0.1:64795#] Connection traffic
+2025-02-14T04:48:14.529+0800 DEBUG [127.0.0.1:64795#] decode packet,buffer:0,length:103,packet:{{{} [] [] 0x14000344008} 2 0x14000696070 [] 0}
+2025-02-14T04:48:14.531+0800 DEBUG [0.0.0.0:7539#19860220#1200120#Mobile] encode packet,buffer:58,length:54,id:type:2  commandBody:{id:"cun5l3m1a37m5ophp840"  cType:"USER_LOGIN"  loginReply:{appId:"19860220"  userId:1200120}}
+2025-02-14T04:48:24.529+0800 DEBUG [127.0.0.1:64795#19860220#1200120#Mobile] Connection traffic
+2025-02-14T04:48:24.530+0800 DEBUG [127.0.0.1:64795#19860220#1200120#Mobile] decode heartbeat,buffer:0,length:4,value:12
+2025-02-14T04:48:24.530+0800 DEBUG [0.0.0.0:7539#19860220#1200120#Mobile] encode heartbeat,buffer:8,length:4,value:1
+2025-02-14T04:50:29.899+0800 DEBUG heartbeatHandler init
+2025-02-14T04:50:29.899+0800 DEBUG commandHandler init
+2025-02-14T04:50:29.899+0800 INFO 1 init producer
+2025-02-14T04:50:29.899+0800 DEBUG messageReceiver init
+2025-02-14T04:50:29.899+0800 DEBUG messageHandler init
+2025-02-14T04:50:29.900+0800 DEBUG default logging level is INFO
+2025-02-14T04:50:29.900+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-02-14T04:50:29.900+0800 INFO BrokerInstance started
+2025-02-14T04:52:00.932+0800 DEBUG heartbeatHandler init
+2025-02-14T04:52:00.933+0800 DEBUG commandHandler init
+2025-02-14T04:52:00.933+0800 INFO 1 init producer
+2025-02-14T04:52:00.933+0800 DEBUG messageReceiver init
+2025-02-14T04:52:00.933+0800 DEBUG messageHandler init
+2025-02-14T04:52:00.933+0800 DEBUG default logging level is INFO
+2025-02-14T04:52:00.933+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-02-14T04:52:00.933+0800 INFO BrokerInstance started
+2025-02-14T04:54:21.904+0800 FATAL 无法连接到服务器: dial tcp 127.0.0.1:7539: connect: connection refused
+2025-02-14T04:54:28.398+0800 DEBUG heartbeatHandler init
+2025-02-14T04:54:28.399+0800 DEBUG commandHandler init
+2025-02-14T04:54:28.399+0800 INFO 1 init producer
+2025-02-14T04:54:28.399+0800 DEBUG messageReceiver init
+2025-02-14T04:54:28.399+0800 DEBUG messageHandler init
+2025-02-14T04:54:28.399+0800 DEBUG default logging level is INFO
+2025-02-14T04:54:28.399+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-02-14T04:54:28.399+0800 INFO BrokerInstance started
+2025-02-14T04:54:33.215+0800 INFO [127.0.0.1:65073#] Connection open
+2025-02-14T04:54:33.215+0800 DEBUG [127.0.0.1:65073#] heartbeatTask started
+2025-02-14T04:54:33.216+0800 DEBUG [127.0.0.1:65073#] Connection traffic
+2025-02-14T04:54:33.216+0800 DEBUG [127.0.0.1:65073#] decode packet,buffer:0,length:103,packet:{{{} [] [] 0x140002cc008} 2 0x140000b8d10 [] 0}
+2025-02-14T04:54:33.218+0800 DEBUG [0.0.0.0:7539#19860220#1200120#Mobile] encode packet,buffer:58,length:54,id:type:2  commandBody:{id:"cun5o2e1a37m85bksbog"  cType:"USER_LOGIN"  loginReply:{appId:"19860220"  userId:1200120}}
+2025-02-14T04:54:43.215+0800 DEBUG [127.0.0.1:65073#19860220#1200120#Mobile] Connection traffic
+2025-02-14T04:54:43.216+0800 DEBUG [127.0.0.1:65073#19860220#1200120#Mobile] decode heartbeat,buffer:0,length:4,value:12
+2025-02-14T04:54:43.216+0800 DEBUG [0.0.0.0:7539#19860220#1200120#Mobile] encode heartbeat,buffer:8,length:4,value:1
+2025-02-14T05:00:45.835+0800 FATAL 无法连接到服务器: dial tcp 127.0.0.1:7539: connect: connection refused
+2025-02-14T05:01:39.322+0800 DEBUG heartbeatHandler init
+2025-02-14T05:01:39.323+0800 DEBUG commandHandler init
+2025-02-14T05:01:39.323+0800 INFO 1 init producer
+2025-02-14T05:01:39.323+0800 DEBUG messageReceiver init
+2025-02-14T05:01:39.323+0800 DEBUG messageHandler init
+2025-02-14T05:01:39.323+0800 DEBUG default logging level is INFO
+2025-02-14T05:01:39.323+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-02-14T05:01:39.323+0800 INFO BrokerInstance started
+2025-02-14T05:01:43.908+0800 INFO [127.0.0.1:65317#] Connection open
+2025-02-14T05:01:43.908+0800 DEBUG [127.0.0.1:65317#] heartbeatTask started
+2025-02-14T05:01:43.909+0800 DEBUG [127.0.0.1:65317#] Connection traffic
+2025-02-14T05:01:43.910+0800 DEBUG [127.0.0.1:65317#] decode packet,buffer:0,length:103,packet:{{{} [] [] 0x14000344008} 2 0x140001144c8 [] 0}
+2025-02-14T05:01:43.911+0800 DEBUG [0.0.0.0:7539#19860220#1200120#Mobile] encode packet,buffer:58,length:54,id:type:2  commandBody:{id:"cun5rdu1a37m9gsl32cg"  cType:"USER_LOGIN"  loginReply:{appId:"19860220"  userId:1200120}}
+2025-02-14T05:01:53.908+0800 DEBUG [127.0.0.1:65317#19860220#1200120#Mobile] Connection traffic
+2025-02-14T05:01:53.909+0800 DEBUG [127.0.0.1:65317#19860220#1200120#Mobile] decode heartbeat,buffer:0,length:4,value:12
+2025-02-14T05:01:53.909+0800 DEBUG [0.0.0.0:7539#19860220#1200120#Mobile] encode heartbeat,buffer:8,length:4,value:1
+2025-02-14T05:03:12.123+0800 FATAL 无法连接到服务器: dial tcp 127.0.0.1:7539: connect: connection refused
+2025-02-14T05:03:50.190+0800 FATAL 无法连接到服务器: dial tcp 127.0.0.1:7539: connect: connection refused
+2025-02-14T05:06:34.991+0800 DEBUG heartbeatHandler init
+2025-02-14T05:06:34.992+0800 DEBUG commandHandler init
+2025-02-14T05:06:34.992+0800 INFO 1 init producer
+2025-02-14T05:06:34.992+0800 DEBUG messageReceiver init
+2025-02-14T05:06:34.992+0800 DEBUG messageHandler init
+2025-02-14T05:06:34.992+0800 DEBUG default logging level is INFO
+2025-02-14T05:06:34.992+0800 INFO Launching gnet with 1 event-loops, listening on: tcp://0.0.0.0:7539
+2025-02-14T05:06:34.992+0800 INFO BrokerInstance started
+2025-02-14T05:07:13.957+0800 FATAL 无法连接到服务器: dial tcp 127.0.0.1:7539: connect: connection refused
+2025-02-14T05:11:24.575+0800 FATAL 无法连接到服务器: dial tcp 127.0.0.1:7539: connect: connection refused
+2025-02-14T05:12:41.043+0800 FATAL 无法连接到服务器: dial tcp 127.0.0.1:7539: connect: connection refused
+2025-02-14T05:16:34.383+0800 FATAL 无法连接到服务器: dial tcp 127.0.0.1:7539: connect: connection refused
+2025-02-14T05:17:24.252+0800 FATAL 无法连接到服务器: dial tcp 127.0.0.1:7539: connect: connection refused
+2025-02-14T05:18:01.949+0800 FATAL 无法连接到服务器: dial tcp 127.0.0.1:7539: connect: connection refused

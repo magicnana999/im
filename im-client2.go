@@ -20,21 +20,49 @@ import (
 	"time"
 )
 
-const (
-	userSig = "cukpovu1a37hpofg6sj0"
-	//userSig           = "cuf5ofe1a37nfi3p4b6g"
-
-	serverAddress     = "127.0.0.1:7539" // IM 服务器地址和端口
-	heartbeatInterval = 5 * time.Second  // 心跳间隔
-)
-
-var (
+type Client struct {
+	userSig              string
+	userId               int64
+	to                   int64
+	serverAddress        string
+	heartbeatInterval    int // 心跳间隔
 	CurrentUserId        int64
 	CurrentAppId         string
-	lastHeartbeatReceive int64 = 0
-)
+	lastHeartbeatReceive int64
+	c                    net.Conn
+	wg                   sync.WaitGroup
+	sender               *sender
+}
 
-func getMessageFromScan(ctx context.Context, cancel context.CancelFunc, conn net.Conn, wg *sync.WaitGroup) {
+func (c *Client) start() {
+
+	conn, err := net.Dial("tcp", c.serverAddress)
+	if err != nil {
+		logger.FatalF("无法连接到服务器: %v", err)
+	}
+	defer conn.Close()
+
+	c.c = conn
+	c.wg.Add(1)
+
+	ctx, cancel := context.WithCancel(context.Background())
+
+	c.sender = initSender(conn, ctx)
+	go c.sender.start()
+
+	go c.startHeartbeat(ctx, c.sender, cancel)
+
+	go c.startRead(ctx, conn, c.sender)
+
+	go c.getMessageFromScan(ctx, cancel, conn, &c.wg)
+
+	login(c.sender, c.userSig)
+
+	c.wg.Wait()
+	fmt.Println("exit")
+}
+
+func (c *Client) getMessageFromScan(ctx context.Context, cancel context.CancelFunc, conn net.Conn, wg *sync.WaitGroup) {
 
 	defer wg.Done()
 
@@ -59,30 +87,16 @@ func getMessageFromScan(ctx context.Context, cancel context.CancelFunc, conn net
 	}
 }
 
-func login(sender *sender, userSig string) {
-	loginRequest := pb.LoginRequest{
-		AppId:        "19860220",
-		UserSig:      userSig,
-		Version:      "1.0.0",
-		Os:           int32(enum.Ios),
-		PushDeviceId: id.GenerateXId(),
-	}
+func (c *Client) startHeartbeat(ctx context.Context, sender *sender, stop context.CancelFunc) {
 
-	request := pb.NewCommand(&loginRequest)
-
-	sender.send(request)
-}
-
-func startHeartbeat(ctx context.Context, sender *sender, stop context.CancelFunc) {
-
-	ticker := time.NewTicker(heartbeatInterval)
+	ticker := time.NewTicker(time.Duration(c.heartbeatInterval) * time.Second)
 	defer ticker.Stop()
 
 	for {
 		select {
 		case <-ticker.C:
 
-			if lastHeartbeatReceive > 0 && time.Now().UnixMilli()-lastHeartbeatReceive >= time.Minute.Milliseconds() {
+			if c.lastHeartbeatReceive > 0 && time.Now().UnixMilli()-c.lastHeartbeatReceive >= time.Minute.Milliseconds() {
 				stop()
 				return
 			}
@@ -96,36 +110,36 @@ func startHeartbeat(ctx context.Context, sender *sender, stop context.CancelFunc
 	}
 }
 
-func startRead(ctx context.Context, conn net.Conn, sender *sender) {
+func (c *Client) startRead(ctx context.Context, conn net.Conn, sender *sender) {
 	for {
 		select {
 		case <-ctx.Done():
 			return
 		default:
-			decode(ctx, conn, sender)
+			c.decode(ctx, conn, sender)
 		}
 	}
 }
 
-func decode(ctx context.Context, c net.Conn, sender *sender) error {
+func (c *Client) decode(ctx context.Context, conn net.Conn, sender *sender) error {
 
 	var length int32
-	binary.Read(c, binary.BigEndian, &length)
+	binary.Read(conn, binary.BigEndian, &length)
 
 	if length == 4 {
 
 		var heartbeat int32
-		binary.Read(c, binary.BigEndian, &heartbeat)
+		binary.Read(conn, binary.BigEndian, &heartbeat)
 
 		p := pb.NewHeartbeat(heartbeat)
-		handlePacket(ctx, p, sender)
+		c.handlePacket(ctx, p, sender)
 		return nil
 	}
 
 	if length > 4 {
 
 		bs := make([]byte, length)
-		l, e := io.ReadFull(c, bs)
+		l, e := io.ReadFull(conn, bs)
 		if e != nil || l != int(length) {
 			panic(e)
 		}
@@ -135,39 +149,39 @@ func decode(ctx context.Context, c net.Conn, sender *sender) error {
 			panic(e4)
 		}
 
-		handlePacket(ctx, &p, sender)
+		c.handlePacket(ctx, &p, sender)
 		return nil
 	}
 
 	return nil
 }
 
-func handlePacket(ctx context.Context, packet *pb.Packet, sender *sender) {
+func (c *Client) handlePacket(ctx context.Context, packet *pb.Packet, sender *sender) {
 	switch packet.Type {
 	case pb.TypeHeartbeat:
-		lastHeartbeatReceive = time.Now().UnixMilli()
+		c.lastHeartbeatReceive = time.Now().UnixMilli()
 		return
 	case pb.TypeMessage:
 		if packet.IsResponse() {
 			sender.close(packet.GetMessageBody().GetId())
 		} else {
-			receiveMessage(ctx, packet, sender)
+			c.receiveMessage(ctx, packet, sender)
 		}
 	case pb.TypeCommand:
-		receiveCommand(ctx, packet, sender)
+		c.receiveCommand(ctx, packet, sender)
 	default:
 		fmt.Printf("不知道啥Type: %d\n", packet.Type)
 	}
 }
 
-func receiveCommand(ctx context.Context, packet *pb.Packet, s *sender) {
+func (c *Client) receiveCommand(ctx context.Context, packet *pb.Packet, s *sender) {
 
 	switch packet.GetCommandBody().CType {
 	case pb.CTypeUserLogin:
 		reply := packet.GetCommandBody().GetLoginReply()
 		if packet.GetCommandBody().Code == 0 {
-			CurrentAppId = reply.AppId
-			CurrentUserId = reply.UserId
+			c.CurrentAppId = reply.AppId
+			c.CurrentUserId = reply.UserId
 			fmt.Println("登录成功")
 		} else {
 			fmt.Println("登录失败,", packet.GetCommandBody().Message)
@@ -178,7 +192,7 @@ func receiveCommand(ctx context.Context, packet *pb.Packet, s *sender) {
 	}
 }
 
-func receiveMessage(ctx context.Context, packet *pb.Packet, s *sender) {
+func (c *Client) receiveMessage(ctx context.Context, packet *pb.Packet, s *sender) {
 	s.send(packet.GetMessageBody().Success(nil).Wrap())
 }
 
@@ -384,30 +398,30 @@ func encode(p *pb.Packet) (*bb.ByteBuffer, error) {
 	return buffer, nil
 }
 
-func main() {
-	conn, err := net.Dial("tcp", serverAddress)
-	if err != nil {
-		logger.FatalF("无法连接到服务器: %v", err)
+func login(sender *sender, userSig string) {
+	loginRequest := pb.LoginRequest{
+		AppId:        "19860220",
+		UserSig:      userSig,
+		Version:      "1.0.0",
+		Os:           int32(enum.Ios),
+		PushDeviceId: id.GenerateXId(),
 	}
-	defer conn.Close()
 
-	var wg sync.WaitGroup
+	request := pb.NewCommand(&loginRequest)
 
-	wg.Add(1)
+	sender.send(request)
+}
 
-	ctx, cancel := context.WithCancel(context.Background())
+func main() {
 
-	sender := initSender(conn, ctx)
-	go sender.start()
+	c1 := &Client{
+		userId:            1200121,
+		to:                1200120,
+		userSig:           "cukpovu1a37hpofg6sjg",
+		serverAddress:     "127.0.0.1:7539",
+		heartbeatInterval: 10,
+	}
 
-	go startHeartbeat(ctx, sender, cancel)
+	c1.start()
 
-	go startRead(ctx, conn, sender)
-
-	go getMessageFromScan(ctx, cancel, conn, &wg)
-
-	login(sender, userSig)
-
-	wg.Wait()
-	fmt.Println("exit")
 }
