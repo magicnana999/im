@@ -4,7 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/magicnana999/im/broker/core"
+	"github.com/magicnana999/im/broker"
 	"github.com/magicnana999/im/logger"
 	"github.com/magicnana999/im/util/ip"
 	"github.com/magicnana999/im/util/json"
@@ -14,15 +14,15 @@ import (
 
 func main() {
 
-	root := context.Background()
+	root, cancel := context.WithCancel(context.Background())
 	option := parseFlag()
 	logger.InfoF("BrokerOption:%s", json.IgnoreErrorMarshal(option))
 
-	core.Start(root, option)
+	broker.Start(root, cancel, option)
 
 }
 
-func parseFlag() *core.Option {
+func parseFlag() *broker.Option {
 	var name string
 	var serverInterval int
 	var heartbeatInterval int
@@ -36,7 +36,7 @@ func parseFlag() *core.Option {
 		if str.IsBlank(ipAddress) || e != nil {
 			logger.FatalF("Failed to get local IP address: %v", e)
 		}
-		name = fmt.Sprintf("%s:%s", ipAddress, core.DefaultPort)
+		name = fmt.Sprintf("%s:%s", ipAddress, broker.DefaultPort)
 	}
 
 	if serverInterval <= 0 {
@@ -46,7 +46,7 @@ func parseFlag() *core.Option {
 		logger.FatalF("Invalid heartbeat interval value: %d (must be > 0)", heartbeatInterval)
 	}
 
-	return &core.Option{
+	return &broker.Option{
 		Name:              name,
 		ServerInterval:    time.Duration(serverInterval) * time.Second,
 		HeartbeatInterval: time.Duration(heartbeatInterval) * time.Second,

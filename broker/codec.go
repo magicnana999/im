@@ -1,8 +1,7 @@
-package core
+package broker
 
 import (
 	"encoding/binary"
-	"github.com/magicnana999/im/broker/state"
 	"github.com/magicnana999/im/errors"
 	"github.com/magicnana999/im/logger"
 	"github.com/magicnana999/im/pb"
@@ -11,25 +10,25 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-type Codec interface {
-	Encode(c gnet.Conn, p *pb.Packet) (*bb.ByteBuffer, error)
-	Decode(c gnet.Conn) ([]*pb.Packet, error)
+type codec interface {
+	encode(c gnet.Conn, p *pb.Packet) (*bb.ByteBuffer, error)
+	decode(c gnet.Conn) ([]*pb.Packet, error)
 }
 
-var defaultCodec = &LengthFieldBasedFrameCodec{}
+var defaultCodec = &lengthFieldBasedFrameCodec{}
 
-type LengthFieldBasedFrameCodec struct {
+type lengthFieldBasedFrameCodec struct {
 }
 
-func InitCodec() Codec {
+func initCodec() codec {
 	return defaultCodec
 }
 
-func (l LengthFieldBasedFrameCodec) Encode(c gnet.Conn, p *pb.Packet) (*bb.ByteBuffer, error) {
+func (l *lengthFieldBasedFrameCodec) encode(c gnet.Conn, p *pb.Packet) (*bb.ByteBuffer, error) {
 
 	buffer := bb.Get()
 
-	user, err := state.CurrentUserFromConn(c)
+	user, err := currentUserFromConn(c)
 	if err != nil {
 		return nil, errors.EncodeError.Detail(err)
 	}
@@ -41,8 +40,8 @@ func (l LengthFieldBasedFrameCodec) Encode(c gnet.Conn, p *pb.Packet) (*bb.ByteB
 		binary.Write(buffer, binary.BigEndian, int32(4))
 		binary.Write(buffer, binary.BigEndian, int32(hb))
 
-		logger.DebugF("[%s#%s] Encode heartbeat,buffer:%d,length:%d,value:%d",
-			c.RemoteAddr().String(),
+		logger.DebugF("[%s#%s] encode heartbeat,buffer:%d,length:%d,value:%d",
+			user.BrokerAddr,
 			user.Label(),
 			buffer.Len(),
 			buffer.Len()-4,
@@ -60,8 +59,8 @@ func (l LengthFieldBasedFrameCodec) Encode(c gnet.Conn, p *pb.Packet) (*bb.ByteB
 		binary.Write(buffer, binary.BigEndian, int32(len(bs)))
 		binary.Write(buffer, binary.BigEndian, bs)
 
-		logger.DebugF("[%s#%s] Encode packet,buffer:%d,length:%d,id:%v",
-			c.RemoteAddr().String(),
+		logger.DebugF("[%s#%s] encode packet,buffer:%d,length:%d,id:%v",
+			user.BrokerAddr,
 			user.Label(),
 			buffer.Len(),
 			len(bs),
@@ -71,11 +70,11 @@ func (l LengthFieldBasedFrameCodec) Encode(c gnet.Conn, p *pb.Packet) (*bb.ByteB
 	}
 }
 
-func (l LengthFieldBasedFrameCodec) Decode(c gnet.Conn) ([]*pb.Packet, error) {
+func (l *lengthFieldBasedFrameCodec) decode(c gnet.Conn) ([]*pb.Packet, error) {
 
 	result := make([]*pb.Packet, 0)
 
-	user, err := state.CurrentUserFromConn(c)
+	user, err := currentUserFromConn(c)
 	if err != nil {
 		return nil, errors.DecodeError.Detail(err)
 
@@ -91,7 +90,7 @@ func (l LengthFieldBasedFrameCodec) Decode(c gnet.Conn) ([]*pb.Packet, error) {
 			var heartbeat int32
 			binary.Read(c, binary.BigEndian, &heartbeat)
 
-			logger.DebugF("[%s#%s] Decode heartbeat,buffer:%d,length:%d,value:%d",
+			logger.DebugF("[%s#%s] decode heartbeat,buffer:%d,length:%d,value:%d",
 				c.RemoteAddr().String(),
 				user.Label(),
 				c.InboundBuffered(),
@@ -120,7 +119,7 @@ func (l LengthFieldBasedFrameCodec) Decode(c gnet.Conn) ([]*pb.Packet, error) {
 				return nil, errors.DecodeError.Detail(e4)
 			}
 
-			logger.DebugF("[%s#%s] Decode packet,buffer:%d,length:%d,packet:%v",
+			logger.DebugF("[%s#%s] decode packet,buffer:%d,length:%d,packet:%v",
 				c.RemoteAddr().String(),
 				user.Label(),
 				c.InboundBuffered(),

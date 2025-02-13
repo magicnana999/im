@@ -9,14 +9,14 @@ const (
 	decode = iota + 1101
 	encode
 	heartbeat
-	packetProcess
+	commandHandle
 )
 
 var (
 	DecodeError        = New(decode, "decode failed")
 	EncodeError        = New(encode, "encode failed")
 	HeartbeatError     = New(heartbeat, "heartbeat failed")
-	PacketProcessError = New(packetProcess, "process packet failed")
+	CommandHandleError = New(commandHandle, "command failed")
 )
 
 const (
@@ -62,6 +62,14 @@ func (e Error) Error() string {
 
 func (e Error) DetailString(str string) Error {
 	e.Details = str
+	return e
+}
+
+func (e Error) DetailJson(m map[string]any) Error {
+	js, err := json.Marshal(m)
+	if err == nil {
+		e.Details = string(js)
+	}
 	return e
 }
 

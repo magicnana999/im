@@ -1,4 +1,4 @@
-package handler
+package broker
 
 import (
 	"context"
@@ -12,7 +12,7 @@ type MessageHandler struct {
 	deliver  *MessageDeliver
 }
 
-func (m *MessageHandler) HandlePacket(ctx context.Context, p *pb.Packet) (*pb.Packet, error) {
+func (m *MessageHandler) handlePacket(ctx context.Context, p *pb.Packet) (*pb.Packet, error) {
 	if p.IsRequest() {
 		return m.receiver.ReceivePacket(ctx, p)
 	}
@@ -24,7 +24,7 @@ func (m *MessageHandler) HandlePacket(ctx context.Context, p *pb.Packet) (*pb.Pa
 	return nil, nil
 }
 
-func (m *MessageHandler) IsSupport(ctx context.Context, packetType int32) bool {
+func (m *MessageHandler) isSupport(ctx context.Context, packetType int32) bool {
 	return packetType == pb.TypeMessage
 }
 

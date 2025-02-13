@@ -1,4 +1,4 @@
-package state
+package broker
 
 import (
 	"context"
@@ -10,19 +10,19 @@ import (
 	"sync"
 )
 
-var DefaultUserState = &UserState{}
+var defaultUserState = &userState{}
 
-type UserState struct {
+type userState struct {
 	storage *redis.UserStorage
 	m       sync.Map
 }
 
-func InitUserState() *UserState {
-	DefaultUserState.storage = redis.InitUserStorage()
-	return DefaultUserState
+func initUserState() *userState {
+	defaultUserState.storage = redis.InitUserStorage()
+	return defaultUserState
 }
 
-func (s *UserState) StoreUser(ctx context.Context, u *domain.UserConnection, appId string, userId int64, os enum.OSType) error {
+func (s *userState) storeUser(ctx context.Context, u *domain.UserConnection, appId string, userId int64, os enum.OSType) error {
 
 	lock, e := s.storage.Lock(ctx, appId, u.Label())
 	if e != nil {
@@ -51,7 +51,7 @@ func (s *UserState) StoreUser(ctx context.Context, u *domain.UserConnection, app
 	return nil
 }
 
-func (s *UserState) RefreshUser(ctx context.Context, uc *domain.UserConnection) error {
+func (s *userState) refreshUser(ctx context.Context, uc *domain.UserConnection) error {
 	lock, e := s.storage.Lock(ctx, uc.AppId, uc.Label())
 	if e != nil {
 		return errors.UserStoreError.Detail(e)
@@ -65,7 +65,7 @@ func (s *UserState) RefreshUser(ctx context.Context, uc *domain.UserConnection) 
 	return nil
 }
 
-func (s *UserState) LoadLocalUser(appId string, userId int64) []*domain.UserConnection {
+func (s *userState) loadLocalUser(appId string, userId int64) []*domain.UserConnection {
 	labels := label(appId, userId)
 	var ret []*domain.UserConnection
 	for _, v := range labels {

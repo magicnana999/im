@@ -13,9 +13,11 @@ var (
 )
 
 type Option struct {
-	Mysql MySQL `yaml:"mysql"`
-	Redis Redis `yaml:"redis"`
-	Kafka Kafka `yaml:"kafka"`
+	Mysql  MySQL  `yaml:"mysql"`
+	Redis  Redis  `yaml:"redis"`
+	Kafka  Kafka  `yaml:"kafka"`
+	Broker Broker `yaml:"broker"`
+	Grpc   Grpc   `yaml:"grpc"`
 }
 
 type MySQL struct {
@@ -65,6 +67,14 @@ type Kafka struct {
 
 func (k Kafka) String() string {
 	return fmt.Sprintf("%s:%s", k.Host, k.Port)
+}
+
+type Broker struct {
+	HeartbeatInterval int `yaml:"heartbeatInterval"`
+}
+
+type Grpc struct {
+	UserApiHost string `yaml:"userApiHost"`
 }
 
 func LoadConfig(path string) error {

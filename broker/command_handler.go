@@ -1,8 +1,8 @@
-package handler
+package broker
 
 import (
 	"context"
-	"github.com/magicnana999/im/broker/state"
+	"github.com/magicnana999/im/conf"
 	"github.com/magicnana999/im/enum"
 	"github.com/magicnana999/im/errors"
 	"github.com/magicnana999/im/logger"
@@ -13,49 +13,53 @@ import (
 	"sync"
 )
 
-var DefaultCommandHandler = &CommandHandler{}
+var defaultCommandHandler = &commandHandler{}
 var commandHandlerMu sync.RWMutex
 
-type CommandHandler struct {
+type commandHandler struct {
 	conn          *grpc.ClientConn
 	userApiClient pb.UserApiClient
-	userState     *state.UserState
+	userState     *userState
 }
 
-func (c *CommandHandler) HandlePacket(ctx context.Context, packet *pb.Packet) (*pb.Packet, error) {
-	reply, err := c.HandleCommand(ctx, packet.GetCommandBody())
+func (c *commandHandler) handlePacket(ctx context.Context, packet *pb.Packet) (*pb.Packet, error) {
+	reply, err := c.handleCommand(ctx, packet.GetCommandBody())
 
 	return packet.GetCommandBody().Response(reply, err).Wrap(), nil
 
 }
 
-func (c *CommandHandler) IsSupport(ctx context.Context, packetType int32) bool {
+func (c *commandHandler) isSupport(ctx context.Context, packetType int32) bool {
 	return pb.TypeCommand == packetType
 }
 
-func InitCommandHandler() *CommandHandler {
+func initCommandHandler() *commandHandler {
 
 	commandHandlerMu.Lock()
 	defer commandHandlerMu.Unlock()
 
-	if DefaultCommandHandler.conn != nil {
-		return DefaultCommandHandler
+	if defaultCommandHandler.conn != nil {
+		return defaultCommandHandler
 	}
 
-	conn, err := grpc.NewClient("localhost:7540", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	//localhost:7540
+	userApiHost := conf.Global.Grpc.UserApiHost
+
+	conn, err := grpc.NewClient(userApiHost, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		logger.FatalF("did not connect: %v", err)
-	}
-	DefaultCommandHandler.conn = conn
-	DefaultCommandHandler.userApiClient = pb.NewUserApiClient(conn)
-	DefaultCommandHandler.userState = state.InitUserState()
+		logger.FatalF("init command handler user api provider error: %v", err)
 
-	return DefaultCommandHandler
+	}
+	defaultCommandHandler.conn = conn
+	defaultCommandHandler.userApiClient = pb.NewUserApiClient(conn)
+	defaultCommandHandler.userState = initUserState()
+
+	return defaultCommandHandler
 }
 
-func (c *CommandHandler) HandleCommand(ctx context.Context, cmd *pb.CommandBody) (proto.Message, error) {
+func (c *commandHandler) handleCommand(ctx context.Context, cmd *pb.CommandBody) (proto.Message, error) {
 
-	uc, e := state.CurrentUserFromCtx(ctx)
+	uc, e := currentUserFromCtx(ctx)
 	if e != nil {
 		return nil, e
 	}
@@ -69,14 +73,14 @@ func (c *CommandHandler) HandleCommand(ctx context.Context, cmd *pb.CommandBody)
 			return nil, err
 		}
 
-		if err = c.userState.StoreUser(ctx, uc, rep.AppId, rep.UserId, enum.OSType(src.Os)); err != nil {
+		if err = c.userState.storeUser(ctx, uc, rep.AppId, rep.UserId, enum.OSType(src.Os)); err != nil {
 			return nil, err
 		}
 
 		return rep, nil
 
 	default:
-		return nil, errors.PacketProcessError
+		return nil, errors.CommandHandleError
 	}
 }
 

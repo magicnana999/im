@@ -1,10 +1,8 @@
-package core
+package broker
 
 import (
 	"context"
 	"fmt"
-	"github.com/magicnana999/im/broker/handler"
-	"github.com/magicnana999/im/broker/state"
 	"github.com/magicnana999/im/domain"
 	"github.com/magicnana999/im/enum"
 	"github.com/magicnana999/im/logger"
@@ -27,7 +25,7 @@ type Option struct {
 	HeartbeatInterval time.Duration `json:"heartbeatInterval"`
 }
 
-type BrokerServer struct {
+type Instance struct {
 	*gnet.BuiltinEventEngine
 	eng               gnet.Engine
 	addr              string
@@ -41,16 +39,18 @@ type BrokerServer struct {
 	workerPool        *goPool.Pool
 	heartbeatPool     *goPool.Pool
 	ctx               context.Context
+	cancel            context.CancelFunc
 	interval          time.Duration
 	heartbeatInterval time.Duration
-	handler           handler.PacketHandler
-	heartbeatHandler  *handler.HeartbeatHandler
-	brokerState       *state.BrokerState
-	codec             Codec
+	handler           packetHandler
+	heartbeatHandler  *heartbeatHandler
+	brokerState       *brokerState
+	codec             codec
+	deliver           *deliver
 }
 
-func Start(ctx context.Context, option *Option) {
-	ts := &BrokerServer{
+func Start(ctx context.Context, cancel context.CancelFunc, option *Option) {
+	ts := &Instance{
 		addr:              option.Name,
 		multicore:         true,
 		async:             true,
@@ -59,12 +59,14 @@ func Start(ctx context.Context, option *Option) {
 		workerPool:        goPool.Default(),
 		heartbeatPool:     goPool.Default(),
 		ctx:               ctx,
+		cancel:            cancel,
 		interval:          option.ServerInterval,
 		heartbeatInterval: option.HeartbeatInterval,
-		handler:           handler.InitHandler(),
-		brokerState:       state.InitBrokerState(),
-		heartbeatHandler:  handler.InitHeartbeatHandler(),
-		codec:             InitCodec(),
+		handler:           InitHandler(),
+		brokerState:       initBrokerState(),
+		heartbeatHandler:  initHeartbeatHandler(),
+		codec:             initCodec(),
+		deliver:           initDeliver(ctx, initCodec()),
 	}
 	err := gnet.Run(ts, fmt.Sprintf("tcp://0.0.0.0:%s", DefaultPort),
 		gnet.WithMulticore(true),
@@ -87,9 +89,11 @@ func Start(ctx context.Context, option *Option) {
 	if err != nil {
 		logger.FatalF("Start BrokerInstance error: %v", err)
 	}
+
+	ts.deliver.start()
 }
 
-func (s *BrokerServer) OnBoot(eng gnet.Engine) (action gnet.Action) {
+func (s *Instance) OnBoot(eng gnet.Engine) (action gnet.Action) {
 	logger.Info("BrokerInstance started")
 
 	s.eng = eng
@@ -97,17 +101,18 @@ func (s *BrokerServer) OnBoot(eng gnet.Engine) (action gnet.Action) {
 	brokerInfo := domain.BrokerInfo{Addr: s.addr, StartAt: time.Now().UnixMilli()}
 	if _, e := s.brokerState.StoreBroker(s.ctx, brokerInfo); e != nil {
 
-		logger.FatalF("BrokerInstance start error: %v", e)
+		logger.FatalF("failed to store broker info: %v", e)
 	}
 
 	return gnet.None
 }
 
-func (s *BrokerServer) OnShutdown(eng gnet.Engine) {
-	logger.Info("BrokerInstance shutdown")
+func (s *Instance) OnShutdown(eng gnet.Engine) {
+	s.cancel()
+	s.heartbeatHandler.stopTickerAll()
 }
 
-func (s *BrokerServer) OnOpen(c gnet.Conn) (out []byte, action gnet.Action) {
+func (s *Instance) OnOpen(c gnet.Conn) (out []byte, action gnet.Action) {
 	uc := &domain.UserConnection{
 		Fd:          c.Fd(),
 		AppId:       "",
@@ -119,61 +124,61 @@ func (s *BrokerServer) OnOpen(c gnet.Conn) (out []byte, action gnet.Action) {
 		C:           c,
 	}
 
-	subCtx := context.WithValue(s.ctx, state.CurrentUser, uc)
+	subCtx := context.WithValue(s.ctx, currentUserKey, uc)
 	c.SetContext(subCtx)
 
 	logger.InfoF("[%s#%s] Connection open", c.RemoteAddr().String(), uc.Label())
 
-	if err := s.heartbeatHandler.StartTicker(subCtx, c, uc); err != nil {
+	if err := s.heartbeatHandler.startTicker(subCtx, c, uc); err != nil {
 		logger.ErrorF("Connection open error: %v", err)
-		s.heartbeatHandler.StopTicker(c)
+		s.heartbeatHandler.stopTicker(c)
 	}
 	return nil, gnet.None
 }
 
-func (s *BrokerServer) OnClose(c gnet.Conn, err error) (action gnet.Action) {
+func (s *Instance) OnClose(c gnet.Conn, err error) (action gnet.Action) {
 
-	user, err := state.CurrentUserFromConn(c)
+	user, err := currentUserFromConn(c)
 	if err != nil {
-		logger.ErrorF("Connection close error: %v", err)
+		logger.ErrorF("Connection stopPacketRetry error: %v", err)
 	}
 
-	s.heartbeatHandler.StopTicker(c)
+	s.heartbeatHandler.stopTicker(c)
 
-	logger.InfoF("[%s#%s] Connection close", c.RemoteAddr().String(), user.Label())
+	logger.InfoF("[%s#%s] Connection stopPacketRetry", c.RemoteAddr().String(), user.Label())
 	return
 }
 
-func (s *BrokerServer) OnTraffic(c gnet.Conn) (action gnet.Action) {
+func (s *Instance) OnTraffic(c gnet.Conn) (action gnet.Action) {
 
 	ctx := c.Context().(context.Context)
 
-	user, err := state.CurrentUserFromConn(c)
+	user, err := currentUserFromConn(c)
 	if err != nil {
 		logger.ErrorF("Connection traffic error: %v", err)
-		s.heartbeatHandler.StopTicker(c)
+		s.heartbeatHandler.stopTicker(c)
 		return gnet.None
 	}
 
 	logger.DebugF("[%s#%s] Connection traffic", c.RemoteAddr().String(), user.Label())
 
-	packets, e := s.codec.Decode(c)
+	packets, e := s.codec.decode(c)
 	if e != nil {
 
 		logger.ErrorF("[%s#%s] Connection traffic error:%v",
 			c.RemoteAddr().String(),
 			user.Label(),
 			e)
-		s.heartbeatHandler.StopTicker(c)
+		s.heartbeatHandler.stopTicker(c)
 		return gnet.None
 	}
 
 	if packets != nil {
 		for _, packet := range packets {
-			response, err11 := s.handler.HandlePacket(ctx, packet)
+			response, err11 := s.handler.handlePacket(ctx, packet)
 			if err11 != nil {
 				logger.ErrorF("[%s#%s] Connection traffic error:%v", c.RemoteAddr().String(), user.Label(), err11)
-				s.heartbeatHandler.StopTicker(c)
+				s.heartbeatHandler.stopTicker(c)
 				return gnet.None
 			}
 
@@ -181,17 +186,17 @@ func (s *BrokerServer) OnTraffic(c gnet.Conn) (action gnet.Action) {
 				continue
 			}
 
-			bs, err12 := s.codec.Encode(c, response)
+			bs, err12 := s.codec.encode(c, response)
 			if err12 != nil {
 				logger.ErrorF("[%s#%s] Connection traffic error:%v", c.RemoteAddr().String(), user.Label(), err12)
-				s.heartbeatHandler.StopTicker(c)
+				s.heartbeatHandler.stopTicker(c)
 				return gnet.None
 			}
 
 			c.AsyncWrite(bs.Bytes(), func(c gnet.Conn, err error) error {
 				if err != nil {
 					logging.Fatalf("[%s#%s] Connection traffic,write error:%v", c.RemoteAddr().String(), user.Label(), err)
-					s.heartbeatHandler.StopTicker(c)
+					s.heartbeatHandler.stopTicker(c)
 				}
 				return err
 			})
@@ -203,7 +208,7 @@ func (s *BrokerServer) OnTraffic(c gnet.Conn) (action gnet.Action) {
 	return gnet.None
 }
 
-func (s *BrokerServer) OnTick() (delay time.Duration, action gnet.Action) {
+func (s *Instance) OnTick() (delay time.Duration, action gnet.Action) {
 
 	broker := domain.BrokerInfo{
 		Addr:    s.addr,
