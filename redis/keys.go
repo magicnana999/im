@@ -8,7 +8,7 @@ const (
 	sequence     = "im:%s:sequence:%s"
 	sequenceLock = "im:%s:sequence:%s:lock"
 	userConn     = "im:%s:user:connect:%s"
-	userClients  = "im:%s:user:clients:%s"
+	userClients  = "im:%s:user:clients:%d"
 	userLock     = "im:%s:user:lock:%s"
 )
 
@@ -32,8 +32,8 @@ func KeyUserConn(appId, ucLabel string) string {
 	return fmt.Sprintf(userConn, appId, ucLabel)
 }
 
-func KeyUserClients(appId, ucLabel string) string {
-	return fmt.Sprintf(userClients, appId, ucLabel)
+func KeyUserClients(appId string, userId int64) string {
+	return fmt.Sprintf(userClients, appId, userId)
 }
 
 func KeyUserLock(appId, ucLabel string) string {

@@ -10,9 +10,11 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/protobuf/proto"
+	"sync"
 )
 
 var DefaultCommandHandler = &CommandHandler{}
+var commandHandlerMu sync.RWMutex
 
 type CommandHandler struct {
 	conn          *grpc.ClientConn
@@ -31,16 +33,24 @@ func (c *CommandHandler) IsSupport(ctx context.Context, packetType int32) bool {
 	return pb.TypeCommand == packetType
 }
 
-func (c *CommandHandler) InitHandler() error {
+func InitCommandHandler() *CommandHandler {
+
+	commandHandlerMu.Lock()
+	defer commandHandlerMu.Unlock()
+
+	if DefaultCommandHandler.conn != nil {
+		return DefaultCommandHandler
+	}
+
 	conn, err := grpc.NewClient("localhost:7540", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		logger.FatalF("did not connect: %v", err)
 	}
-	c.conn = conn
-	c.userApiClient = pb.NewUserApiClient(conn)
-	c.userState = state.InitUserState()
+	DefaultCommandHandler.conn = conn
+	DefaultCommandHandler.userApiClient = pb.NewUserApiClient(conn)
+	DefaultCommandHandler.userState = state.InitUserState()
 
-	return nil
+	return DefaultCommandHandler
 }
 
 func (c *CommandHandler) HandleCommand(ctx context.Context, cmd *pb.CommandBody) (proto.Message, error) {

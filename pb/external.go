@@ -239,3 +239,7 @@ func (mb *MessageBody) SetContent(content proto.Message) {
 	default:
 	}
 }
+
+func (mb *MessageBody) IsToGroup() bool {
+	return mb.GroupId > 0 && mb.To == 0
+}

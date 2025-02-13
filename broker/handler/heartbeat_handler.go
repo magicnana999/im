@@ -19,6 +19,7 @@ const (
 	heartbeatInterval = 30 * time.Second
 )
 
+var heartbeatMu sync.RWMutex
 var DefaultHeartbeatHandler = &HeartbeatHandler{}
 
 type HeartbeatHandler struct {
@@ -42,7 +43,15 @@ func (h *HeartbeatHandler) IsSupport(ctx context.Context, packetType int32) bool
 	return packetType == pb.TypeHeartbeat
 }
 
-func (h *HeartbeatHandler) InitHandler() error {
+func InitHeartbeatHandler() *HeartbeatHandler {
+
+	heartbeatMu.Lock()
+	defer heartbeatMu.Unlock()
+
+	if DefaultHeartbeatHandler.heartbeatPool != nil {
+		return DefaultHeartbeatHandler
+	}
+
 	var (
 		DefaultAntsPoolSize = 1 << 18
 		ExpiryDuration      = 10 * time.Second
@@ -69,7 +78,7 @@ func (h *HeartbeatHandler) InitHandler() error {
 
 	logger.DebugF("HeartbeatHandler init")
 
-	return nil
+	return DefaultHeartbeatHandler
 }
 
 func (h *HeartbeatHandler) Count() int {

@@ -7,5 +7,10 @@ import (
 var DefaultBrokerState = &BrokerState{}
 
 type BrokerState struct {
-	redis.BrokerStorage
+	*redis.BrokerStorage
+}
+
+func InitBrokerState() *BrokerState {
+	DefaultBrokerState.BrokerStorage = redis.InitBrokerStorage()
+	return DefaultBrokerState
 }

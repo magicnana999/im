@@ -6,7 +6,7 @@
   cd $kafka_home
   bin/zookeeper-server-start.sh config/zookeeper.properties
   bin/kafka-server-start.sh config/server.properties
-  bin/kafka-topics.sh --create --topic im-message-route --bootstrap-server localhost:9092
+  bin/kafka-topics.sh --create --topic msg-route --bootstrap-server localhost:9092
 
 ```
 * Redis
@@ -22,15 +22,21 @@ redis-server
 
 ### 创建
 ``` shell
-bin/kafka-topics.sh --create --topic im-message-route --bootstrap-server localhost:9092 --partitions 8 --replication-factor 1
-bin/kafka-topics.sh --create --topic im-message-push --bootstrap-server localhost:9092 --partitions 8 --replication-factor 1
+bin/kafka-topics.sh --create --topic msg-route --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1
+bin/kafka-topics.sh --create --topic msg-store --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1
+bin/kafka-topics.sh --create --topic msg-push --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1
+bin/kafka-topics.sh --create --topic msg-offline --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1
 ```
 * partitions 分区8个
 * replication-factor 副本1个
 
 ### 删除
 ``` shell
-bin/kafka-topics.sh --delete --topic im-message-route --bootstrap-server localhost:9092
+bin/kafka-topics.sh --delete --topic msg-route --bootstrap-server localhost:9092
+bin/kafka-topics.sh --delete --topic msg-store --bootstrap-server localhost:9092
+bin/kafka-topics.sh --delete --topic msg-push --bootstrap-server localhost:9092
+bin/kafka-topics.sh --delete --topic msg-offline --bootstrap-server localhost:9092
+
 ```
 
 ### 查询
@@ -39,28 +45,28 @@ bin/kafka-topics.sh --list --bootstrap-server localhost:9092
 ```
 
 ```shell
-bin/kafka-topics.sh --describe --topic im-message-route --bootstrap-server localhost:9092
+bin/kafka-topics.sh --describe --topic msg-route --bootstrap-server localhost:9092
 ```
 
 ```text
-Topic: im-message-route	TopicId: wvB01QusSg2964GQdrYowQ	PartitionCount: 8	ReplicationFactor: 1	Configs:
-	Topic: im-message-route	Partition: 0	Leader: 0	Replicas: 0	Isr: 0	Elr: N/A	LastKnownElr: N/A
-	Topic: im-message-route	Partition: 1	Leader: 0	Replicas: 0	Isr: 0	Elr: N/A	LastKnownElr: N/A
-	Topic: im-message-route	Partition: 2	Leader: 0	Replicas: 0	Isr: 0	Elr: N/A	LastKnownElr: N/A
-	Topic: im-message-route	Partition: 3	Leader: 0	Replicas: 0	Isr: 0	Elr: N/A	LastKnownElr: N/A
-	Topic: im-message-route	Partition: 4	Leader: 0	Replicas: 0	Isr: 0	Elr: N/A	LastKnownElr: N/A
-	Topic: im-message-route	Partition: 5	Leader: 0	Replicas: 0	Isr: 0	Elr: N/A	LastKnownElr: N/A
-	Topic: im-message-route	Partition: 6	Leader: 0	Replicas: 0	Isr: 0	Elr: N/A	LastKnownElr: N/A
-	Topic: im-message-route	Partition: 7	Leader: 0	Replicas: 0	Isr: 0	Elr: N/A	LastKnownElr: N/A
+Topic: msg-route	TopicId: wvB01QusSg2964GQdrYowQ	PartitionCount: 8	ReplicationFactor: 1	Configs:
+	Topic: msg-route	Partition: 0	Leader: 0	Replicas: 0	Isr: 0	Elr: N/A	LastKnownElr: N/A
+	Topic: msg-route	Partition: 1	Leader: 0	Replicas: 0	Isr: 0	Elr: N/A	LastKnownElr: N/A
+	Topic: msg-route	Partition: 2	Leader: 0	Replicas: 0	Isr: 0	Elr: N/A	LastKnownElr: N/A
+	Topic: msg-route	Partition: 3	Leader: 0	Replicas: 0	Isr: 0	Elr: N/A	LastKnownElr: N/A
+	Topic: msg-route	Partition: 4	Leader: 0	Replicas: 0	Isr: 0	Elr: N/A	LastKnownElr: N/A
+	Topic: msg-route	Partition: 5	Leader: 0	Replicas: 0	Isr: 0	Elr: N/A	LastKnownElr: N/A
+	Topic: msg-route	Partition: 6	Leader: 0	Replicas: 0	Isr: 0	Elr: N/A	LastKnownElr: N/A
+	Topic: msg-route	Partition: 7	Leader: 0	Replicas: 0	Isr: 0	Elr: N/A	LastKnownElr: N/A
 ```
 
-#### 输出解析  ```Topic: im-message-route	TopicId: wvB01QusSg2964GQdrYowQ	PartitionCount: 8	ReplicationFactor: 1	Configs:```
+#### 输出解析  ```Topic: msg-route	TopicId: wvB01QusSg2964GQdrYowQ	PartitionCount: 8	ReplicationFactor: 1	Configs:```
 
 
-1. Topic: im-message-route 
+1. Topic: msg-route 
    * 这是正在查询的 Kafka topic 名称。
 2. TopicId: wvB01QusSg2964GQdrYowQ 
-   * 每个 topic 在 Kafka 中有一个唯一的 ID，这里是 im-message-route 的 TopicId。
+   * 每个 topic 在 Kafka 中有一个唯一的 ID，这里是 msg-route 的 TopicId。
 3. PartitionCount: 8 
    * 该 topic 有 8 个分区。这意味着该 topic 中的消息会被分散到这 8 个分区中。
 4. ReplicationFactor: 1 
@@ -68,9 +74,9 @@ Topic: im-message-route	TopicId: wvB01QusSg2964GQdrYowQ	PartitionCount: 8	Replic
 5. Configs: 
    * 该行没有列出具体的配置项，表示该 topic 使用了 Kafka 的默认配置。
 
-#### 每个分区输出解析  ```Topic: im-message-route	Partition: 0	Leader: 0	Replicas: 0	Isr: 0	Elr: N/A	LastKnownElr: N/A```
+#### 每个分区输出解析  ```Topic: msg-route	Partition: 0	Leader: 0	Replicas: 0	Isr: 0	Elr: N/A	LastKnownElr: N/A```
 1. Partition: 0 
-   * 这是 im-message-route topic 的第 0 号分区。Kafka 会将消息分配到这些分区。
+   * 这是 msg-route topic 的第 0 号分区。Kafka 会将消息分配到这些分区。
 2. Leader: 0 
    * 该分区的 Leader 位于 Broker 0。Kafka 的分区有一个 leader，负责处理所有的读写请求。leader 负责数据的写入和分发，其他副本只是进行数据同步。
 3. Replicas: 0 
@@ -83,20 +89,20 @@ Topic: im-message-route	TopicId: wvB01QusSg2964GQdrYowQ	PartitionCount: 8	Replic
 
 ### 消费状态
 ```shell
-bin/kafka-consumer-groups.sh --describe --group im-message-route-group --bootstrap-server localhost:9092
+bin/kafka-consumer-groups.sh --describe --group msg-route-group --bootstrap-server localhost:9092
 ```
 ```textmate
-Consumer group 'im-message-route-group' has no active members.
+Consumer group 'msg-route-group' has no active members.
 
 GROUP                  TOPIC            PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID     HOST           CLIENT-ID
-im-message-route-group im-message-route 3          43543           43543           0               -               -               -
-im-message-route-group im-message-route 2          43336           43336           0               -               -               -
-im-message-route-group im-message-route 1          43145           43145           0               -               -               -
-im-message-route-group im-message-route 0          43749           43749           0               -               -               -
-im-message-route-group im-message-route 7          43438           43438           0               -               -               -
-im-message-route-group im-message-route 6          43529           43529           0               -               -               -
-im-message-route-group im-message-route 5          43743           43743           0               -               -               -
-im-message-route-group im-message-route 4          43635           43635           0               -               -               -%
+msg-route-group msg-route 3          43543           43543           0               -               -               -
+msg-route-group msg-route 2          43336           43336           0               -               -               -
+msg-route-group msg-route 1          43145           43145           0               -               -               -
+msg-route-group msg-route 0          43749           43749           0               -               -               -
+msg-route-group msg-route 7          43438           43438           0               -               -               -
+msg-route-group msg-route 6          43529           43529           0               -               -               -
+msg-route-group msg-route 5          43743           43743           0               -               -               -
+msg-route-group msg-route 4          43635           43635           0               -               -               -%
 ```
 
 ##### 说明

@@ -1,6 +1,7 @@
 package pb
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	imerror "github.com/magicnana999/im/errors"
@@ -49,6 +50,14 @@ func TestMessage(t *testing.T) {
 	}
 
 	mb := NewMessage(1000, 2000, 0, 11111, "appId", "cId", text)
+	js, _ := json.Marshal(mb)
+	fmt.Println(mb)
+	fmt.Println(string(js))
+
+	var mb2 MessageBody
+	json.Unmarshal(js, &mb2)
+	fmt.Println(mb2)
+	fmt.Println(mb2.Id, mb2.CId, mb2.GetTextContent().Text)
 
 	p := mb.Wrap()
 	fmt.Println(&p, p)

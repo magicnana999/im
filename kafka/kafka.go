@@ -1,9 +1,7 @@
 package kafka
 
 import (
-	"bytes"
 	"context"
-	"encoding/binary"
 	"github.com/magicnana999/im/logger"
 	"github.com/magicnana999/im/pb"
 	"github.com/panjf2000/ants/v2"
@@ -20,13 +18,14 @@ var (
 	lock     sync.RWMutex
 )
 
-type handle func(message *pb.MessageBody) error
+type MQMessageHandler interface {
+	Consume(ctx context.Context, msg *pb.MQMessage) error
+}
 
 type Consumer struct {
 	brokers   []string
 	topicInfo TopicInfo
-	executor  *goPool.Pool
-	handle    handle
+	handle    MQMessageHandler
 }
 
 type Producer struct {
@@ -35,12 +34,12 @@ type Producer struct {
 
 func (c *Consumer) Start(ctx context.Context) error {
 	go func() {
-		logger.InfoF("%d start consumer,topic:%s", routine.Goid(), c.topicInfo)
+		logger.InfoF("%d start consumer,Topic:%s", routine.Goid(), c.topicInfo)
 
 		reader := kafka.NewReader(kafka.ReaderConfig{
 			Brokers: c.brokers,
-			GroupID: c.topicInfo.group,
-			Topic:   c.topicInfo.topic,
+			GroupID: c.topicInfo.Group,
+			Topic:   c.topicInfo.Topic,
 		})
 
 		defer reader.Close()
@@ -55,13 +54,11 @@ func (c *Consumer) Start(ctx context.Context) error {
 					continue
 				}
 
-				c.executor.Submit(func() {
-					if err := handleMessageRoute(c.handle, &message); err != nil {
-						logger.ErrorF("%d consume message,topic:%s,error:%v", routine.Goid(), c.topicInfo.topic, err)
-						return
-					}
-					reader.CommitMessages(ctx, message)
-				})
+				if err := handleMessageRoute(ctx, c.handle, &message); err != nil {
+					logger.ErrorF("%d consume message,Topic:%s,error:%v", routine.Goid(), c.topicInfo.Topic, err)
+					return
+				}
+				reader.CommitMessages(ctx, message)
 
 			}
 		}
@@ -69,14 +66,14 @@ func (c *Consumer) Start(ctx context.Context) error {
 	return nil
 }
 
-func handleMessageRoute(h handle, m *kafka.Message) error {
-	var msg pb.MessageBody
+func handleMessageRoute(ctx context.Context, h MQMessageHandler, m *kafka.Message) error {
+	var msg pb.MQMessage
 	if err := proto.Unmarshal(m.Value, &msg); err != nil {
 		return err
 	}
-	logger.InfoF("%d consume message,topic:%s,id:%s", routine.Goid(), m.Topic, msg.Id)
+	logger.InfoF("%d consume message,Topic:%s,id:%s", routine.Goid(), m.Topic, msg.Id)
 
-	return h(&msg)
+	return h.Consume(ctx, &msg)
 }
 
 func initExecutor(maxWorkers int) *goPool.Pool {
@@ -95,26 +92,23 @@ func initExecutor(maxWorkers int) *goPool.Pool {
 	return executor
 }
 
-func InitConsumer(brokers []string, maxWorkers int, topic TopicInfo, handle handle) (*Consumer, error) {
-
-	e := initExecutor(maxWorkers)
+func InitConsumer(brokers []string, topic TopicInfo, handle MQMessageHandler) *Consumer {
 
 	c := &Consumer{
 		topicInfo: topic,
-		executor:  e,
 		handle:    handle,
 		brokers:   brokers,
 	}
 
-	logger.InfoF("%d init consumer,executor:%p", routine.Goid(), e)
+	logger.InfoF("%d init consumer", routine.Goid())
 
-	return c, nil
+	return c
 }
 
 func InitProducer(brokers []string) *Producer {
 	writer := &kafka.Writer{
 		Addr: kafka.TCP(brokers...), //TCP函数参数为不定长参数，可以传多个地址组成集群
-		//Topic:                  TopicRoute.topic,
+		//Topic:                  TopicRoute.Topic,
 		Balancer:               &kafka.Hash{}, // 用于对key进行hash，决定消息发送到哪个分区
 		MaxAttempts:            0,
 		WriteBackoffMin:        0,
@@ -141,28 +135,46 @@ func InitProducer(brokers []string) *Producer {
 	}
 }
 
-func (p *Producer) SendMessageRoute(ctx context.Context, packet *pb.Packet) error {
+func (p *Producer) send(ctx context.Context, topic string, m *pb.MessageBody, count int32) error {
+	if count == 0 {
+		count = 1
+	}
+	mq := &pb.MQMessage{
+		Id:      m.Id,
+		Count:   count,
+		Message: m,
+	}
 
-	msg := packet.GetMessageBody()
-	bs, e := proto.Marshal(msg)
+	bs, e := proto.Marshal(mq)
 	if e != nil {
 		return e
 	}
 
-	buf := new(bytes.Buffer)
-	k := binary.Write(buf, binary.BigEndian, msg.GetTo())
-	if k != nil {
-		return k
-	}
-	m := kafka.Message{
-		Topic:      Route.topic,
+	body := kafka.Message{
+		Topic:      topic,
 		Value:      bs,
 		Headers:    nil,
 		WriterData: nil,
 		Time:       time.Time{},
 	}
 
-	logger.InfoF("%d produce message,topic:%s,id:%s", routine.Goid(), m.Topic, msg.Id)
+	logger.InfoF("%d produce message,Topic:%s,id:%s", routine.Goid(), body.Topic, mq.Id)
 
-	return p.writer.WriteMessages(ctx, m)
+	return p.writer.WriteMessages(ctx, body)
+}
+
+func (p *Producer) SendRoute(ctx context.Context, m *pb.MessageBody, count int32) error {
+	return p.send(ctx, Route.Topic, m, count)
+}
+
+func (p *Producer) SendStore(ctx context.Context, m *pb.MessageBody, count int32) error {
+	return p.send(ctx, Store.Topic, m, count)
+}
+
+func (p *Producer) SendOffline(ctx context.Context, m *pb.MessageBody, count int32) error {
+	return p.send(ctx, Offline.Topic, m, count)
+}
+
+func (p *Producer) SendPush(ctx context.Context, m *pb.MessageBody, count int32) error {
+	return p.send(ctx, Push.Topic, m, count)
 }

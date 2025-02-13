@@ -8,8 +8,8 @@ import (
 var DefaultMessageHandler = &MessageHandler{}
 
 type MessageHandler struct {
-	receiver *MessageReceivingHandler
-	deliver  *MessageDeliveryHandler
+	receiver *MessageReceiver
+	deliver  *MessageDeliver
 }
 
 func (m *MessageHandler) HandlePacket(ctx context.Context, p *pb.Packet) (*pb.Packet, error) {
@@ -28,12 +28,8 @@ func (m *MessageHandler) IsSupport(ctx context.Context, packetType int32) bool {
 	return packetType == pb.TypeMessage
 }
 
-func (m *MessageHandler) InitHandler() error {
-	m.deliver = DefaultMessageDeliveryHandler
-	m.receiver = DefaultMessageReceivingHandler
-
-	m.deliver.InitHandler()
-	m.receiver.InitHandler()
-
-	return nil
+func InitMessageHandler() *MessageHandler {
+	DefaultMessageHandler.deliver = InitMessageDeliver()
+	DefaultMessageHandler.receiver = InitMessageReceiver()
+	return DefaultMessageHandler
 }

@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/magicnana999/im/pb"
 	"github.com/magicnana999/im/util/id"
-	"runtime"
 	"strings"
 	"sync"
 	"testing"
@@ -23,7 +22,10 @@ func TestProducer(t *testing.T) {
 			case <-ctx.Done():
 				return
 			default:
-				producer.sendMessageRoute(ctx, NewMessage())
+				producer.SendRoute(ctx, NewMessage().GetMessageBody(), 1)
+				producer.SendStore(ctx, NewMessage().GetMessageBody(), 1)
+				producer.SendPush(ctx, NewMessage().GetMessageBody(), 1)
+				producer.SendOffline(ctx, NewMessage().GetMessageBody(), 1)
 			}
 		}
 	}()
@@ -37,14 +39,20 @@ func TestConsumer(t *testing.T) {
 	var wg sync.WaitGroup
 	wg.Add(1)
 
-	c1, _ := InitConsumer([]string{"localhost:9092"}, runtime.NumCPU()*2, Route, process)
-	c1.Start(ctx)
+	InitConsumer([]string{"localhost:9092"}, Route, &TestMessageHandler{}).Start(ctx)
+	InitConsumer([]string{"localhost:9092"}, Store, &TestMessageHandler{}).Start(ctx)
+	InitConsumer([]string{"localhost:9092"}, Push, &TestMessageHandler{}).Start(ctx)
+	InitConsumer([]string{"localhost:9092"}, Offline, &TestMessageHandler{}).Start(ctx)
 
 	wg.Wait()
 
 }
 
-func process(m *pb.MessageBody) error {
+type TestMessageHandler struct {
+}
+
+func (t TestMessageHandler) Consume(ctx context.Context, msg *pb.MQMessage) error {
+	msg.GetMessage()
 	return nil
 }
 
@@ -62,7 +70,7 @@ func NewMessage() *pb.Packet {
 		CTime:    time.Now().UnixMilli(),
 	}
 
-	mb.Set(&pb.TextContent{
+	mb.SetContent(&pb.TextContent{
 		Text: "hello world",
 	})
 

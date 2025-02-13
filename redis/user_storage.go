@@ -19,6 +19,12 @@ func InitUserStorage() *UserStorage {
 	return DefaultUserStorage
 }
 
+func (s *UserStorage) LoadUserConn(ctx context.Context, appId string, userId int64) (map[string]string, error) {
+	key := KeyUserClients(appId, userId)
+	cmd := rds.HGetAll(ctx, key)
+	return cmd.Val(), cmd.Err()
+}
+
 func (s *UserStorage) StoreUserConn(ctx context.Context, uc *domain.UserConnection) (string, error) {
 
 	key := KeyUserConn(uc.AppId, uc.Label())
@@ -42,7 +48,7 @@ func (s *UserStorage) RefreshUserConn(ctx context.Context, uc *domain.UserConnec
 
 func (s *UserStorage) StoreUserClients(ctx context.Context, uc *domain.UserConnection) (int64, error) {
 
-	key := KeyUserClients(uc.AppId, uc.Label())
+	key := KeyUserClients(uc.AppId, uc.UserId)
 
 	js, err := json.Marshal(uc)
 	if err != nil {

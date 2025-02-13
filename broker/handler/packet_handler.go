@@ -5,12 +5,14 @@ import (
 	"github.com/magicnana999/im/errors"
 	"github.com/magicnana999/im/logger"
 	"github.com/magicnana999/im/pb"
+	"sync"
 )
+
+var handlerMu sync.Mutex
 
 type PacketHandler interface {
 	HandlePacket(ctx context.Context, packet *pb.Packet) (*pb.Packet, error)
 	IsSupport(ctx context.Context, packetType int32) bool
-	InitHandler() error
 }
 
 type PacketHandlerImpl struct {
@@ -19,13 +21,6 @@ type PacketHandlerImpl struct {
 
 var DefaultHandler = &PacketHandlerImpl{
 	handlers: make([]PacketHandler, 0),
-}
-
-func init() {
-
-	DefaultHandler.handlers = append(DefaultHandler.handlers,
-		DefaultHeartbeatHandler, DefaultCommandHandler)
-	DefaultHandler.InitHandler()
 }
 
 func (p *PacketHandlerImpl) HandlePacket(ctx context.Context, packet *pb.Packet) (*pb.Packet, error) {
@@ -48,13 +43,21 @@ func (p *PacketHandlerImpl) IsSupport(ctx context.Context, packetType int32) boo
 	return false
 }
 
-func (p *PacketHandlerImpl) InitHandler() error {
-	for _, handler := range p.handlers {
-		err := handler.InitHandler()
-		if err != nil {
-			logger.FatalF("init handler error: %v", err)
-		}
-	}
+func (p *PacketHandlerImpl) HeartbeatHandler() *HeartbeatHandler {
+	return DefaultHeartbeatHandler
+}
 
-	return nil
+func InitHandler() *PacketHandlerImpl {
+
+	handlerMu.Lock()
+	defer handlerMu.Unlock()
+
+	if len(DefaultHandler.handlers) != 0 {
+		return DefaultHandler
+	}
+	DefaultHandler.handlers = append(DefaultHandler.handlers, InitHeartbeatHandler())
+	DefaultHandler.handlers = append(DefaultHandler.handlers, InitCommandHandler())
+	DefaultHandler.handlers = append(DefaultHandler.handlers, InitMessageHandler())
+
+	return DefaultHandler
 }

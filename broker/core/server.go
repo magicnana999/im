@@ -44,8 +44,9 @@ type BrokerServer struct {
 	ctx               context.Context
 	interval          time.Duration
 	heartbeatInterval time.Duration
+	handler           handler.PacketHandler
+	heartbeatHandler  *handler.HeartbeatHandler
 	brokerState       *state.BrokerState
-	userState         *state.UserState
 }
 
 func Start(ctx context.Context, option *Option) {
@@ -60,8 +61,9 @@ func Start(ctx context.Context, option *Option) {
 		ctx:               ctx,
 		interval:          option.ServerInterval,
 		heartbeatInterval: option.HeartbeatInterval,
-		userState:         state.DefaultUserState,
-		brokerState:       state.DefaultBrokerState,
+		handler:           handler.InitHandler(),
+		brokerState:       state.InitBrokerState(),
+		heartbeatHandler:  handler.InitHeartbeatHandler(),
 	}
 	err := gnet.Run(ts, fmt.Sprintf("tcp://0.0.0.0:%s", DefaultPort),
 		gnet.WithMulticore(true),
@@ -167,7 +169,7 @@ func (s *BrokerServer) OnTraffic(c gnet.Conn) (action gnet.Action) {
 
 	if packets != nil {
 		for _, packet := range packets {
-			response, err11 := handler.DefaultHandler.HandlePacket(ctx, packet)
+			response, err11 := s.handler.HandlePacket(ctx, packet)
 			if err11 != nil {
 				logger.ErrorF("[%s#%s] Connection traffic error:%v", c.RemoteAddr().String(), user.Label(), err11)
 				handler.DefaultHeartbeatHandler.StopTicker(c)

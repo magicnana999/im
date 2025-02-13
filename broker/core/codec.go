@@ -21,6 +21,10 @@ var DefaultCodec = &LengthFieldBasedFrameCodec{}
 type LengthFieldBasedFrameCodec struct {
 }
 
+func InitCodec() Codec {
+	return DefaultCodec
+}
+
 func (l LengthFieldBasedFrameCodec) Encode(c gnet.Conn, p *pb.Packet) (*bb.ByteBuffer, error) {
 
 	buffer := bb.Get()
