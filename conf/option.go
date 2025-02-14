@@ -73,6 +73,7 @@ type Broker struct {
 	Addr              string `yaml:"addr"`
 	ServerInterval    int    `yaml:"serverInterval"`
 	HeartbeatInterval int    `yaml:"heartbeatInterval"`
+	LoggerLevel       string `yaml:"loggerLevel"`
 }
 
 type Grpc struct {

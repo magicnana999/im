@@ -88,6 +88,7 @@ func (c *commandHandler) handleCommand(ctx context.Context, cmd *pb.CommandBody)
 
 func login(ctx context.Context, request *pb.LoginRequest) (*pb.LoginReply, error) {
 
+	logger.DebugF("登录成功")
 	switch request.UserSig {
 	case "cukpovu1a37hpofg6sj0":
 		return &pb.LoginReply{
@@ -102,7 +103,7 @@ func login(ctx context.Context, request *pb.LoginRequest) (*pb.LoginReply, error
 	default:
 		return &pb.LoginReply{
 			AppId:  "19860220",
-			UserId: 0,
+			UserId: 100,
 		}, nil
 	}
 }

@@ -7,9 +7,7 @@ import (
 	"github.com/magicnana999/im/errors"
 	"github.com/magicnana999/im/logger"
 	"github.com/magicnana999/im/pb"
-	"github.com/panjf2000/ants/v2"
 	"github.com/panjf2000/gnet/v2"
-	"github.com/panjf2000/gnet/v2/pkg/logging"
 	goPool "github.com/panjf2000/gnet/v2/pkg/pool/goroutine"
 	"sync"
 	"time"
@@ -34,30 +32,12 @@ func initHeartbeatHandler() *heartbeatHandler {
 		return defaultHeartbeatHandler
 	}
 
-	var PoolSize = 1 << 18
-	var ExpiryDuration = 10 * time.Second
-	var Nonblocking = true
-
-	options := ants.Options{
-		ExpiryDuration: ExpiryDuration,
-		Nonblocking:    Nonblocking,
-		Logger:         logger.Logger,
-		PanicHandler: func(a any) {
-			logging.Errorf("goroutine pool panic: %v", a)
-		},
-	}
-	defaultAntsPool, err := ants.NewPool(PoolSize, ants.WithOptions(options))
-
-	if err != nil {
-		logger.FatalF("init heartbeat ants pool error: %v", err)
-	}
-
 	interval := conf.Global.Broker.HeartbeatInterval
 	if interval <= 0 {
 		interval = 30
 	}
 
-	defaultHeartbeatHandler.heartbeatPool = defaultAntsPool
+	defaultHeartbeatHandler.heartbeatPool = goPool.Default()
 	defaultHeartbeatHandler.userState = initUserState()
 	defaultHeartbeatHandler.interval = time.Duration(interval) * time.Second
 

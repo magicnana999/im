@@ -61,7 +61,7 @@ func initDeliver(ctx context.Context, codec codec) *deliver {
 	defaultDeliver.executor = pool
 	defaultDeliver.mqProducer = kafka.InitProducer([]string{conf.Global.Kafka.String()})
 	defaultDeliver.deliverFailed = func(delivery *delivery) {
-		eee := defaultDeliver.mqProducer.SendOffline(ctx, delivery.packet.GetMessageBody(), 1)
+		eee := defaultDeliver.mqProducer.SendOffline(ctx, delivery.packet.GetMessageBody(), []int64{delivery.uc.UserId})
 		if eee != nil {
 			logger.ErrorF("[%s#%s] deliver task creation error:%v", delivery.uc.ClientAddr, delivery.uc.Label(), err)
 

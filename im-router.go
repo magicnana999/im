@@ -4,17 +4,24 @@ import (
 	"context"
 	"flag"
 	"github.com/magicnana999/im/conf"
+	"github.com/magicnana999/im/logger"
+	"github.com/magicnana999/im/router"
+	"sync"
 )
 
 func main() {
 
-	ctx, cancel := context.WithCancel(context.Background())
-	_init()
-}
+	ctx, _ := context.WithCancel(context.Background())
 
-func _init() {
-	var file string
-	flag.StringVar(&file, "conf", "conf/im-router.yaml", "config file path")
+	var confFile string
+	flag.StringVar(&confFile, "conf", "conf/im-router.yaml", "config file path")
 	flag.Parse()
-	conf.LoadConfig(file)
+
+	conf.LoadConfig(confFile)
+	logger.InitLogger(conf.Global.Broker.LoggerLevel)
+	router.Start(ctx)
+
+	var wg sync.WaitGroup
+	wg.Add(1)
+	wg.Wait()
 }

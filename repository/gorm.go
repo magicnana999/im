@@ -8,22 +8,24 @@ import (
 	"sync"
 )
 
-var db *gorm.DB
+var DB *gorm.DB
 var lock sync.RWMutex
 
-func initGorm() {
+func InitGorm() *gorm.DB {
 
 	lock.Lock()
 	defer lock.Unlock()
 
-	if db == nil {
+	if DB == nil {
 		dsn := conf.Global.Mysql.String()
 
 		d, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 		if err != nil {
 			logger.FatalF("Failed to connect to MySQL:%v", err)
 		}
-		db = d
+		DB = d
 	}
+
+	return DB
 
 }

@@ -5,6 +5,7 @@ import (
 	"flag"
 	"github.com/magicnana999/im/broker"
 	"github.com/magicnana999/im/conf"
+	"github.com/magicnana999/im/logger"
 )
 
 func main() {
@@ -16,6 +17,7 @@ func main() {
 	flag.Parse()
 
 	conf.LoadConfig(confFile)
+	logger.InitLogger(conf.Global.Broker.LoggerLevel)
 	broker.Start(root, cancel)
 
 }

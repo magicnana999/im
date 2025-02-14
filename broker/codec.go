@@ -7,6 +7,7 @@ import (
 	"github.com/magicnana999/im/pb"
 	"github.com/panjf2000/gnet/v2"
 	bb "github.com/panjf2000/gnet/v2/pkg/pool/bytebuffer"
+	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -40,15 +41,13 @@ func (l *lengthFieldBasedFrameCodec) encode(c gnet.Conn, p *pb.Packet) (*bb.Byte
 		binary.Write(buffer, binary.BigEndian, int32(4))
 		binary.Write(buffer, binary.BigEndian, int32(hb))
 
-		logger.DebugF("[%s#%s] encode heartbeat,buffer:%d,length:%d,value:%d",
-			user.BrokerAddr,
-			user.Label(),
-			buffer.Len(),
-			buffer.Len()-4,
-			hb)
-
 		return buffer, nil
 	} else {
+
+		if logger.IsDebug() {
+			bss, _ := protojson.Marshal(p)
+			logger.DebugF("[%s#%s] encode %s", user.ClientAddr, user.Label(), string(bss))
+		}
 
 		bs, e := proto.Marshal(p)
 
@@ -58,14 +57,6 @@ func (l *lengthFieldBasedFrameCodec) encode(c gnet.Conn, p *pb.Packet) (*bb.Byte
 
 		binary.Write(buffer, binary.BigEndian, int32(len(bs)))
 		binary.Write(buffer, binary.BigEndian, bs)
-
-		logger.DebugF("[%s#%s] encode packet,buffer:%d,length:%d,id:%v",
-			user.BrokerAddr,
-			user.Label(),
-			buffer.Len(),
-			len(bs),
-			p)
-
 		return buffer, nil
 	}
 }
@@ -90,13 +81,6 @@ func (l *lengthFieldBasedFrameCodec) decode(c gnet.Conn) ([]*pb.Packet, error) {
 			var heartbeat int32
 			binary.Read(c, binary.BigEndian, &heartbeat)
 
-			logger.DebugF("[%s#%s] decode heartbeat,buffer:%d,length:%d,value:%d",
-				c.RemoteAddr().String(),
-				user.Label(),
-				c.InboundBuffered(),
-				length,
-				heartbeat)
-
 			packet := pb.NewHeartbeat(int32(heartbeat))
 			result = append(result, packet)
 
@@ -119,12 +103,10 @@ func (l *lengthFieldBasedFrameCodec) decode(c gnet.Conn) ([]*pb.Packet, error) {
 				return nil, errors.DecodeError.Detail(e4)
 			}
 
-			logger.DebugF("[%s#%s] decode packet,buffer:%d,length:%d,packet:%v",
-				c.RemoteAddr().String(),
-				user.Label(),
-				c.InboundBuffered(),
-				length,
-				p)
+			if logger.IsDebug() {
+				bss, _ := protojson.Marshal(&p)
+				logger.DebugF("[%s#%s] decode %s", user.ClientAddr, user.Label(), string(bss))
+			}
 
 			result = append(result, &p)
 

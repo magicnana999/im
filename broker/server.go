@@ -81,7 +81,7 @@ func Start(ctx context.Context, cancel context.CancelFunc) {
 		gnet.WithSocketRecvBuffer(4096),
 		gnet.WithSocketSendBuffer(4096),
 		gnet.WithTicker(true),
-		gnet.WithLogger(logger.Logger),
+		gnet.WithLogger(logger.InitLogger("debug")),
 		gnet.WithLogLevel(logging.DebugLevel),
 		gnet.WithEdgeTriggeredIO(true),
 		gnet.WithEdgeTriggeredIOChunk(0))
@@ -93,8 +93,6 @@ func Start(ctx context.Context, cancel context.CancelFunc) {
 }
 
 func (s *Instance) OnBoot(eng gnet.Engine) (action gnet.Action) {
-	logger.Info("BrokerInstance started")
-
 	s.eng = eng
 
 	brokerInfo := domain.BrokerInfo{Addr: s.addr, StartAt: time.Now().UnixMilli()}
@@ -126,8 +124,6 @@ func (s *Instance) OnOpen(c gnet.Conn) (out []byte, action gnet.Action) {
 	subCtx := context.WithValue(s.ctx, currentUserKey, uc)
 	c.SetContext(subCtx)
 
-	logger.InfoF("[%s#%s] Connection open", c.RemoteAddr().String(), uc.Label())
-
 	if err := s.heartbeatHandler.startTicker(subCtx, c, uc); err != nil {
 		logger.ErrorF("Connection open error: %v", err)
 		s.heartbeatHandler.stopTicker(c)
@@ -151,8 +147,6 @@ func (s *Instance) OnTraffic(c gnet.Conn) (action gnet.Action) {
 		s.heartbeatHandler.stopTicker(c)
 		return gnet.None
 	}
-
-	logger.DebugF("[%s#%s] Connection traffic", c.RemoteAddr().String(), user.Label())
 
 	packets, e := s.codec.decode(c)
 	if e != nil {

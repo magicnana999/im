@@ -2,6 +2,7 @@ broker:
     addr: "tcp://0.0.0.0:7539"
     ServerInterval: 30
     HeartbeatInterval: 30
+    loggerLevel: debug
 mysql:
     user: root
     password: root1234

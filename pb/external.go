@@ -241,5 +241,5 @@ func (mb *MessageBody) SetContent(content proto.Message) {
 }
 
 func (mb *MessageBody) IsToGroup() bool {
-	return mb.GroupId > 0 && mb.To == 0
+	return mb.GroupId > 0
 }

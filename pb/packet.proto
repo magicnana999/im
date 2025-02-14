@@ -136,7 +136,9 @@ message LoginReply{
 message MQMessage{
   string id = 1;
   int32 count = 2;
-  MessageBody message = 3;
+  repeated int64 userIds = 3;
+  repeated string userLabels = 4;
+  MessageBody message = 5;
 }
 
 

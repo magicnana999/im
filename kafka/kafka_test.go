@@ -2,13 +2,25 @@ package kafka
 
 import (
 	"context"
+	"github.com/magicnana999/im/conf"
+	"github.com/magicnana999/im/logger"
 	"github.com/magicnana999/im/pb"
 	"github.com/magicnana999/im/util/id"
+	"os"
 	"strings"
 	"sync"
 	"testing"
 	"time"
 )
+
+func TestMain(m *testing.M) {
+	conf.LoadConfig("/Users/jinsong/source/github/im/conf/im-router.yaml")
+	logger.InitLogger("debug")
+
+	exitCode := m.Run()
+	os.Exit(exitCode)
+
+}
 
 func TestProducer(t *testing.T) {
 	ctx, _ := context.WithCancel(context.Background())
@@ -23,9 +35,6 @@ func TestProducer(t *testing.T) {
 				return
 			default:
 				producer.SendRoute(ctx, NewMessage().GetMessageBody(), 1)
-				producer.SendStore(ctx, NewMessage().GetMessageBody(), 1)
-				producer.SendPush(ctx, NewMessage().GetMessageBody(), 1)
-				producer.SendOffline(ctx, NewMessage().GetMessageBody(), 1)
 			}
 		}
 	}()
@@ -40,9 +49,6 @@ func TestConsumer(t *testing.T) {
 	wg.Add(1)
 
 	InitConsumer([]string{"localhost:9092"}, Route, &TestMessageHandler{}).Start(ctx)
-	InitConsumer([]string{"localhost:9092"}, Store, &TestMessageHandler{}).Start(ctx)
-	InitConsumer([]string{"localhost:9092"}, Push, &TestMessageHandler{}).Start(ctx)
-	InitConsumer([]string{"localhost:9092"}, Offline, &TestMessageHandler{}).Start(ctx)
 
 	wg.Wait()
 
@@ -51,7 +57,7 @@ func TestConsumer(t *testing.T) {
 type TestMessageHandler struct {
 }
 
-func (t TestMessageHandler) Consume(ctx context.Context, msg *pb.MQMessage) error {
+func (t *TestMessageHandler) Consume(ctx context.Context, msg *pb.MQMessage) error {
 	msg.GetMessage()
 	return nil
 }
