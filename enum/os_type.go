@@ -1,7 +1,5 @@
 package enum
 
-import "fmt"
-
 type OSType int
 
 const (
@@ -32,10 +30,6 @@ func (o OSType) Code() int {
 	return int(o)
 }
 
-func (o OSType) GetParser() (EnumParser, error) {
-	return DefaultOSTypeParser, nil
-}
-
 func (o OSType) Valid() bool {
 	return o >= Windows && o <= Vivo
 }
@@ -49,17 +43,4 @@ func (o OSType) GetDeviceType() DeviceType {
 	default:
 		return DeviceType(0)
 	}
-}
-
-var (
-	DefaultOSTypeParser = OSTypeParser{}
-)
-
-type OSTypeParser struct{}
-
-func (p OSTypeParser) Parse(code int) (any, error) {
-	if code >= int(Windows) && code <= int(Vivo) {
-		return OSType(code), nil
-	}
-	return nil, fmt.Errorf("invalid OSType code: %d", code)
 }
