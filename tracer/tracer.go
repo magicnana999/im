@@ -8,7 +8,6 @@ import (
 	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
 	"go.opentelemetry.io/otel/sdk/trace"
 	traceing "go.opentelemetry.io/otel/trace"
-	"os"
 )
 
 const name = "go.opentelemetry.io/otel/tracer"
@@ -22,10 +21,10 @@ func init() {
 
 	otel.SetTextMapPropagator(b3.New())
 
-	f, _ := os.Create("trace.txt")
+	//f, _ := os.Create("trace.txt")
 
 	exp, _ := stdouttrace.New(
-		stdouttrace.WithWriter(f),
+		//stdouttrace.WithWriter(f),
 		stdouttrace.WithPrettyPrint(),
 		stdouttrace.WithoutTimestamps(),
 	)
