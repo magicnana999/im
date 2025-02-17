@@ -2,10 +2,10 @@ package router
 
 import (
 	"context"
-	"github.com/goccy/go-json"
 	"github.com/magicnana999/im/conf"
 	"github.com/magicnana999/im/domain"
 	"github.com/magicnana999/im/kafka"
+	"github.com/magicnana999/im/logger"
 	"github.com/magicnana999/im/pb"
 	"github.com/magicnana999/im/redis"
 	"github.com/magicnana999/im/svc"
@@ -51,8 +51,10 @@ func (s *messageRouter) routeMessage(ctx context.Context, delivery *pb.MQMessage
 			return err
 		}
 	} else {
-		userIds = append(userIds, message.UserId)
+		userIds = append(userIds, message.To)
 	}
+
+	logger.DebugF("receive userIds: %v", userIds)
 
 	online := make(map[string]*domain.UserConnection)
 	offline := make([]int64, 0)
@@ -68,14 +70,12 @@ func (s *messageRouter) routeMessage(ctx context.Context, delivery *pb.MQMessage
 		}
 
 		for k, v := range m {
-			var uc *domain.UserConnection
-			ee := json.Unmarshal([]byte(v), uc)
-			if ee != nil {
-				return e
-			}
-			online[k] = uc
+			online[k] = v
 		}
 	}
+
+	logger.DebugF("online users: %d", len(online))
+	logger.DebugF("offline users: %d", len(offline))
 
 	brokerMap := make(map[string][]string)
 	for _, uc := range online {
@@ -85,6 +85,8 @@ func (s *messageRouter) routeMessage(ctx context.Context, delivery *pb.MQMessage
 
 		brokerMap[uc.BrokerAddr] = append(brokerMap[uc.BrokerAddr], uc.Label())
 	}
+
+	logger.DebugF("online brokers: %d", len(brokerMap))
 
 	for key, v := range brokerMap {
 		s.mqProducer.SendDeliver(ctx, key, message, v)

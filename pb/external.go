@@ -46,20 +46,6 @@ func NewMessage(
 	return mb
 }
 
-func (p *Packet) IsRequest() bool {
-	if p.Type == TypeMessage {
-		return p.GetMessageBody().Flow == FlowRequest
-	}
-	return false
-}
-
-func (p *Packet) IsResponse() bool {
-	if p.Type == TypeMessage {
-		return p.GetMessageBody().Flow == FlowResponse
-	}
-	return false
-}
-
 func (p *Packet) IsHeartbeat() bool {
 	return p.Type == TypeHeartbeat
 }
@@ -139,19 +125,10 @@ func (mb *MessageBody) Success(content proto.Message) *MessageBody {
 	}
 
 	ack := &MessageBody{
-		Id:       mb.Id,
-		AppId:    mb.AppId,
-		UserId:   mb.UserId,
-		CId:      mb.CId,
-		To:       mb.To,
-		GroupId:  mb.GroupId,
-		Sequence: mb.Sequence,
-		Flow:     FlowResponse,
-		NeedAck:  NO,
-		CTime:    mb.CTime,
-		STime:    time.Now().UnixMilli(),
-		CType:    mb.CType,
-		Code:     0,
+		Id:      mb.Id,
+		Flow:    FlowResponse,
+		NeedAck: NO,
+		Code:    0,
 		//Content:  mb.Content,
 	}
 
@@ -242,4 +219,18 @@ func (mb *MessageBody) SetContent(content proto.Message) {
 
 func (mb *MessageBody) IsToGroup() bool {
 	return mb.GroupId > 0
+}
+
+func (mb *MessageBody) IsRequest() bool {
+	if mb.Flow == FlowRequest {
+		return true
+	}
+	return false
+}
+
+func (mb *MessageBody) IsResponse() bool {
+	if mb.Flow == FlowResponse {
+		return true
+	}
+	return false
 }

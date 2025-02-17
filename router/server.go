@@ -14,7 +14,7 @@ var lock sync.Mutex
 
 type Server struct {
 	mqProducer *kafka.Producer
-	mqRouter   *kafka.Consumer
+	mqConsumer *kafka.Consumer
 	msgRouter  *messageRouter
 	executor   *goPool.Pool
 }
@@ -29,11 +29,11 @@ func Start(ctx context.Context) *Server {
 
 	s := &Server{}
 
-	s.mqRouter = kafka.InitConsumer([]string{conf.Global.Kafka.String()}, kafka.Route, s)
+	s.mqConsumer = kafka.InitConsumer([]string{conf.Global.Kafka.String()}, kafka.Route, s)
 	s.mqProducer = kafka.InitProducer([]string{conf.Global.Kafka.String()})
 	s.executor = goPool.Default()
 	s.msgRouter = initMessageRouter()
-	s.mqRouter.Start(ctx)
+	s.mqConsumer.Start(ctx)
 
 	DefaultServer = s
 

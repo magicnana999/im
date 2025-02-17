@@ -3,6 +3,7 @@ package redis
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/magicnana999/im/domain"
 	"github.com/magicnana999/im/errors"
 	"strconv"
@@ -19,10 +20,26 @@ func InitUserStorage() *UserStorage {
 	return DefaultUserStorage
 }
 
-func (s *UserStorage) LoadUserConn(ctx context.Context, appId string, userId int64) (map[string]string, error) {
+func (s *UserStorage) LoadUserConn(ctx context.Context, appId string, userId int64) (map[string]*domain.UserConnection, error) {
 	key := KeyUserClients(appId, userId)
 	cmd := rds.HGetAll(ctx, key)
-	return cmd.Val(), cmd.Err()
+	if cmd.Err() == nil {
+		m := cmd.Val()
+		ret := make(map[string]*domain.UserConnection, len(m))
+		for k, v := range m {
+
+			var uc domain.UserConnection
+			ee := json.Unmarshal([]byte(v), &uc)
+			if ee != nil {
+				return nil, ee
+			}
+
+			ret[k] = &uc
+		}
+		return ret, nil
+	} else {
+		return nil, cmd.Err()
+	}
 }
 
 func (s *UserStorage) StoreUserConn(ctx context.Context, uc *domain.UserConnection) (string, error) {
@@ -54,6 +71,9 @@ func (s *UserStorage) StoreUserClients(ctx context.Context, uc *domain.UserConne
 	if err != nil {
 		return 0, errors.UserStoreError.Detail(err)
 	}
+
+	ping := rds.Ping(ctx)
+	fmt.Println(ping)
 
 	ret := rds.HSet(ctx, key, uc.Label(), string(js))
 

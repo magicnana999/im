@@ -176,10 +176,11 @@ func (c *Client) handlePacket(ctx context.Context, packet *pb.Packet, sender *se
 		c.LastHeartbeatReceive = time.Now().UnixMilli()
 		return
 	case pb.TypeMessage:
-		if packet.IsResponse() {
-			sender.close(packet.GetMessageBody().GetId())
+		mb := packet.GetMessageBody()
+		if mb.IsResponse() {
+			sender.close(mb.Id)
 		} else {
-			c.receiveMessage(ctx, packet, sender)
+			c.receiveMessage(ctx, mb, sender)
 		}
 	case pb.TypeCommand:
 		c.receiveCommand(ctx, packet, sender)
@@ -206,8 +207,8 @@ func (c *Client) receiveCommand(ctx context.Context, packet *pb.Packet, s *sende
 	}
 }
 
-func (c *Client) receiveMessage(ctx context.Context, packet *pb.Packet, s *sender) {
-	s.send(packet.GetMessageBody().Success(nil).Wrap())
+func (c *Client) receiveMessage(ctx context.Context, mb *pb.MessageBody, s *sender) {
+	write(c.C, mb.Success(nil).Wrap())
 }
 
 func fibonacci(n int) int {
@@ -278,12 +279,6 @@ func (s *sender) closeAll() {
 
 func (s *sender) send(packet *pb.Packet) {
 
-	if packet.Type != pb.TypeHeartbeat {
-		bbs, _ := protojson.Marshal(packet)
-		logger.DebugF("发送：%s\n\n", string(bbs))
-
-	}
-
 	s.packets <- packet
 }
 
@@ -314,11 +309,7 @@ func (s *sender) start() {
 			case pb.TypeCommand:
 				s.sendCommand(packet)
 			case pb.TypeMessage:
-				if packet.IsResponse() {
-					s.close(packet.GetMessageBody().GetId())
-				} else {
-					s.sendMessage(packet)
-				}
+				s.sendMessage(packet)
 			}
 		}
 	}
@@ -334,7 +325,8 @@ func (s *sender) sendCommand(packet *pb.Packet) {
 
 func (s *sender) sendMessage(packet *pb.Packet) {
 	s.lock.RLock()
-	_, exist := s.m[packet.GetMessageBody().GetId()]
+	mb := packet.GetMessageBody()
+	_, exist := s.m[mb.Id]
 	s.lock.RUnlock()
 	if !exist {
 		subCtx, cancel := context.WithCancel(s.ctx)
@@ -396,6 +388,11 @@ func write(conn net.Conn, packet *pb.Packet) (int, error) {
 }
 
 func encode(p *pb.Packet) (*bb.ByteBuffer, error) {
+
+	if p.Type != pb.TypeHeartbeat {
+		bbs, _ := protojson.Marshal(p)
+		logger.DebugF("发送：%s\n\n", string(bbs))
+	}
 
 	buffer := bb.Get()
 

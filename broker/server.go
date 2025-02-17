@@ -2,6 +2,7 @@ package broker
 
 import (
 	"context"
+	"fmt"
 	"github.com/magicnana999/im/conf"
 	"github.com/magicnana999/im/domain"
 	"github.com/magicnana999/im/enum"
@@ -65,9 +66,13 @@ func Start(ctx context.Context, cancel context.CancelFunc) {
 		deliver:          initDeliver(ctx, initCodec()),
 	}
 
-	defaultInstance = ts
+	go ts.deliver.start()
+	defaultMessageHandler.deliver = ts.deliver
 
-	err := gnet.Run(ts, ts.addr,
+	defaultInstance = ts
+	addr := fmt.Sprintf("tcp://%s", ts.addr)
+
+	err := gnet.Run(ts, addr,
 		gnet.WithMulticore(true),
 		gnet.WithLockOSThread(true),
 		gnet.WithReadBufferCap(4096),
@@ -89,7 +94,6 @@ func Start(ctx context.Context, cancel context.CancelFunc) {
 		logger.FatalF("Start BrokerInstance error: %v", err)
 	}
 
-	ts.deliver.start()
 }
 
 func (s *Instance) OnBoot(eng gnet.Engine) (action gnet.Action) {

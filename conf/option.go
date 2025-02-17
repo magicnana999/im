@@ -2,6 +2,7 @@ package conf
 
 import (
 	"fmt"
+	"github.com/magicnana999/im/util/ip"
 	"github.com/magicnana999/im/util/str"
 	"gopkg.in/yaml.v3"
 	"os"
@@ -94,5 +95,14 @@ func LoadConfig(path string) error {
 	}
 
 	Global = config
+
+	if config.Broker.Addr == "" {
+		i, e := ip.GetLocalIP()
+		if e != nil {
+			fmt.Errorf("can not get local ip %v", e)
+		}
+
+		config.Broker.Addr = fmt.Sprintf("%s:7539", i)
+	}
 	return nil
 }

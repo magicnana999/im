@@ -26,6 +26,9 @@ bin/kafka-topics.sh --create --topic msg-route --bootstrap-server localhost:9092
 bin/kafka-topics.sh --create --topic msg-store --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1
 bin/kafka-topics.sh --create --topic msg-push --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1
 bin/kafka-topics.sh --create --topic msg-offline --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1
+
+bin/kafka-topics.sh --create --topic 127.0.0.1-7539 --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1
+
 ```
 * partitions 分区8个
 * replication-factor 副本1个
@@ -89,6 +92,7 @@ Topic: msg-route	TopicId: wvB01QusSg2964GQdrYowQ	PartitionCount: 8	ReplicationFa
 
 ### 消费状态
 ```shell
+bin/kafka-consumer-groups.sh --describe --group 127.0.0.1-7539-group --bootstrap-server localhost:9092
 bin/kafka-consumer-groups.sh --describe --group msg-route-group --bootstrap-server localhost:9092
 ```
 ```textmate

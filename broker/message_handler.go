@@ -22,12 +22,15 @@ func (m *messageHandler) handlePacket(ctx context.Context, p *pb.Packet) (*pb.Pa
 		return nil, e
 	}
 
-	if p.IsRequest() {
-		return m.receiver.receive(ctx, p.GetMessageBody())
+	mb := p.GetMessageBody()
+	if mb.IsRequest() {
+		logger.DebugF("[%s#%s] receive request %s", user.ClientAddr, user.Label(), mb.Id)
+		return m.receiver.receive(ctx, mb)
 	}
 
-	if p.IsResponse() {
-		m.deliver.ack(&delivery{packet: p, uc: user})
+	if mb.IsResponse() {
+		logger.DebugF("[%s#%s] receive response %s", user.ClientAddr, user.Label(), mb.Id)
+		m.deliver.ack(mb.Id)
 	}
 
 	return nil, nil
@@ -46,7 +49,6 @@ func initMessageHandler() *messageHandler {
 		return defaultMessageHandler
 	}
 
-	defaultMessageHandler.deliver = defaultDeliver
 	defaultMessageHandler.receiver = initMessageReceiver()
 
 	logger.DebugF("messageHandler init")

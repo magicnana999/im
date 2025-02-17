@@ -6,7 +6,6 @@ import (
 	"github.com/magicnana999/im/enum"
 	"github.com/magicnana999/im/errors"
 	"github.com/magicnana999/im/redis"
-	"strconv"
 	"sync"
 )
 
@@ -65,22 +64,9 @@ func (s *userState) refreshUser(ctx context.Context, uc *domain.UserConnection) 
 	return nil
 }
 
-func (s *userState) loadLocalUser(appId string, userId int64) []*domain.UserConnection {
-	labels := label(appId, userId)
-	var ret []*domain.UserConnection
-	for _, v := range labels {
-		if val, ok := s.m.Load(v); ok && val.(*domain.UserConnection).UserId == userId {
-			ret = append(ret, val.(*domain.UserConnection))
-		}
+func (s *userState) loadLocalUser(label string) *domain.UserConnection {
+	if val, ok := s.m.Load(label); ok {
+		return val.(*domain.UserConnection)
 	}
-	if len(ret) == 0 {
-		return nil
-	}
-	return ret
-}
-
-func label(appId string, userId int64) []string {
-	s1 := appId + "#" + strconv.FormatInt(userId, 10) + "#" + enum.Desktop.String()
-	s2 := appId + "#" + strconv.FormatInt(userId, 10) + "#" + enum.Mobile.String()
-	return []string{s1, s2}
+	return nil
 }

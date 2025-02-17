@@ -6,6 +6,7 @@ import (
 	"github.com/magicnana999/im/pb"
 	"github.com/segmentio/kafka-go"
 	"google.golang.org/protobuf/proto"
+	"strings"
 	"sync"
 	"time"
 )
@@ -59,7 +60,7 @@ func (c *Consumer) Start(ctx context.Context) error {
 					continue
 				}
 
-				if err := handleMessageRoute(ctx, c.handle, &message); err != nil {
+				if err := handleMessageRoute(ctx, c.topicInfo.Topic, c.handle, &message); err != nil {
 					logger.ErrorF("consume message,topic:%s,error:%v", c.topicInfo.Topic, err)
 					return
 				}
@@ -71,13 +72,13 @@ func (c *Consumer) Start(ctx context.Context) error {
 	return nil
 }
 
-func handleMessageRoute(ctx context.Context, h MQMessageHandler, m *kafka.Message) error {
+func handleMessageRoute(ctx context.Context, topic string, h MQMessageHandler, m *kafka.Message) error {
 	var msg pb.MQMessage
 	if err := proto.Unmarshal(m.Value, &msg); err != nil {
 		return err
 	}
 
-	logger.DebugF("consume message,topic:%s,id:%s", Route.Topic, msg.Id)
+	logger.DebugF("consume message,topic:%s,id:%s", topic, msg.Id)
 
 	return h.Consume(ctx, &msg)
 }
@@ -178,5 +179,6 @@ func (p *Producer) SendPush(ctx context.Context, m *pb.MessageBody) error {
 }
 
 func (p *Producer) SendDeliver(ctx context.Context, topic string, m *pb.MessageBody, labels []string) error {
+	topic = strings.Replace(topic, ":", "-", -1)
 	return p.send(ctx, topic, m, nil, labels, 0)
 }

@@ -105,7 +105,7 @@ func (l *lengthFieldBasedFrameCodec) decode(c gnet.Conn) ([]*pb.Packet, error) {
 
 			if logger.IsDebug() {
 				bss, _ := protojson.Marshal(&p)
-				logger.DebugF("[%s#%s] decode %s", user.ClientAddr, user.Label(), string(bss))
+				logger.DebugF("[%s#%s] decode %s %d", user.ClientAddr, user.Label(), string(bss), c.InboundBuffered())
 			}
 
 			result = append(result, &p)

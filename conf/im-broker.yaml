@@ -1,7 +1,7 @@
 broker:
-    addr: "tcp://0.0.0.0:7539"
+    addr: "127.0.0.1:7539"
     ServerInterval: 30
-    HeartbeatInterval: 30
+    heartbeatInterval: 30
     loggerLevel: debug
 mysql:
     user: root

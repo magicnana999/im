@@ -95,10 +95,10 @@ func login(ctx context.Context, request *pb.LoginRequest) (*pb.LoginReply, error
 			AppId:  "19860220",
 			UserId: 1200120,
 		}, nil
-	case "cuf5ofe1a37nfi3p4b6g":
+	case "cukpovu1a37hpofg6sjg":
 		return &pb.LoginReply{
 			AppId:  "19860220",
-			UserId: 1200122,
+			UserId: 1200121,
 		}, nil
 	default:
 		return &pb.LoginReply{
