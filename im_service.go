@@ -1,7 +1,9 @@
 package main
 
-import "github.com/magicnana999/im/service/servr"
+import (
+	"github.com/magicnana999/im/service"
+)
 
 func main() {
-	servr.Start()
+	service.Start()
 }

@@ -10,7 +10,7 @@ syntax = "proto3";
 package pb;
 
 //import "google/protobuf/any.proto";
-import "google/protobuf/empty.proto";
+//import "google/protobuf/empty.proto";
 
 
 option go_package = "../pb";
@@ -43,10 +43,10 @@ message CommandBody {
 }
 
 message MessageBody{
-  string id = 1;
+  string messageId = 1;
   string appId = 2;
   int64 userId = 3;
-  string cId = 4;
+  string convId = 4;
   int64 to = 5;
   int64 groupId = 6;
   int64 sequence = 7;
@@ -142,13 +142,18 @@ message MQMessage{
 }
 
 
-
+message ApiResult{
+  int32 code = 1;
+  string message = 2;
+  oneof data {
+    LoginReply loginReply = 3;
+  }
+}
 
 
 service UserApi {
-  rpc Login (LoginRequest) returns (LoginReply) {}
+  rpc Login (LoginRequest) returns (ApiResult) {}
 }
 
-service MessageDeliverApi {
-  rpc deliver (CommandBody) returns (google.protobuf.Empty) {}
-}
+
+

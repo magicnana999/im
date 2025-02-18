@@ -2,14 +2,15 @@ package broker
 
 import (
 	"context"
+	"github.com/magicnana999/im/constants"
 	"github.com/magicnana999/im/domain"
-	"github.com/magicnana999/im/enum"
 	"github.com/magicnana999/im/errors"
 	"github.com/magicnana999/im/redis"
 	"sync"
 )
 
-var defaultUserState = &userState{}
+var defaultUserState *userState
+var usOnce sync.Once
 
 type userState struct {
 	storage *redis.UserStorage
@@ -17,11 +18,15 @@ type userState struct {
 }
 
 func initUserState() *userState {
-	defaultUserState.storage = redis.InitUserStorage()
+
+	usOnce.Do(func() {
+		defaultUserState = &userState{}
+		defaultUserState.storage = redis.InitUserStorage()
+	})
 	return defaultUserState
 }
 
-func (s *userState) storeUser(ctx context.Context, u *domain.UserConnection, appId string, userId int64, os enum.OSType) error {
+func (s *userState) storeUser(ctx context.Context, u *domain.UserConnection, appId string, userId int64, os constants.OSType) error {
 
 	lock, e := s.storage.Lock(ctx, appId, u.Label())
 	if e != nil {

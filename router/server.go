@@ -10,7 +10,7 @@ import (
 )
 
 var DefaultServer *Server
-var lock sync.Mutex
+var sOnce sync.Once
 
 type Server struct {
 	mqProducer *kafka.Producer
@@ -20,24 +20,21 @@ type Server struct {
 }
 
 func Start(ctx context.Context) *Server {
-	lock.Lock()
-	defer lock.Unlock()
 
-	if DefaultServer != nil {
-		return DefaultServer
-	}
+	sOnce.Do(func() {
 
-	s := &Server{}
+		s := &Server{}
 
-	s.mqConsumer = kafka.InitConsumer([]string{conf.Global.Kafka.String()}, kafka.Route, s)
-	s.mqProducer = kafka.InitProducer([]string{conf.Global.Kafka.String()})
-	s.executor = goPool.Default()
-	s.msgRouter = initMessageRouter()
-	s.mqConsumer.Start(ctx)
+		s.mqConsumer = kafka.InitConsumer([]string{conf.Global.Kafka.String()}, kafka.Route, s)
+		s.mqProducer = kafka.InitProducer([]string{conf.Global.Kafka.String()})
+		s.executor = goPool.Default()
+		s.msgRouter = initMessageRouter()
+		s.mqConsumer.Start(ctx)
 
-	DefaultServer = s
+		DefaultServer = s
 
-	return s
+	})
+	return DefaultServer
 }
 
 func (s *Server) Consume(ctx context.Context, msg *pb.MQMessage) error {

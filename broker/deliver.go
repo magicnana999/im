@@ -18,7 +18,7 @@ import (
 )
 
 var defaultDeliver *deliver
-var lock sync.RWMutex
+var dOnce sync.Once
 
 type deliverTask struct {
 	ctx      context.Context
@@ -46,45 +46,40 @@ type deliver struct {
 
 func initDeliver(ctx context.Context, codec codec) *deliver {
 
-	lock.Lock()
-	defer lock.Unlock()
-
-	if defaultDeliver != nil {
-		return defaultDeliver
-	}
-
-	d := &deliver{}
-	pool, err := ants.NewPool(1024)
-	if err != nil {
-		logger.FatalF("init deliver err: %v", err)
-	}
-
-	broker := []string{conf.Global.Kafka.String()}
-	topic := getTopic()
-
-	d.ctx = ctx
-	d.delivery = make(chan *delivery, 4096)
-	d.heartbeatHandler = initHeartbeatHandler()
-	d.codec = codec
-	d.executor = pool
-	d.userState = initUserState()
-	d.mqProducer = kafka.InitProducer(broker)
-	d.mqConsumer = kafka.InitConsumer(broker, topic, d)
-	d.deliverFailed = func(delivery *delivery) {
-		eee := d.mqProducer.SendOffline(ctx, delivery.packet.GetMessageBody(), []int64{delivery.uc.UserId})
-		if eee != nil {
-			logger.ErrorF("[%s#%s] deliver task creation error:%v", delivery.uc.ClientAddr, delivery.uc.Label(), err)
-
-			defaultInstance.eng.Stop(defaultInstance.ctx)
-
+	dOnce.Do(func() {
+		d := &deliver{}
+		pool, err := ants.NewPool(1024)
+		if err != nil {
+			logger.FatalF("init deliver err: %v", err)
 		}
-	}
 
-	d.mqConsumer.Start(ctx)
+		broker := []string{conf.Global.Kafka.String()}
+		topic := getTopic()
 
-	defaultDeliver = d
+		d.ctx = ctx
+		d.delivery = make(chan *delivery, 4096)
+		d.heartbeatHandler = initHeartbeatHandler()
+		d.codec = codec
+		d.executor = pool
+		d.userState = initUserState()
+		d.mqProducer = kafka.InitProducer(broker)
+		d.mqConsumer = kafka.InitConsumer(broker, topic, d)
+		d.deliverFailed = func(delivery *delivery) {
+			eee := d.mqProducer.SendOffline(ctx, delivery.packet.GetMessageBody(), []int64{delivery.uc.UserId})
+			if eee != nil {
+				logger.ErrorF("[%s#%s] deliver task creation error:%v", delivery.uc.ClientAddr, delivery.uc.Label(), err)
 
-	return d
+				defaultInstance.eng.Stop(defaultInstance.ctx)
+
+			}
+		}
+
+		d.mqConsumer.Start(ctx)
+
+		defaultDeliver = d
+	})
+
+	return defaultDeliver
 }
 
 func (s *deliver) stopAll() {
@@ -138,7 +133,7 @@ func (s *deliver) sendMessage(delivery *delivery) {
 	uc := delivery.uc
 	packet := delivery.packet
 
-	_, exist := s.m.Load(packet.GetMessageBody().GetId())
+	_, exist := s.m.Load(packet.GetMessageBody().MessageId)
 
 	if exist {
 		return
@@ -146,7 +141,7 @@ func (s *deliver) sendMessage(delivery *delivery) {
 
 	subCtx, cancel := context.WithCancel(s.ctx)
 
-	task := &deliverTask{id: packet.GetMessageBody().GetId()}
+	task := &deliverTask{id: packet.GetMessageBody().MessageId}
 	_, loaded := s.m.LoadOrStore(task.id, task)
 	if loaded {
 		task = nil
@@ -155,7 +150,7 @@ func (s *deliver) sendMessage(delivery *delivery) {
 
 	s.write(uc.C, packet, uc)
 	logger.InfoF("[%s#%s] deliver,id:%s",
-		uc.ClientAddr, uc.Label(), packet.GetMessageBody().GetId())
+		uc.ClientAddr, uc.Label(), packet.GetMessageBody().MessageId)
 
 	task.ctx = subCtx
 	task.cancel = cancel
@@ -178,19 +173,19 @@ func (s *deliver) sendMessage(delivery *delivery) {
 
 				if !s.heartbeatHandler.isRunning(task.conn.Fd()) {
 					s.deliverFailed(task.delivery)
-					s.stopPacketRetry(packet.GetMessageBody().GetId())
+					s.stopPacketRetry(packet.GetMessageBody().MessageId)
 				}
 
 				next := exponentialBackoff(task.interval)
 				if next >= 8 {
 					s.deliverFailed(task.delivery)
-					s.stopPacketRetry(packet.GetMessageBody().GetId())
+					s.stopPacketRetry(packet.GetMessageBody().MessageId)
 					return
 
 				}
 				s.write(task.conn, packet, uc)
 				logger.InfoF("[%s#%s] deliver retry,id:%s",
-					uc.ClientAddr, uc.Label(), packet.GetMessageBody().GetId())
+					uc.ClientAddr, uc.Label(), packet.GetMessageBody().MessageId)
 
 				task.interval = next
 				task.ticker.Reset(time.Duration(next) * time.Second)
@@ -214,7 +209,7 @@ func (s *deliver) write(conn gnet.Conn, packet *pb.Packet, uc *domain.UserConnec
 	if err != nil {
 
 		logger.ErrorF("[%s#%s] deliver encode error:%v", uc.ClientAddr, uc.Label())
-		s.stopPacketRetry(mb.Id)
+		s.stopPacketRetry(mb.MessageId)
 		s.heartbeatHandler.stopTicker(conn)
 	}
 
@@ -224,7 +219,7 @@ func (s *deliver) write(conn gnet.Conn, packet *pb.Packet, uc *domain.UserConnec
 		n, err := conn.Write(buffer.Bytes()[sent:])
 		if err != nil {
 			logger.ErrorF("[%s#%s] deliver write error:%v", uc.ClientAddr, uc.Label())
-			s.stopPacketRetry(mb.Id)
+			s.stopPacketRetry(mb.MessageId)
 			s.heartbeatHandler.stopTicker(conn)
 		}
 		sent += n

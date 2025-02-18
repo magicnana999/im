@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/magicnana999/im/conf"
+	"github.com/magicnana999/im/constants"
 	"github.com/magicnana999/im/domain"
-	"github.com/magicnana999/im/enum"
 	"github.com/magicnana999/im/logger"
 	"github.com/panjf2000/gnet/v2"
 	"github.com/panjf2000/gnet/v2/pkg/logging"
@@ -120,7 +120,7 @@ func (s *Instance) OnOpen(c gnet.Conn) (out []byte, action gnet.Action) {
 		UserId:      0,
 		ClientAddr:  c.RemoteAddr().String(),
 		BrokerAddr:  c.LocalAddr().String(),
-		OS:          enum.OSType(0),
+		OS:          constants.OSType(0),
 		ConnectTime: time.Now().UnixMilli(),
 		C:           c,
 	}

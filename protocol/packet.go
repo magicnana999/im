@@ -1,7 +1,7 @@
 package protocol
 
 import (
-	"github.com/magicnana999/im/enum"
+	"github.com/magicnana999/im/constants"
 )
 
 type Packet struct {
@@ -74,11 +74,11 @@ type CommandBody struct {
 }
 
 type LoginRequest struct {
-	AppId        string      `json:"appId"`
-	UserSig      string      `json:"userSig"`
-	Version      string      `json:"version"`
-	OS           enum.OSType `json:"os"`
-	PushDeviceId string      `json:"pushDeviceId"`
+	AppId        string           `json:"appId"`
+	UserSig      string           `json:"userSig"`
+	Version      string           `json:"version"`
+	OS           constants.OSType `json:"os"`
+	PushDeviceId string           `json:"pushDeviceId"`
 }
 
 type LoginReply struct {

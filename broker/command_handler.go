@@ -3,7 +3,7 @@ package broker
 import (
 	"context"
 	"github.com/magicnana999/im/conf"
-	"github.com/magicnana999/im/enum"
+	"github.com/magicnana999/im/constants"
 	"github.com/magicnana999/im/errors"
 	"github.com/magicnana999/im/logger"
 	"github.com/magicnana999/im/pb"
@@ -13,8 +13,8 @@ import (
 	"sync"
 )
 
-var defaultCommandHandler = &commandHandler{}
-var commandHandlerMu sync.RWMutex
+var defaultCommandHandler *commandHandler
+var cmdHandlerOnce sync.Once
 
 type commandHandler struct {
 	conn          *grpc.ClientConn
@@ -24,26 +24,21 @@ type commandHandler struct {
 
 func initCommandHandler() *commandHandler {
 
-	commandHandlerMu.Lock()
-	defer commandHandlerMu.Unlock()
+	cmdHandlerOnce.Do(func() {
+		defaultCommandHandler := &commandHandler{}
+		userApiHost := conf.Global.Grpc.UserApiHost
 
-	if defaultCommandHandler.conn != nil {
-		return defaultCommandHandler
-	}
+		conn, err := grpc.NewClient(userApiHost, grpc.WithTransportCredentials(insecure.NewCredentials()))
+		if err != nil {
+			logger.FatalF("init command handler user api provider error: %v", err)
 
-	//localhost:7540
-	userApiHost := conf.Global.Grpc.UserApiHost
+		}
+		defaultCommandHandler.conn = conn
+		defaultCommandHandler.userApiClient = pb.NewUserApiClient(conn)
+		defaultCommandHandler.userState = initUserState()
 
-	conn, err := grpc.NewClient(userApiHost, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err != nil {
-		logger.FatalF("init command handler user api provider error: %v", err)
-
-	}
-	defaultCommandHandler.conn = conn
-	defaultCommandHandler.userApiClient = pb.NewUserApiClient(conn)
-	defaultCommandHandler.userState = initUserState()
-
-	logger.DebugF("commandHandler init")
+		logger.DebugF("commandHandler init")
+	})
 
 	return defaultCommandHandler
 }
@@ -75,7 +70,7 @@ func (c *commandHandler) handleCommand(ctx context.Context, cmd *pb.CommandBody)
 			return nil, err
 		}
 
-		if err = c.userState.storeUser(ctx, uc, rep.AppId, rep.UserId, enum.OSType(src.Os)); err != nil {
+		if err = c.userState.storeUser(ctx, uc, rep.AppId, rep.UserId, constants.OSType(src.Os)); err != nil {
 			return nil, err
 		}
 
@@ -92,17 +87,17 @@ func login(ctx context.Context, request *pb.LoginRequest) (*pb.LoginReply, error
 	switch request.UserSig {
 	case "cukpovu1a37hpofg6sj0":
 		return &pb.LoginReply{
-			AppId:  "19860220",
+			AppId:  constants.AppId,
 			UserId: 1200120,
 		}, nil
 	case "cukpovu1a37hpofg6sjg":
 		return &pb.LoginReply{
-			AppId:  "19860220",
+			AppId:  constants.AppId,
 			UserId: 1200121,
 		}, nil
 	default:
 		return &pb.LoginReply{
-			AppId:  "19860220",
+			AppId:  constants.AppId,
 			UserId: 100,
 		}, nil
 	}

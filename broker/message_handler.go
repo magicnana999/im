@@ -7,8 +7,8 @@ import (
 	"sync"
 )
 
-var defaultMessageHandler = &messageHandler{}
-var messageHandlerMu sync.RWMutex
+var defaultMessageHandler *messageHandler
+var mhOnce sync.Once
 
 type messageHandler struct {
 	receiver *messageReceiver
@@ -24,13 +24,13 @@ func (m *messageHandler) handlePacket(ctx context.Context, p *pb.Packet) (*pb.Pa
 
 	mb := p.GetMessageBody()
 	if mb.IsRequest() {
-		logger.DebugF("[%s#%s] receive request %s", user.ClientAddr, user.Label(), mb.Id)
+		logger.DebugF("[%s#%s] receive request %s", user.ClientAddr, user.Label(), mb.MessageId)
 		return m.receiver.receive(ctx, mb)
 	}
 
 	if mb.IsResponse() {
-		logger.DebugF("[%s#%s] receive response %s", user.ClientAddr, user.Label(), mb.Id)
-		m.deliver.ack(mb.Id)
+		logger.DebugF("[%s#%s] receive response %s", user.ClientAddr, user.Label(), mb.MessageId)
+		m.deliver.ack(mb.MessageId)
 	}
 
 	return nil, nil
@@ -42,16 +42,12 @@ func (m *messageHandler) isSupport(ctx context.Context, packetType int32) bool {
 
 func initMessageHandler() *messageHandler {
 
-	messageHandlerMu.Lock()
-	defer messageHandlerMu.Unlock()
+	mhOnce.Do(func() {
+		defaultMessageHandler = &messageHandler{}
+		defaultMessageHandler.receiver = initMessageReceiver()
 
-	if defaultMessageHandler.receiver != nil {
-		return defaultMessageHandler
-	}
-
-	defaultMessageHandler.receiver = initMessageReceiver()
-
-	logger.DebugF("messageHandler init")
+		logger.DebugF("messageHandler init")
+	})
 
 	return defaultMessageHandler
 }

@@ -11,8 +11,8 @@ import (
 )
 
 var (
-	defaultMessageReceiver = &messageReceiver{}
-	mrLock                 sync.Mutex
+	defaultMessageReceiver *messageReceiver
+	mrOnce                 sync.Once
 )
 
 type messageReceiver struct {
@@ -21,16 +21,12 @@ type messageReceiver struct {
 
 func initMessageReceiver() *messageReceiver {
 
-	mrLock.Lock()
-	defer mrLock.Unlock()
+	mrOnce.Do(func() {
+		defaultMessageReceiver = &messageReceiver{}
+		defaultMessageReceiver.mqProducer = kafka.InitProducer([]string{conf.Global.Kafka.String()})
 
-	if defaultMessageReceiver.mqProducer != nil {
-		return defaultMessageReceiver
-	}
-
-	defaultMessageReceiver.mqProducer = kafka.InitProducer([]string{conf.Global.Kafka.String()})
-
-	logger.DebugF("messageReceiver init")
+		logger.DebugF("messageReceiver init")
+	})
 
 	return defaultMessageReceiver
 }

@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/magicnana999/im/conf"
+	"github.com/magicnana999/im/constants"
 	"github.com/magicnana999/im/domain"
-	"github.com/magicnana999/im/enum"
 	"github.com/magicnana999/im/logger"
 	"os"
 	"testing"
@@ -24,9 +24,9 @@ func TestUserStorage_StoreUserClients(t *testing.T) {
 	ss := InitUserStorage()
 
 	uc := &domain.UserConnection{
-		AppId:  "19860220",
+		AppId:  constants.AppId,
 		UserId: 1001,
-		OS:     enum.Ios,
+		OS:     constants.Ios,
 	}
 
 	key := KeyUserClients(uc.AppId, uc.UserId)

@@ -9,17 +9,18 @@ import (
 var (
 	rds *redis.Client
 
-	lock sync.RWMutex
+	once sync.Once
 )
 
-func initRedis() {
-	lock.Lock()
-	defer lock.Unlock()
-	if rds == nil {
+func initRedis() *redis.Client {
+
+	once.Do(func() {
+
 		rds = redis.NewClient(&redis.Options{
 			Addr:     conf.Global.Redis.String(),
 			Password: "",
 			DB:       conf.Global.Redis.Db,
 		})
-	}
+	})
+	return rds
 }

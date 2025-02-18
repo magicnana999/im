@@ -13,7 +13,7 @@ import (
 )
 
 var defaultMessageRouter *messageRouter
-var mrLock sync.Mutex
+var once sync.Once
 
 type messageRouter struct {
 	groupMemberSvc *svc.GroupMemberSvc
@@ -22,16 +22,15 @@ type messageRouter struct {
 }
 
 func initMessageRouter() *messageRouter {
-	mrLock.Lock()
-	defer mrLock.Unlock()
-	if defaultMessageRouter != nil {
-		return defaultMessageRouter
-	}
-	defaultMessageRouter = &messageRouter{
-		groupMemberSvc: svc.InitGroupMemberSvc(),
-		userStorage:    redis.InitUserStorage(),
-		mqProducer:     kafka.InitProducer([]string{conf.Global.Kafka.String()}),
-	}
+
+	once.Do(func() {
+
+		defaultMessageRouter = &messageRouter{
+			groupMemberSvc: svc.InitGroupMemberSvc(),
+			userStorage:    redis.InitUserStorage(),
+			mqProducer:     kafka.InitProducer([]string{conf.Global.Kafka.String()}),
+		}
+	})
 
 	return defaultMessageRouter
 }

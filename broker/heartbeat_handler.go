@@ -13,8 +13,8 @@ import (
 	"time"
 )
 
-var heartbeatMu sync.RWMutex
-var defaultHeartbeatHandler = &heartbeatHandler{}
+var defaultHeartbeatHandler *heartbeatHandler
+var hhOnce sync.Once
 
 type heartbeatHandler struct {
 	heartbeatPool *goPool.Pool
@@ -25,23 +25,21 @@ type heartbeatHandler struct {
 
 func initHeartbeatHandler() *heartbeatHandler {
 
-	heartbeatMu.Lock()
-	defer heartbeatMu.Unlock()
+	hhOnce.Do(func() {
 
-	if defaultHeartbeatHandler.heartbeatPool != nil {
-		return defaultHeartbeatHandler
-	}
+		defaultHeartbeatHandler = &heartbeatHandler{}
 
-	interval := conf.Global.Broker.HeartbeatInterval
-	if interval <= 0 {
-		interval = 30
-	}
+		interval := conf.Global.Broker.HeartbeatInterval
+		if interval <= 0 {
+			interval = 30
+		}
 
-	defaultHeartbeatHandler.heartbeatPool = goPool.Default()
-	defaultHeartbeatHandler.userState = initUserState()
-	defaultHeartbeatHandler.interval = time.Duration(interval) * time.Second
+		defaultHeartbeatHandler.heartbeatPool = goPool.Default()
+		defaultHeartbeatHandler.userState = initUserState()
+		defaultHeartbeatHandler.interval = time.Duration(interval) * time.Second
 
-	logger.DebugF("heartbeatHandler init")
+		logger.DebugF("heartbeatHandler init")
+	})
 
 	return defaultHeartbeatHandler
 }

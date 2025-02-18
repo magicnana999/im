@@ -9,7 +9,7 @@ import (
 	"sync"
 )
 
-var handlerMu sync.Mutex
+var hOnce sync.Once
 
 type packetHandler interface {
 	handlePacket(ctx context.Context, packet *pb.Packet) (*pb.Packet, error)
@@ -20,7 +20,7 @@ type packetHandlerImpl struct {
 	handlers []packetHandler
 }
 
-var defaultHandler = &packetHandlerImpl{handlers: make([]packetHandler, 0)}
+var defaultHandler *packetHandlerImpl
 
 func (p *packetHandlerImpl) handlePacket(ctx context.Context, packet *pb.Packet) (*pb.Packet, error) {
 	for _, handler := range p.handlers {
@@ -48,15 +48,11 @@ func (p *packetHandlerImpl) HeartbeatHandler() *heartbeatHandler {
 
 func initHandler() *packetHandlerImpl {
 
-	handlerMu.Lock()
-	defer handlerMu.Unlock()
-
-	if len(defaultHandler.handlers) != 0 {
-		return defaultHandler
-	}
-	defaultHandler.handlers = append(defaultHandler.handlers, initHeartbeatHandler())
-	defaultHandler.handlers = append(defaultHandler.handlers, initCommandHandler())
-	defaultHandler.handlers = append(defaultHandler.handlers, initMessageHandler())
-
+	hOnce.Do(func() {
+		defaultHandler = &packetHandlerImpl{handlers: make([]packetHandler, 0)}
+		defaultHandler.handlers = append(defaultHandler.handlers, initHeartbeatHandler())
+		defaultHandler.handlers = append(defaultHandler.handlers, initCommandHandler())
+		defaultHandler.handlers = append(defaultHandler.handlers, initMessageHandler())
+	})
 	return defaultHandler
 }

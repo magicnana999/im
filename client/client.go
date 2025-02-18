@@ -5,7 +5,7 @@ import (
 	"context"
 	"encoding/binary"
 	"fmt"
-	"github.com/magicnana999/im/enum"
+	"github.com/magicnana999/im/constants"
 	"github.com/magicnana999/im/logger"
 	"github.com/magicnana999/im/pb"
 	"github.com/magicnana999/im/util/id"
@@ -94,7 +94,7 @@ func (c *Client) saySomething(t string) {
 
 	text := &pb.TextContent{Text: t}
 
-	packet := pb.NewMessage(c.UserId, c.To, 0, 100, "19860220", "1-1", text).Wrap()
+	packet := pb.NewMessage(c.UserId, c.To, 0, 100, constants.AppId, "1-1", text).Wrap()
 	c.Sender.send(packet)
 }
 
@@ -178,7 +178,7 @@ func (c *Client) handlePacket(ctx context.Context, packet *pb.Packet, sender *se
 	case pb.TypeMessage:
 		mb := packet.GetMessageBody()
 		if mb.IsResponse() {
-			sender.close(mb.Id)
+			sender.close(mb.MessageId)
 		} else {
 			c.receiveMessage(ctx, mb, sender)
 		}
@@ -236,7 +236,7 @@ func newResendTask(ctx context.Context, cancel context.CancelFunc, interval int,
 	return &resendTask{
 		ctx:      ctx,
 		cancel:   cancel,
-		id:       cmd.GetMessageBody().Id,
+		id:       cmd.GetMessageBody().MessageId,
 		interval: interval,
 		packet:   cmd,
 		ticker:   time.NewTicker(time.Duration(interval) * time.Second),
@@ -326,14 +326,14 @@ func (s *sender) sendCommand(packet *pb.Packet) {
 func (s *sender) sendMessage(packet *pb.Packet) {
 	s.lock.RLock()
 	mb := packet.GetMessageBody()
-	_, exist := s.m[mb.Id]
+	_, exist := s.m[mb.MessageId]
 	s.lock.RUnlock()
 	if !exist {
 		subCtx, cancel := context.WithCancel(s.ctx)
 		task := newResendTask(subCtx, cancel, 1, packet, s.conn)
 
 		s.lock.Lock()
-		if _, doubleCheck := s.m[packet.GetMessageBody().GetId()]; doubleCheck { // Double-check 防止并发问题
+		if _, doubleCheck := s.m[packet.GetMessageBody().GetMessageId()]; doubleCheck { // Double-check 防止并发问题
 			s.lock.Unlock()
 			return
 		}
@@ -351,8 +351,8 @@ func (s *sender) sendMessage(packet *pb.Packet) {
 					next := fibonacci(task.interval)
 					if next >= 8 {
 
-						fmt.Println("重试超过限制，关闭连接:", packet.GetMessageBody().GetId())
-						s.close(packet.GetMessageBody().GetId())
+						fmt.Println("重试超过限制，关闭连接:", packet.GetMessageBody().MessageId)
+						s.close(packet.GetMessageBody().MessageId)
 						s.conn.Close()
 						return
 
@@ -413,10 +413,10 @@ func encode(p *pb.Packet) (*bb.ByteBuffer, error) {
 
 func login(sender *sender, userSig string) {
 	loginRequest := pb.LoginRequest{
-		AppId:        "19860220",
+		AppId:        constants.AppId,
 		UserSig:      userSig,
 		Version:      "1.0.0",
-		Os:           int32(enum.Ios),
+		Os:           int32(constants.Ios),
 		PushDeviceId: strings.ToLower(id.GenerateXId()),
 	}
 

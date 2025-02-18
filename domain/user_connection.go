@@ -1,21 +1,21 @@
 package domain
 
 import (
-	"github.com/magicnana999/im/enum"
+	"github.com/magicnana999/im/constants"
 	"github.com/panjf2000/gnet/v2"
 	"strconv"
 )
 
 type UserConnection struct {
-	Fd          int         `json:"fd"`
-	AppId       string      `json:"appId"`
-	UserId      int64       `json:"userId"`
-	ClientAddr  string      `json:"clientAddr"`
-	BrokerAddr  string      `json:"brokerAddr"`
-	OS          enum.OSType `json:"os"`
-	ConnectTime int64       `json:"connectTime"`
-	IsLogin     bool        `json:"isLogin"`
-	C           gnet.Conn   `json:"-"`
+	Fd          int              `json:"fd"`
+	AppId       string           `json:"appId"`
+	UserId      int64            `json:"userId"`
+	ClientAddr  string           `json:"clientAddr"`
+	BrokerAddr  string           `json:"brokerAddr"`
+	OS          constants.OSType `json:"os"`
+	ConnectTime int64            `json:"connectTime"`
+	IsLogin     bool             `json:"isLogin"`
+	C           gnet.Conn        `json:"-"`
 }
 
 func (u *UserConnection) Label() string {

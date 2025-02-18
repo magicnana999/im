@@ -5,8 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/magicnana999/im/domain"
+	"github.com/magicnana999/im/entity"
 	"github.com/magicnana999/im/errors"
+	"github.com/magicnana999/im/util/id"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -91,4 +94,27 @@ func (s *UserStorage) UnLock(ctx context.Context, appId, ucLabel, lock string) (
 	key := KeyUserLock(appId, ucLabel)
 	ret := rds.Del(ctx, key)
 	return ret.Val(), ret.Err()
+}
+
+func (s *UserStorage) LoadUserSig(ctx context.Context, appId, userSig string) (*entity.User, error) {
+	cmd := rds.Get(ctx, KeyUserSig(appId, userSig))
+
+	if cmd.Err() != nil {
+		return nil, cmd.Err()
+	}
+
+	var user entity.User
+	err := json.Unmarshal([]byte(cmd.Val()), &user)
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
+func (s *UserStorage) StoreUserSig(ctx context.Context, appId string, user *entity.User) (string, error) {
+	sig := strings.ToLower(id.GenerateXId())
+	json1, _ := json.Marshal(user)
+
+	cmd := rds.Set(ctx, KeyUserSig(appId, sig), json1, -1)
+	return cmd.Val(), cmd.Err()
 }

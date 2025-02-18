@@ -18,12 +18,12 @@ func KeyUserSig(appId, sig string) string {
 	return fmt.Sprintf(userSig, appId, sig)
 }
 
-func KeySequence(appId, cId string) string {
-	return fmt.Sprintf(sequence, appId, cId)
+func KeySequence(appId, sequenceId string) string {
+	return fmt.Sprintf(sequence, appId, sequenceId)
 }
 
-func KeySequenceLock(appId, cId string) string {
-	return fmt.Sprintf(sequenceLock, appId, cId)
+func KeySequenceLock(appId, seqId string) string {
+	return fmt.Sprintf(sequenceLock, appId, seqId)
 }
 
 func KeyBroker(addr string) string {

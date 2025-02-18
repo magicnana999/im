@@ -12,7 +12,7 @@ import (
 )
 
 var DefaultGroupMemberSvc *GroupMemberSvc
-var gmsvcLock sync.Mutex
+var gmOnce sync.Once
 
 type GroupMemberSvc struct {
 	storage *redis.GroupMemberStorage
@@ -20,17 +20,14 @@ type GroupMemberSvc struct {
 }
 
 func InitGroupMemberSvc() *GroupMemberSvc {
-	gmsvcLock.Lock()
-	defer gmsvcLock.Unlock()
 
-	if DefaultGroupMemberSvc != nil {
-		return DefaultGroupMemberSvc
-	}
+	gmOnce.Do(func() {
 
-	DefaultGroupMemberSvc = &GroupMemberSvc{
-		storage: redis.InitGroupMemberStorage(),
-		db:      repository.InitGorm(),
-	}
+		DefaultGroupMemberSvc = &GroupMemberSvc{
+			storage: redis.InitGroupMemberStorage(),
+			db:      repository.InitGorm(),
+		}
+	})
 
 	return DefaultGroupMemberSvc
 }
@@ -69,7 +66,7 @@ func (s *GroupMemberSvc) LoadAndFetch(ctx context.Context, appId string, groupId
 	zs := make([]*red.Z, len(members))
 	ret := make([]int64, len(members))
 	for _, member := range members {
-		zs = append(zs, &red.Z{Score: float64(member.CreateTime.Second()), Member: member.UserId})
+		zs = append(zs, &red.Z{Score: float64(member.CreatedAt.Second()), Member: member.UserId})
 		ret = append(ret, member.UserId)
 	}
 

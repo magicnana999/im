@@ -9,14 +9,12 @@ import (
 )
 
 var DB *gorm.DB
-var lock sync.RWMutex
+var once sync.Once
 
 func InitGorm() *gorm.DB {
 
-	lock.Lock()
-	defer lock.Unlock()
+	once.Do(func() {
 
-	if DB == nil {
 		dsn := conf.Global.Mysql.String()
 
 		d, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
@@ -24,7 +22,7 @@ func InitGorm() *gorm.DB {
 			logger.FatalF("Failed to connect to MySQL:%v", err)
 		}
 		DB = d
-	}
+	})
 
 	return DB
 

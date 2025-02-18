@@ -43,14 +43,13 @@ var (
 	GetUserError     = New(stateGetUser, "get user failed")
 )
 
+// GRPC API
 const (
-	seqIncrError = iota + 1601
-	seqInitError
+	userSigNotFound = iota + 2001
 )
 
 var (
-	SeqIncrError = New(seqIncrError, "increase sequence failed")
-	SeqInitError = New(seqInitError, "initialize sequence failed")
+	UserSigNotFound = New(userSigNotFound, "user sig not found")
 )
 
 ///////////////////////////////
@@ -59,6 +58,10 @@ type Error struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`
 	Details string `json:"details,omitempty"`
+}
+
+func (e Error) String() string {
+	return e.Message + " " + e.Details
 }
 
 func (e Error) Error() string {
@@ -98,4 +101,18 @@ func New(code int, message string) Error {
 		Code:    code,
 		Message: message,
 	}
+}
+
+func Format(e error) *Error {
+	if e == nil {
+		return nil
+	}
+
+	var ime Error
+	if ok := errors.As(e, &ime); ok {
+		return &ime
+	}
+
+	ime = New(-1, e.Error())
+	return &ime
 }
