@@ -31,16 +31,16 @@ func NewMessage(
 	c proto.Message) *MessageBody {
 
 	mb := &MessageBody{
-		Id:       strings.ToLower(id.GenerateXId()),
-		AppId:    appId,
-		UserId:   userId,
-		CId:      cId,
-		To:       to,
-		GroupId:  groupId,
-		Sequence: sequence,
-		Flow:     FlowRequest,
-		NeedAck:  YES,
-		CTime:    time.Now().UnixMilli(),
+		MessageId: strings.ToLower(id.GenerateXId()),
+		AppId:     appId,
+		UserId:    userId,
+		ConvId:    cId,
+		To:        to,
+		GroupId:   groupId,
+		Sequence:  sequence,
+		Flow:      FlowRequest,
+		NeedAck:   YES,
+		CTime:     time.Now().UnixMilli(),
 	}
 	mb.SetContent(c)
 	return mb
@@ -109,7 +109,7 @@ func (mb *CommandBody) Failure(e error) *CommandBody {
 
 	ack := mb.Success(nil)
 
-	ee := imerror.Format2ImError(e)
+	ee := imerror.Format(e)
 	if ee != nil {
 		ack.Code = int32(ee.Code)
 		ack.Message = ee.Message
@@ -125,10 +125,10 @@ func (mb *MessageBody) Success(content proto.Message) *MessageBody {
 	}
 
 	ack := &MessageBody{
-		Id:      mb.Id,
-		Flow:    FlowResponse,
-		NeedAck: NO,
-		Code:    0,
+		MessageId: mb.MessageId,
+		Flow:      FlowResponse,
+		NeedAck:   NO,
+		Code:      0,
 		//Content:  mb.Content,
 	}
 
@@ -139,7 +139,7 @@ func (mb *MessageBody) Failure(e error) *MessageBody {
 
 	ack := mb.Success(nil)
 
-	ee := imerror.Format2ImError(e)
+	ee := imerror.Format(e)
 	if ee != nil {
 		ack.Code = int32(ee.Code)
 		ack.Message = ee.Message

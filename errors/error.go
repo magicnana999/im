@@ -11,10 +11,9 @@ const (
 	noHandler
 	heartbeat
 	heartbeatTask
-	command
-	cmdUnknownType
 	msgMQProduce
 	msgDeliverTask
+	usrCtxNotFound
 )
 
 var (
@@ -23,24 +22,25 @@ var (
 	NoHandlerSupport    = New(noHandler, "no handler support")
 	HeartbeatError      = New(heartbeat, "heartbeat failed")
 	HeartbeatTaskError  = New(heartbeatTask, "heartbeatTask failed")
-	CommandHandleError  = New(command, "command failed")
-	CmdUnknownTypeError = New(cmdUnknownType, "unknown command type")
 	MsgMQProduceError   = New(msgMQProduce, "message produce failed")
 	MsgDeliverTaskError = New(msgDeliverTask, "message deliver task failed")
+	CurUserNotFound     = New(usrCtxNotFound, "current user not found")
 )
 
 const (
-	stateStoreBroker = iota + 1151
-	stateStoreUser
-	stateGetCtx
-	stateGetUser
+	cmd            = iota + 1201
+	cmdUnknownType = iota + 1201
+	cmdResponseNull
+	cmdReplyNull
+	cmdLogin
 )
 
 var (
-	BrokerStoreError = New(stateStoreBroker, "store broker failed")
-	UserStoreError   = New(stateStoreUser, "store user failed")
-	GetCtxError      = New(stateGetCtx, "get context failed")
-	GetUserError     = New(stateGetUser, "get user failed")
+	CmdError        = New(cmd, "command failed")
+	CmdUnknownType  = New(cmdUnknownType, "unknown command type")
+	CmdResponseNull = New(cmdResponseNull, "response is null")
+	CmdReplyNull    = New(cmdReplyNull, "reply is null")
+	CmdLoginError   = New(cmdLogin, "login failed")
 )
 
 // GRPC API

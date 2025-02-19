@@ -1,46 +1,31 @@
 package constants
 
-type OSType int
+type OSType string
 
 const (
-	Windows OSType = iota + 1
-	MacOS
-	Linux
-	Ios
-	Xiaomi
-	Huawei
-	Samsung
-	Honor
-	Oppo
-	Vivo
+	Windows OSType = "Windows"
+	MacOS          = "MaxOS"
+	Linux          = "Linux"
+	Ios            = "iOS"
+	Xiaomi         = "Xiaomi"
+	Huawei         = "Huawei"
+	Samsung        = "Samsung"
+	Honor          = "Honer"
+	Oppo           = "Oppo"
+	Vivo           = "Vivo"
 )
 
-var osNames = [...]string{
-	"Windows", "MacOS", "Linux", "iOS", "Xiaomi", "Huawei", "Samsung", "Honor", "Oppo", "Vivo",
-}
-
 func (o OSType) String() string {
-	if o.Valid() {
-		return osNames[o-1]
-	}
-	return "Unknown"
-}
-
-func (o OSType) Code() int {
-	return int(o)
-}
-
-func (o OSType) Valid() bool {
-	return o >= Windows && o <= Vivo
+	return string(o)
 }
 
 func (o OSType) GetDeviceType() DeviceType {
-	switch o.Code() {
-	case int(Windows), int(MacOS), int(Linux):
+	switch o {
+	case Windows, MacOS, Linux:
 		return Desktop
-	case int(Ios), int(Xiaomi), int(Huawei), int(Samsung), int(Honor), int(Oppo), int(Vivo):
+	case Ios, Xiaomi, Huawei, Samsung, Honor, Oppo, Vivo:
 		return Mobile
 	default:
-		return DeviceType(0)
+		return Desktop
 	}
 }

@@ -15,7 +15,7 @@ func currentContext(c gnet.Conn) (context.Context, error) {
 	if ctx, o := c.Context().(context.Context); o {
 		return ctx, nil
 	}
-	return nil, errors.GetCtxError
+	return nil, errors.CurUserNotFound
 }
 
 func currentUserFromCtx(ctx context.Context) (*domain.UserConnection, error) {
@@ -23,7 +23,7 @@ func currentUserFromCtx(ctx context.Context) (*domain.UserConnection, error) {
 		return u, nil
 	}
 
-	return nil, errors.GetUserError
+	return nil, errors.CurUserNotFound
 }
 
 func currentUserFromConn(c gnet.Conn) (*domain.UserConnection, error) {

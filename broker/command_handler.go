@@ -44,61 +44,58 @@ func initCommandHandler() *commandHandler {
 }
 
 func (c *commandHandler) handlePacket(ctx context.Context, packet *pb.Packet) (*pb.Packet, error) {
-	reply, err := c.handleCommand(ctx, packet.GetCommandBody())
+
+	var reply proto.Message
+	var err error
+
+	mb := packet.GetCommandBody()
+	switch mb.CType {
+	case pb.CTypeUserLogin:
+		reply, err = c.login(ctx, mb.GetLoginRequest())
+	default:
+		err = errors.CmdUnknownType
+	}
 
 	return packet.GetCommandBody().Response(reply, err).Wrap(), nil
 
 }
 
 func (c *commandHandler) isSupport(ctx context.Context, packetType int32) bool {
+
 	return pb.TypeCommand == packetType
 }
 
-func (c *commandHandler) handleCommand(ctx context.Context, cmd *pb.CommandBody) (proto.Message, error) {
+func (c *commandHandler) login(ctx context.Context, req *pb.LoginRequest) (proto.Message, error) {
 
 	uc, e := currentUserFromCtx(ctx)
 	if e != nil {
-		return nil, errors.CommandHandleError.Detail(e)
+		return nil, errors.CurUserNotFound.Detail(e)
 	}
 
-	switch cmd.CType {
-	case pb.CTypeUserLogin:
-		src := cmd.GetLoginRequest()
+	rep, err := c.userApiClient.Login(ctx, req)
 
-		rep, err := login(ctx, src)
-		if err != nil {
-			return nil, err
-		}
-
-		if err = c.userState.storeUser(ctx, uc, rep.AppId, rep.UserId, constants.OSType(src.Os)); err != nil {
-			return nil, err
-		}
-
-		return rep, nil
-
-	default:
-		return nil, errors.CmdUnknownTypeError.DetailString("unknown type:" + cmd.CType)
+	if err != nil {
+		return nil, errors.CmdError.Detail(err)
 	}
-}
 
-func login(ctx context.Context, request *pb.LoginRequest) (*pb.LoginReply, error) {
-
-	logger.DebugF("登录成功")
-	switch request.UserSig {
-	case "cukpovu1a37hpofg6sj0":
-		return &pb.LoginReply{
-			AppId:  constants.AppId,
-			UserId: 1200120,
-		}, nil
-	case "cukpovu1a37hpofg6sjg":
-		return &pb.LoginReply{
-			AppId:  constants.AppId,
-			UserId: 1200121,
-		}, nil
-	default:
-		return &pb.LoginReply{
-			AppId:  constants.AppId,
-			UserId: 100,
-		}, nil
+	if rep == nil {
+		return nil, errors.CmdResponseNull
 	}
+
+	if rep.Code != 0 {
+		return nil, errors.New(int(rep.Code), rep.Message)
+	}
+
+	if rep.GetLoginReply() == nil {
+		return nil, errors.CmdReplyNull
+	}
+
+	ret := rep.GetLoginReply()
+
+	if err = c.userState.storeUser(ctx, uc, ret.AppId, ret.UserId, constants.OSType(req.Os)); err != nil {
+		return nil, errors.CmdLoginError.Detail(err)
+	}
+
+	return ret, nil
+
 }

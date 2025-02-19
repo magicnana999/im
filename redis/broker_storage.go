@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/magicnana999/im/domain"
-	"github.com/magicnana999/im/errors"
 	"time"
 )
 
@@ -21,7 +20,7 @@ func InitBrokerStorage() *BrokerStorage {
 func (s *BrokerStorage) StoreBroker(ctx context.Context, broker domain.BrokerInfo) (string, error) {
 	json, err := json.Marshal(broker)
 	if err != nil {
-		return "", errors.BrokerStoreError.Detail(err)
+		return "", err
 	}
 
 	key := KeyBroker(broker.Addr)

@@ -1,27 +1,12 @@
 package constants
 
-type DeviceType int
+type DeviceType string
 
 const (
-	Mobile DeviceType = iota + 1
-	Desktop
+	Mobile  DeviceType = "Mobile"
+	Desktop            = "Desktop"
 )
 
-var deviceNames = [...]string{
-	"Mobile", "Desktop",
-}
-
 func (d DeviceType) String() string {
-	if d.Valid() {
-		return deviceNames[d-1]
-	}
-	return ""
-}
-
-func (d DeviceType) Code() int {
-	return int(d)
-}
-
-func (d DeviceType) Valid() bool {
-	return d >= Mobile && d <= Desktop
+	return string(d)
 }

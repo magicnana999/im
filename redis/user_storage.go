@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/magicnana999/im/domain"
 	"github.com/magicnana999/im/entity"
-	"github.com/magicnana999/im/errors"
 	"github.com/magicnana999/im/util/id"
 	"strconv"
 	"strings"
@@ -51,7 +50,7 @@ func (s *UserStorage) StoreUserConn(ctx context.Context, uc *domain.UserConnecti
 
 	js, err := json.Marshal(uc)
 	if err != nil {
-		return "", errors.UserStoreError.Detail(err)
+		return "", err
 	}
 
 	ret := rds.Set(ctx, key, string(js), time.Minute)
@@ -72,7 +71,7 @@ func (s *UserStorage) StoreUserClients(ctx context.Context, uc *domain.UserConne
 
 	js, err := json.Marshal(uc)
 	if err != nil {
-		return 0, errors.UserStoreError.Detail(err)
+		return 0, err
 	}
 
 	ping := rds.Ping(ctx)

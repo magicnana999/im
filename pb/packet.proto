@@ -123,7 +123,7 @@ message LoginRequest {
   string appId = 1;
   string userSig = 2;
   string version = 3;
-  int32 os = 4;
+  string os = 4;
   string pushDeviceId = 5;
 }
 
