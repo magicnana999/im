@@ -11,11 +11,17 @@ import (
 )
 
 func Start() {
+
+	initLogger()
+
 	lis, err := net.Listen("tcp", conf.Global.Service.Addr)
 	if err != nil {
-		logger.FatalF("failed to listen: %v", err)
+		logger.Fatalf("failed to listen: %v", err)
 	}
-	s := grpc.NewServer()
+
+	s := grpc.NewServer(
+		grpc.UnaryInterceptor(logger.UnaryServerInterceptor()),
+	)
 	pb.RegisterUserApiServer(s, apiimpl.InitUserApi())
 	log.Printf("server listening at %v", lis.Addr())
 	if err := s.Serve(lis); err != nil {

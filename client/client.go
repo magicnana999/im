@@ -6,7 +6,6 @@ import (
 	"encoding/binary"
 	"fmt"
 	"github.com/magicnana999/im/constants"
-	"github.com/magicnana999/im/logger"
 	"github.com/magicnana999/im/pb"
 	"github.com/magicnana999/im/util/id"
 	"github.com/panjf2000/ants/v2"
@@ -38,11 +37,11 @@ type Client struct {
 
 func (c *Client) Start() {
 
-	logger.InitLogger("debug")
+	initLogger()
 
 	conn, err := net.Dial("tcp", c.ServerAddress)
 	if err != nil {
-		logger.FatalF("无法连接到服务器: %v", err)
+		fmt.Errorf("无法连接到服务器: %v", err)
 	}
 	defer conn.Close()
 
@@ -161,7 +160,7 @@ func (c *Client) decode(ctx context.Context, conn net.Conn, sender *sender) erro
 		}
 
 		bss, _ := protojson.Marshal(&p)
-		logger.DebugF("收到：%s\n\n", string(bss))
+		fmt.Printf("收到：%s\n\n", string(bss))
 
 		c.handlePacket(ctx, &p, sender)
 		return nil
@@ -391,7 +390,7 @@ func encode(p *pb.Packet) (*bb.ByteBuffer, error) {
 
 	if p.Type != pb.TypeHeartbeat {
 		bbs, _ := protojson.Marshal(p)
-		logger.DebugF("发送：%s\n\n", string(bbs))
+		fmt.Printf("发送：%s\n\n", string(bbs))
 	}
 
 	buffer := bb.Get()
@@ -413,11 +412,11 @@ func encode(p *pb.Packet) (*bb.ByteBuffer, error) {
 
 func login(sender *sender, userSig string) {
 	loginRequest := pb.LoginRequest{
-		AppId:        constants.AppId,
-		UserSig:      userSig,
-		Version:      "1.0.0",
-		Os:           int32(constants.Ios),
-		PushDeviceId: strings.ToLower(id.GenerateXId()),
+		AppId:    constants.AppId,
+		UserSig:  userSig,
+		Version:  "1.0.0",
+		Os:       constants.Ios,
+		DeviceId: strings.ToLower(id.GenerateXId()),
 	}
 
 	request := pb.NewCommand(&loginRequest)

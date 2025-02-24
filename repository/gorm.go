@@ -19,7 +19,7 @@ func InitGorm() *gorm.DB {
 
 		d, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 		if err != nil {
-			logger.FatalF("Failed to connect to MySQL:%v", err)
+			logger.Z.Fatalf("Failed to connect to MySQL:%v", err)
 		}
 		DB = d
 	})

@@ -1,6 +1,8 @@
 package main
 
-import "github.com/magicnana999/im/client"
+import (
+	"github.com/magicnana999/im/client"
+)
 
 func main() {
 

@@ -25,7 +25,8 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	UserApi_Login_FullMethodName = "/pb.UserApi/Login"
+	UserApi_Login_FullMethodName  = "/pb.UserApi/Login"
+	UserApi_Logout_FullMethodName = "/pb.UserApi/Logout"
 )
 
 // UserApiClient is the client API for UserApi service.
@@ -33,6 +34,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UserApiClient interface {
 	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*ApiResult, error)
+	Logout(ctx context.Context, in *LogoutRequest, opts ...grpc.CallOption) (*ApiResult, error)
 }
 
 type userApiClient struct {
@@ -53,11 +55,22 @@ func (c *userApiClient) Login(ctx context.Context, in *LoginRequest, opts ...grp
 	return out, nil
 }
 
+func (c *userApiClient) Logout(ctx context.Context, in *LogoutRequest, opts ...grpc.CallOption) (*ApiResult, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ApiResult)
+	err := c.cc.Invoke(ctx, UserApi_Logout_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserApiServer is the server API for UserApi service.
 // All implementations must embed UnimplementedUserApiServer
 // for forward compatibility.
 type UserApiServer interface {
 	Login(context.Context, *LoginRequest) (*ApiResult, error)
+	Logout(context.Context, *LogoutRequest) (*ApiResult, error)
 	mustEmbedUnimplementedUserApiServer()
 }
 
@@ -70,6 +83,9 @@ type UnimplementedUserApiServer struct{}
 
 func (UnimplementedUserApiServer) Login(context.Context, *LoginRequest) (*ApiResult, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
+}
+func (UnimplementedUserApiServer) Logout(context.Context, *LogoutRequest) (*ApiResult, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Logout not implemented")
 }
 func (UnimplementedUserApiServer) mustEmbedUnimplementedUserApiServer() {}
 func (UnimplementedUserApiServer) testEmbeddedByValue()                 {}
@@ -110,6 +126,24 @@ func _UserApi_Login_Handler(srv interface{}, ctx context.Context, dec func(inter
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserApi_Logout_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LogoutRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserApiServer).Logout(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserApi_Logout_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserApiServer).Logout(ctx, req.(*LogoutRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UserApi_ServiceDesc is the grpc.ServiceDesc for UserApi service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -120,6 +154,188 @@ var UserApi_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Login",
 			Handler:    _UserApi_Login_Handler,
+		},
+		{
+			MethodName: "Logout",
+			Handler:    _UserApi_Logout_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "packet.proto",
+}
+
+const (
+	FriendApi_AddRequest_FullMethodName    = "/pb.FriendApi/AddRequest"
+	FriendApi_AgreeRequest_FullMethodName  = "/pb.FriendApi/AgreeRequest"
+	FriendApi_RejectRequest_FullMethodName = "/pb.FriendApi/RejectRequest"
+)
+
+// FriendApiClient is the client API for FriendApi service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type FriendApiClient interface {
+	AddRequest(ctx context.Context, in *FriendRequest, opts ...grpc.CallOption) (*ApiResult, error)
+	AgreeRequest(ctx context.Context, in *FriendRequestAgree, opts ...grpc.CallOption) (*ApiResult, error)
+	RejectRequest(ctx context.Context, in *FriendRequestReject, opts ...grpc.CallOption) (*ApiResult, error)
+}
+
+type friendApiClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewFriendApiClient(cc grpc.ClientConnInterface) FriendApiClient {
+	return &friendApiClient{cc}
+}
+
+func (c *friendApiClient) AddRequest(ctx context.Context, in *FriendRequest, opts ...grpc.CallOption) (*ApiResult, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ApiResult)
+	err := c.cc.Invoke(ctx, FriendApi_AddRequest_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *friendApiClient) AgreeRequest(ctx context.Context, in *FriendRequestAgree, opts ...grpc.CallOption) (*ApiResult, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ApiResult)
+	err := c.cc.Invoke(ctx, FriendApi_AgreeRequest_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *friendApiClient) RejectRequest(ctx context.Context, in *FriendRequestReject, opts ...grpc.CallOption) (*ApiResult, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ApiResult)
+	err := c.cc.Invoke(ctx, FriendApi_RejectRequest_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// FriendApiServer is the server API for FriendApi service.
+// All implementations must embed UnimplementedFriendApiServer
+// for forward compatibility.
+type FriendApiServer interface {
+	AddRequest(context.Context, *FriendRequest) (*ApiResult, error)
+	AgreeRequest(context.Context, *FriendRequestAgree) (*ApiResult, error)
+	RejectRequest(context.Context, *FriendRequestReject) (*ApiResult, error)
+	mustEmbedUnimplementedFriendApiServer()
+}
+
+// UnimplementedFriendApiServer must be embedded to have
+// forward compatible implementations.
+//
+// NOTE: this should be embedded by value instead of pointer to avoid a nil
+// pointer dereference when methods are called.
+type UnimplementedFriendApiServer struct{}
+
+func (UnimplementedFriendApiServer) AddRequest(context.Context, *FriendRequest) (*ApiResult, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddRequest not implemented")
+}
+func (UnimplementedFriendApiServer) AgreeRequest(context.Context, *FriendRequestAgree) (*ApiResult, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AgreeRequest not implemented")
+}
+func (UnimplementedFriendApiServer) RejectRequest(context.Context, *FriendRequestReject) (*ApiResult, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RejectRequest not implemented")
+}
+func (UnimplementedFriendApiServer) mustEmbedUnimplementedFriendApiServer() {}
+func (UnimplementedFriendApiServer) testEmbeddedByValue()                   {}
+
+// UnsafeFriendApiServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to FriendApiServer will
+// result in compilation errors.
+type UnsafeFriendApiServer interface {
+	mustEmbedUnimplementedFriendApiServer()
+}
+
+func RegisterFriendApiServer(s grpc.ServiceRegistrar, srv FriendApiServer) {
+	// If the following call pancis, it indicates UnimplementedFriendApiServer was
+	// embedded by pointer and is nil.  This will cause panics if an
+	// unimplemented method is ever invoked, so we test this at initialization
+	// time to prevent it from happening at runtime later due to I/O.
+	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
+		t.testEmbeddedByValue()
+	}
+	s.RegisterService(&FriendApi_ServiceDesc, srv)
+}
+
+func _FriendApi_AddRequest_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FriendRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FriendApiServer).AddRequest(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: FriendApi_AddRequest_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FriendApiServer).AddRequest(ctx, req.(*FriendRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _FriendApi_AgreeRequest_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FriendRequestAgree)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FriendApiServer).AgreeRequest(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: FriendApi_AgreeRequest_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FriendApiServer).AgreeRequest(ctx, req.(*FriendRequestAgree))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _FriendApi_RejectRequest_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FriendRequestReject)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FriendApiServer).RejectRequest(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: FriendApi_RejectRequest_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FriendApiServer).RejectRequest(ctx, req.(*FriendRequestReject))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// FriendApi_ServiceDesc is the grpc.ServiceDesc for FriendApi service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var FriendApi_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "pb.FriendApi",
+	HandlerType: (*FriendApiServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "AddRequest",
+			Handler:    _FriendApi_AddRequest_Handler,
+		},
+		{
+			MethodName: "AgreeRequest",
+			Handler:    _FriendApi_AgreeRequest_Handler,
+		},
+		{
+			MethodName: "RejectRequest",
+			Handler:    _FriendApi_RejectRequest_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

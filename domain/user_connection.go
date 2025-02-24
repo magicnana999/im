@@ -7,15 +7,15 @@ import (
 )
 
 type UserConnection struct {
-	Fd          int              `json:"fd"`
-	AppId       string           `json:"appId"`
-	UserId      int64            `json:"userId"`
-	ClientAddr  string           `json:"clientAddr"`
-	BrokerAddr  string           `json:"brokerAddr"`
-	OS          constants.OSType `json:"os"`
-	ConnectTime int64            `json:"connectTime"`
-	IsLogin     bool             `json:"isLogin"`
-	C           gnet.Conn        `json:"-"`
+	Fd          int       `json:"fd"`
+	AppId       string    `json:"appId"`
+	UserId      int64     `json:"userId"`
+	ClientAddr  string    `json:"clientAddr"`
+	BrokerAddr  string    `json:"brokerAddr"`
+	OS          string    `json:"os"`
+	ConnectTime int64     `json:"connectTime"`
+	IsLogin     bool      `json:"isLogin"`
+	C           gnet.Conn `json:"-"`
 }
 
 func (u *UserConnection) Label() string {
@@ -26,10 +26,7 @@ func (u *UserConnection) Label() string {
 		return ""
 	}
 
-	dt := u.OS.GetDeviceType()
-	if !dt.Valid() {
-		return ""
-	}
+	dt := constants.GetDeviceType(u.OS)
 
 	if len(dt.String()) == 0 {
 		return ""

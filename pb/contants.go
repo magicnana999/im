@@ -10,6 +10,7 @@ const (
 	TypeHeartbeat int32 = iota + 1
 	TypeCommand
 	TypeMessage
+	TypeEvent
 )
 
 // NeedAck
@@ -19,7 +20,11 @@ const (
 )
 
 const (
-	CTypeUserLogin string = "USER_LOGIN"
+	CTypeUserLogin      string = "USER_LOGIN"
+	CTypeUserLogout            = "USER_LOGOUT"
+	CTypeFriendAdd             = "FRIEND_ADD"
+	CTypeFriendAddAgree        = "FRIEND_ADD_AGREE"
+	CTypeFriendReject          = "FRIEND_ADD_REJECT"
 )
 
 const (

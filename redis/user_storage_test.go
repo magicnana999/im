@@ -7,14 +7,12 @@ import (
 	"github.com/magicnana999/im/conf"
 	"github.com/magicnana999/im/constants"
 	"github.com/magicnana999/im/domain"
-	"github.com/magicnana999/im/logger"
 	"os"
 	"testing"
 )
 
 func TestMain(m *testing.M) {
 	conf.LoadConfig("/Users/jinsong/source/github/im/conf/im-router.yaml")
-	logger.InitLogger("debug")
 
 	exitCode := m.Run()
 	os.Exit(exitCode)

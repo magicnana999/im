@@ -5,7 +5,6 @@ import (
 	"github.com/magicnana999/im/conf"
 	"github.com/magicnana999/im/errors"
 	"github.com/magicnana999/im/kafka"
-	"github.com/magicnana999/im/logger"
 	"github.com/magicnana999/im/pb"
 	"sync"
 )
@@ -25,7 +24,6 @@ func initMessageReceiver() *messageReceiver {
 		defaultMessageReceiver = &messageReceiver{}
 		defaultMessageReceiver.mqProducer = kafka.InitProducer([]string{conf.Global.Kafka.String()})
 
-		logger.DebugF("messageReceiver init")
 	})
 
 	return defaultMessageReceiver

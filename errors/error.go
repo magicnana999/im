@@ -32,7 +32,6 @@ const (
 	cmdUnknownType = iota + 1201
 	cmdResponseNull
 	cmdReplyNull
-	cmdLogin
 )
 
 var (
@@ -40,7 +39,6 @@ var (
 	CmdUnknownType  = New(cmdUnknownType, "unknown command type")
 	CmdResponseNull = New(cmdResponseNull, "response is null")
 	CmdReplyNull    = New(cmdReplyNull, "reply is null")
-	CmdLoginError   = New(cmdLogin, "login failed")
 )
 
 // GRPC API

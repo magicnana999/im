@@ -1,0 +1,112 @@
+2025-02-25T02:14:54.268+0800 INFO kafka/kafka.go:41 consumer start,topic:{127.0.0.1-7539 127.0.0.1-7539-group}
+2025-02-25T02:16:10.564+0800 INFO kafka/kafka.go:41 consumer start,topic:{127.0.0.1-7539 127.0.0.1-7539-group}
+2025-02-25T02:42:27.481+0800 INFO kafka/kafka.go:41 consumer start,topic:{127.0.0.1-7539 127.0.0.1-7539-group}
+2025-02-25T02:43:44.108+0800 INFO kafka/kafka.go:41 consumer start,topic:{127.0.0.1-7539 127.0.0.1-7539-group}
+2025-02-25T02:43:44.108+0800 INFO broker/deliver.go:107 deliver start
+2025-02-25T02:44:35.308+0800 INFO broker/deliver.go:107 deliver start
+2025-02-25T02:44:35.308+0800 INFO kafka/kafka.go:41 consumer start,topic:{127.0.0.1-7539 127.0.0.1-7539-group}
+2025-02-25T02:47:17.634+0800 INFO broker/deliver.go:107 deliver start
+2025-02-25T02:47:17.634+0800 INFO kafka/kafka.go:41 consumer start,topic:{127.0.0.1-7539 127.0.0.1-7539-group}
+2025-02-25T02:50:52.274+0800 INFO kafka/kafka.go:41 consumer start,topic:{127.0.0.1-7539 127.0.0.1-7539-group}
+2025-02-25T02:50:52.274+0800 INFO broker/deliver.go:107 deliver start
+2025-02-25T02:51:56.807+0800 ERROR broker/heartbeat_handler.go:95 [127.0.0.1:63147#] heartbeatTask timeout,now:2025-02-25 02:51:56.5156,last:2025-02-25 02:50:56.5056,interval:30000(ms)
+2025-02-25T02:58:00.739+0800 INFO kafka/kafka.go:41 consumer start,topic:{127.0.0.1-7539 127.0.0.1-7539-group}
+2025-02-25T02:58:00.739+0800 INFO broker/deliver.go:107 deliver start
+2025-02-25T02:59:04.194+0800 INFO kafka/kafka.go:41 consumer start,topic:{127.0.0.1-7539 127.0.0.1-7539-group}
+2025-02-25T02:59:04.194+0800 INFO broker/deliver.go:107 deliver start
+2025-02-25T02:59:40.713+0800 ERROR broker/server.go:201 [<nil> a4f6cc48ded52d760791ce4f26391407  ] [%!s(MISSING)#%!s(MISSING)] write error:%!v(MISSING)
+2025-02-25T03:00:06.553+0800 INFO kafka/kafka.go:41 consumer start,topic:{127.0.0.1-7539 127.0.0.1-7539-group}
+2025-02-25T03:00:06.552+0800 INFO broker/deliver.go:107 deliver start
+2025-02-25T03:00:08.212+0800 DEBUG broker/server.go:168 [{"type":2, "commandBody":{"id":"cuuc3e61a37qorv78tv0", "cType":"USER_LOGIN", "loginRequest":{"appId":"19860220", "userSig":"cukpovu1a37hpofg6sjg", "version":"1.0.0", "os":"iOS", "deviceId":"cuuc3e61a37qorv78tug"}}} 504e30241ea4f3a156c6b30437fbb067 127.0.0.1:63779 ] [%!s(MISSING)#%!s(MISSING)] decode:%!s(MISSING)
+2025-02-25T03:00:08.212+0800 DEBUG broker/server.go:187 [{"type":2, "commandBody":{"id":"cuuc3e61a37qorv78tv0", "cType":"USER_LOGIN", "code":1201, "message":"command failed rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp 127.0.0.1:7540: connect: connection refused\""}} 504e30241ea4f3a156c6b30437fbb067 127.0.0.1:63779 ] [%!s(MISSING)#%!s(MISSING)] encode:%!s(MISSING)
+2025-02-25T03:01:54.698+0800 INFO kafka/kafka.go:41 consumer start,topic:{127.0.0.1-7539 127.0.0.1-7539-group}
+2025-02-25T03:01:54.698+0800 INFO broker/deliver.go:107 deliver start
+2025-02-25T03:01:56.554+0800 DEBUG broker/server.go:168 [2fd000cf3db5a07cc341513a1bf62cf2 127.0.0.1:63872  {"type":2,"commandBody":{"id":"cuuc4961a37qpcdja9o0","cType":"USER_LOGIN","loginRequest":{"appId":"19860220","userSig":"cukpovu1a37hpofg6sjg","version":"1.0.0","os":"iOS","deviceId":"cuuc4961a37qpcdja9ng"}}}] [%!s(MISSING)#%!s(MISSING)] decode:%!s(MISSING)
+2025-02-25T03:01:56.554+0800 DEBUG broker/server.go:187 [2fd000cf3db5a07cc341513a1bf62cf2 127.0.0.1:63872  {"type":2,"commandBody":{"id":"cuuc4961a37qpcdja9o0","cType":"USER_LOGIN","code":1201,"message":"command failed rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp 127.0.0.1:7540: connect: connection refused\""}}] [%!s(MISSING)#%!s(MISSING)] encode:%!s(MISSING)
+2025-02-25T03:02:40.914+0800 INFO broker/deliver.go:107 deliver start
+2025-02-25T03:02:40.914+0800 INFO kafka/kafka.go:41 consumer start,topic:{127.0.0.1-7539 127.0.0.1-7539-group}
+2025-02-25T03:03:46.273+0800 ERROR broker/heartbeat_handler.go:95 [127.0.0.1:63927#] heartbeatTask timeout,now:2025-02-25 03:03:15.0315,last:2025-02-25 03:02:42.0242,interval:30000(ms)
+2025-02-25T03:03:54.103+0800 ERROR broker/heartbeat_handler.go:95 [127.0.0.1:63927#] heartbeatTask timeout,now:2025-02-25 03:03:54.0354,last:2025-02-25 03:02:42.0242,interval:30000(ms)
+2025-02-25T03:03:54.103+0800 DEBUG broker/server.go:168 [ddfa0e14847efef6bf4b7099b49fb9ea 127.0.0.1:63927  {"type":2, "commandBody":{"id":"cuuc4km1a37qpmo2ealg", "cType":"USER_LOGIN", "loginRequest":{"appId":"19860220", "userSig":"cukpovu1a37hpofg6sjg", "version":"1.0.0", "os":"iOS", "deviceId":"cuuc4km1a37qpmo2eal0"}}}] [%!s(MISSING)#%!s(MISSING)] decode:%!s(MISSING)
+2025-02-25T03:04:39.310+0800 INFO kafka/kafka.go:41 consumer start,topic:{127.0.0.1-7539 127.0.0.1-7539-group}
+2025-02-25T03:04:39.310+0800 INFO broker/deliver.go:107 deliver start
+2025-02-25T03:04:45.373+0800 DEBUG broker/server.go:168 0c3f884c969b44d0a86e9a824938bc0c [127.0.0.1:64008#] decode:{"type":2,"commandBody":{"id":"cuuc5je1a37qq4hb8lsg","cType":"USER_LOGIN","loginRequest":{"appId":"19860220","userSig":"cukpovu1a37hpofg6sjg","version":"1.0.0","os":"iOS","deviceId":"cuuc5je1a37qq4hb8ls0"}}}
+2025-02-25T03:04:45.373+0800 DEBUG broker/server.go:187 [0c3f884c969b44d0a86e9a824938bc0c 127.0.0.1:64008  {"type":2,"commandBody":{"id":"cuuc5je1a37qq4hb8lsg","cType":"USER_LOGIN","code":1201,"message":"command failed rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp 127.0.0.1:7540: connect: connection refused\""}}] [%!s(MISSING)#%!s(MISSING)] encode:%!s(MISSING)
+2025-02-25T03:05:57.707+0800 INFO broker/deliver.go:107 deliver start
+2025-02-25T03:05:57.707+0800 INFO kafka/kafka.go:41 consumer start,topic:{127.0.0.1-7539 127.0.0.1-7539-group}
+2025-02-25T03:06:00.078+0800 DEBUG broker/server.go:168 b38f743b536fe6d79d66f84d9ff26a98 [127.0.0.1:64107#] decode:{"type":2,"commandBody":{"id":"cuuc6661a37qqj4t0gjg","cType":"USER_LOGIN","loginRequest":{"appId":"19860220","userSig":"cukpovu1a37hpofg6sjg","version":"1.0.0","os":"iOS","deviceId":"cuuc6661a37qqj4t0gj0"}}}
+2025-02-25T03:06:00.079+0800 DEBUG broker/server.go:187 b38f743b536fe6d79d66f84d9ff26a98 [127.0.0.1:64107#] encode:{"type":2,"commandBody":{"id":"cuuc6661a37qqj4t0gjg","cType":"USER_LOGIN","code":1201,"message":"command failed rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp 127.0.0.1:7540: connect: connection refused\""}}
+2025-02-25T03:06:27.657+0800 DEBUG broker/server.go:168 c34029e93833d532767b23c445086ffd [127.0.0.1:64131#] decode:{"type":2,"commandBody":{"id":"cuuc6cu1a37qqr87e5ag","cType":"USER_LOGIN","loginRequest":{"appId":"19860220","userSig":"cukpovu1a37hpofg6sjg","version":"1.0.0","os":"iOS","deviceId":"cuuc6cu1a37qqr87e5a0"}}}
+2025-02-25T03:06:27.659+0800 DEBUG broker/server.go:187 c34029e93833d532767b23c445086ffd [127.0.0.1:64131#] encode:{"type":2,"commandBody":{"id":"cuuc6cu1a37qqr87e5ag","cType":"USER_LOGIN","code":2001,"message":"user sig not found json: cannot unmarshal number into Go struct field User.Os of type string "}}
+2025-02-25T03:16:05.086+0800 INFO broker/deliver.go:107 deliver start
+2025-02-25T03:16:05.086+0800 INFO kafka/kafka.go:41 consumer start,topic:{127.0.0.1-7539 127.0.0.1-7539-group}
+2025-02-25T03:16:16.612+0800 DEBUG broker/server.go:168 e8e9ee3614be0ef95405512659523329 [127.0.0.1:64719#] decode:{"type":2,"commandBody":{"id":"cuucb061a37qt3qps6i0","cType":"USER_LOGIN","loginRequest":{"appId":"19860220","userSig":"cukpovu1a37hpofg6sjg","version":"1.0.0","os":"iOS","deviceId":"cuucb061a37qt3qps6hg"}}}
+2025-02-25T03:16:16.612+0800 INFO logger/grpc.go:86 gRPC Client: Sending request - Trace ID: e8e9ee3614be0ef95405512659523329
+2025-02-25T03:16:16.612+0800 DEBUG logger/grpc.go:90 e8e9ee3614be0ef95405512659523329 grpc client /pb.UserApi/Login input:
+19860220cukpovu1a37hpofg6sjg1.0.0"iOS*cuucb061a37qt3qps6hg
+2025-02-25T03:16:16.615+0800 DEBUG logger/grpc.go:103 e8e9ee3614be0ef95405512659523329 grpc client /pb.UserApi/Login output:Ñ\user sig not found json: cannot unmarshal number into Go struct field User.Os of type string
+2025-02-25T03:16:16.615+0800 DEBUG broker/server.go:187 e8e9ee3614be0ef95405512659523329 [127.0.0.1:64719#] encode:{"type":2,"commandBody":{"id":"cuucb061a37qt3qps6i0","cType":"USER_LOGIN","code":2001,"message":"user sig not found json: cannot unmarshal number into Go struct field User.Os of type string "}}
+2025-02-25T03:19:41.365+0800 INFO kafka/kafka.go:41 consumer start,topic:{127.0.0.1-7539 127.0.0.1-7539-group}
+2025-02-25T03:19:41.365+0800 INFO broker/deliver.go:107 deliver start
+2025-02-25T03:19:47.119+0800 DEBUG broker/server.go:168 a952dda66877a47c3171389878bb8071 [127.0.0.1:64964#] decode:{"type":2,"commandBody":{"id":"cuuccku1a37qtutjnq00","cType":"USER_LOGIN","loginRequest":{"appId":"19860220","userSig":"cukpovu1a37hpofg6sjg","version":"1.0.0","os":"iOS","deviceId":"cuuccku1a37qtutjnpvg"}}}
+2025-02-25T03:19:47.120+0800 INFO logger/grpc.go:87 gRPC Client: Sending request - Trace ID: a952dda66877a47c3171389878bb8071
+2025-02-25T03:19:47.120+0800 DEBUG logger/grpc.go:91 a952dda66877a47c3171389878bb8071 grpc client /pb.UserApi/Login input:
+19860220cukpovu1a37hpofg6sjg1.0.0"iOS*cuuccku1a37qtutjnpvg
+2025-02-25T03:19:47.122+0800 DEBUG logger/grpc.go:104 a952dda66877a47c3171389878bb8071 grpc client /pb.UserApi/Login output:Ñ\user sig not found json: cannot unmarshal number into Go struct field User.Os of type string
+2025-02-25T03:19:47.122+0800 DEBUG broker/server.go:187 a952dda66877a47c3171389878bb8071 [127.0.0.1:64964#] encode:{"type":2,"commandBody":{"id":"cuuccku1a37qtutjnq00","cType":"USER_LOGIN","code":2001,"message":"user sig not found json: cannot unmarshal number into Go struct field User.Os of type string "}}
+2025-02-25T03:20:53.254+0800 INFO broker/deliver.go:107 deliver start
+2025-02-25T03:20:53.254+0800 INFO kafka/kafka.go:41 consumer start,topic:{127.0.0.1-7539 127.0.0.1-7539-group}
+2025-02-25T03:21:00.426+0800 DEBUG broker/server.go:168 236813f5eefad150b086d153ecf5c71b [127.0.0.1:65105#] decode:{"type":2, "commandBody":{"id":"cuucd761a37quhfdrod0", "cType":"USER_LOGIN", "loginRequest":{"appId":"19860220", "userSig":"cukpovu1a37hpofg6sjg", "version":"1.0.0", "os":"iOS", "deviceId":"cuucd761a37quhfdrocg"}}}
+2025-02-25T03:21:00.426+0800 INFO logger/grpc.go:87 gRPC Client: Sending request - Trace ID: 236813f5eefad150b086d153ecf5c71b
+2025-02-25T03:21:00.426+0800 DEBUG logger/grpc.go:91 236813f5eefad150b086d153ecf5c71b grpc client /pb.UserApi/Login input:{"appId":"19860220", "userSig":"cukpovu1a37hpofg6sjg", "version":"1.0.0", "os":"iOS", "deviceId":"cuucd761a37quhfdrocg"}
+2025-02-25T03:21:00.429+0800 DEBUG logger/grpc.go:104 236813f5eefad150b086d153ecf5c71b grpc client /pb.UserApi/Login output:{"code":2001, "message":"user sig not found json: cannot unmarshal number into Go struct field User.Os of type string"}
+2025-02-25T03:21:00.429+0800 DEBUG broker/server.go:187 236813f5eefad150b086d153ecf5c71b [127.0.0.1:65105#] encode:{"type":2, "commandBody":{"id":"cuucd761a37quhfdrod0", "cType":"USER_LOGIN", "code":2001, "message":"user sig not found json: cannot unmarshal number into Go struct field User.Os of type string "}}
+2025-02-25T03:23:43.136+0800 INFO kafka/kafka.go:41 consumer start,topic:{127.0.0.1-7539 127.0.0.1-7539-group}
+2025-02-25T03:23:43.136+0800 INFO broker/deliver.go:107 deliver start
+2025-02-25T03:23:54.925+0800 DEBUG broker/server.go:168 c7cd05b7dcda82866a07519aeec42f95 [127.0.0.1:65332#] decode:{"type":2, "commandBody":{"id":"cuucehe1a37qvantaa50", "cType":"USER_LOGIN", "loginRequest":{"appId":"19860220", "userSig":"cukpovu1a37hpofg6sjg", "version":"1.0.0", "os":"iOS", "deviceId":"cuucehe1a37qvantaa4g"}}}
+2025-02-25T03:24:09.238+0800 DEBUG logger/grpc.go:90 c7cd05b7dcda82866a07519aeec42f95 grpc client /pb.UserApi/Login input:{"appId":"19860220", "userSig":"cukpovu1a37hpofg6sjg", "version":"1.0.0", "os":"iOS", "deviceId":"cuucehe1a37qvantaa4g"}
+2025-02-25T03:24:09.243+0800 DEBUG logger/grpc.go:103 c7cd05b7dcda82866a07519aeec42f95 grpc client /pb.UserApi/Login output:{"code":2001, "message":"user sig not found json: cannot unmarshal number into Go struct field User.Os of type string"}
+2025-02-25T03:24:39.935+0800 ERROR broker/heartbeat_handler.go:95 [127.0.0.1:65332#] heartbeatTask timeout,now:2025-02-25 03:24:29.2429,last:2025-02-25 03:23:49.2349,interval:30000(ms)
+2025-02-25T03:25:16.689+0800 DEBUG broker/server.go:187 c7cd05b7dcda82866a07519aeec42f95 [127.0.0.1:65332#] encode:{"type":2, "commandBody":{"id":"cuucehe1a37qvantaa50", "cType":"USER_LOGIN", "code":2001, "message":"user sig not found json: cannot unmarshal number into Go struct field User.Os of type string "}}
+2025-02-25T03:25:16.689+0800 ERROR broker/server.go:201 c7cd05b7dcda82866a07519aeec42f95 [#] write error:<nil>
+2025-02-25T03:25:16.689+0800 ERROR broker/server.go:201 2a7671a923ff970c6c259a8a75ec6778 [#] write error:<nil>
+2025-02-25T03:25:16.689+0800 ERROR broker/server.go:201 2a7671a923ff970c6c259a8a75ec6778 [#] write error:<nil>
+2025-02-25T03:25:16.689+0800 ERROR broker/server.go:201 2a7671a923ff970c6c259a8a75ec6778 [#] write error:<nil>
+2025-02-25T03:25:16.689+0800 ERROR broker/server.go:201 2a7671a923ff970c6c259a8a75ec6778 [#] write error:<nil>
+2025-02-25T03:25:16.689+0800 ERROR broker/server.go:201 2a7671a923ff970c6c259a8a75ec6778 [#] write error:<nil>
+2025-02-25T03:25:16.689+0800 ERROR broker/server.go:201 2a7671a923ff970c6c259a8a75ec6778 [#] write error:<nil>
+2025-02-25T03:25:38.051+0800 INFO kafka/kafka.go:41 consumer start,topic:{127.0.0.1-7539 127.0.0.1-7539-group}
+2025-02-25T03:25:38.051+0800 INFO broker/deliver.go:107 deliver start
+2025-02-25T03:25:42.646+0800 DEBUG broker/server.go:168 89c4f7b9169c22f71bc8d5964d71c180 [127.0.0.1:65427#] decode:{"type":2, "commandBody":{"id":"cuucfdm1a37qvu7sajag", "cType":"USER_LOGIN", "loginRequest":{"appId":"19860220", "userSig":"cukpovu1a37hpofg6sjg", "version":"1.0.0", "os":"iOS", "deviceId":"cuucfdm1a37qvu7saja0"}}}
+2025-02-25T03:26:22.160+0800 ERROR broker/heartbeat_handler.go:95 [127.0.0.1:65427#] heartbeatTask timeout,now:2025-02-25 03:26:22.2622,last:2025-02-25 03:25:42.2542,interval:30000(ms)
+2025-02-25T03:26:42.012+0800 DEBUG logger/grpc.go:90 89c4f7b9169c22f71bc8d5964d71c180 grpc client /pb.UserApi/Login input:{"appId":"19860220", "userSig":"cukpovu1a37hpofg6sjg", "version":"1.0.0", "os":"iOS", "deviceId":"cuucfdm1a37qvu7saja0"}
+2025-02-25T03:26:48.415+0800 DEBUG logger/grpc.go:103 89c4f7b9169c22f71bc8d5964d71c180 grpc client /pb.UserApi/Login output:{"code":2001, "message":"user sig not found json: cannot unmarshal number into Go struct field User.Os of type string"}
+2025-02-25T03:29:44.579+0800 INFO broker/deliver.go:107 deliver start
+2025-02-25T03:29:44.579+0800 INFO kafka/kafka.go:41 consumer start,topic:{127.0.0.1-7539 127.0.0.1-7539-group}
+2025-02-25T03:29:50.878+0800 DEBUG broker/server.go:168 8273a049f854c76002b63bd7b56e7acb [127.0.0.1:49198#] decode:{"type":2, "commandBody":{"id":"cuuchbm1a37r1k9ug9b0", "cType":"USER_LOGIN", "loginRequest":{"appId":"19860220", "userSig":"cukpovu1a37hpofg6sjg", "version":"1.0.0", "os":"iOS", "deviceId":"cuuchbm1a37r1k9ug9ag"}}}
+2025-02-25T03:29:50.878+0800 DEBUG logger/grpc.go:90 8273a049f854c76002b63bd7b56e7acb grpc client /pb.UserApi/Login input:{"appId":"19860220", "userSig":"cukpovu1a37hpofg6sjg", "version":"1.0.0", "os":"iOS", "deviceId":"cuuchbm1a37r1k9ug9ag"}
+2025-02-25T03:29:50.882+0800 DEBUG logger/grpc.go:103 8273a049f854c76002b63bd7b56e7acb grpc client /pb.UserApi/Login output:{"code":2001, "message":"user sig not found json: cannot unmarshal number into Go struct field User.Os of type string"}
+2025-02-25T03:29:50.882+0800 DEBUG broker/server.go:187 8273a049f854c76002b63bd7b56e7acb [127.0.0.1:49198#] encode:{"type":2, "commandBody":{"id":"cuuchbm1a37r1k9ug9b0", "cType":"USER_LOGIN", "code":2001, "message":"user sig not found json: cannot unmarshal number into Go struct field User.Os of type string "}}
+2025-02-25T03:36:45.011+0800 INFO kafka/kafka.go:41 consumer start,topic:{127.0.0.1-7539 127.0.0.1-7539-group}
+2025-02-25T03:36:45.011+0800 INFO broker/deliver.go:107 deliver start
+2025-02-25T03:37:00.316+0800 INFO broker/deliver.go:107 deliver start
+2025-02-25T03:37:00.316+0800 INFO kafka/kafka.go:41 consumer start,topic:{127.0.0.1-7539 127.0.0.1-7539-group}
+2025-02-25T03:37:15.701+0800 DEBUG broker/server.go:167 2d9f588c057a89458de30656979b94d4 [127.0.0.1:49690#] decode:{"type":2,"commandBody":{"id":"cuuckqu1a37r3jntetlg","cType":"USER_LOGIN","loginRequest":{"appId":"19860220","userSig":"cukpovu1a37hpofg6sjg","version":"1.0.0","os":"iOS","deviceId":"cuuckqu1a37r3jntetl0"}}}
+2025-02-25T03:37:15.701+0800 DEBUG logger/grpc.go:90 2d9f588c057a89458de30656979b94d4 grpc client /pb.UserApi/Login input:{"appId":"19860220","userSig":"cukpovu1a37hpofg6sjg","version":"1.0.0","os":"iOS","deviceId":"cuuckqu1a37r3jntetl0"}
+2025-02-25T03:37:15.704+0800 DEBUG logger/grpc.go:103 2d9f588c057a89458de30656979b94d4 grpc client /pb.UserApi/Login output:{"code":2001,"message":"user sig not found json: cannot unmarshal number into Go struct field User.Os of type string"}
+2025-02-25T03:37:15.704+0800 DEBUG broker/server.go:186 2d9f588c057a89458de30656979b94d4 [127.0.0.1:49690#] encode:{"type":2,"commandBody":{"id":"cuuckqu1a37r3jntetlg","cType":"USER_LOGIN","code":2001,"message":"user sig not found json: cannot unmarshal number into Go struct field User.Os of type string "}}
+2025-02-25T03:38:28.503+0800 INFO kafka/kafka.go:41 consumer start,topic:{127.0.0.1-7539 127.0.0.1-7539-group}
+2025-02-25T03:38:28.503+0800 INFO broker/deliver.go:107 deliver start
+2025-02-25T03:38:35.068+0800 DEBUG broker/server.go:168 a0ca16a7fe4c433a205d40148299fcc8 [127.0.0.1:49812#] decode:{"type":2,"commandBody":{"id":"cuucleu1a37r47tqkm30","cType":"USER_LOGIN","loginRequest":{"appId":"19860220","userSig":"cukpovu1a37hpofg6sjg","version":"1.0.0","os":"iOS","deviceId":"cuucleu1a37r47tqkm2g"}}}
+2025-02-25T03:38:35.068+0800 DEBUG logger/grpc.go:90 a0ca16a7fe4c433a205d40148299fcc8 grpc client /pb.UserApi/Login input:{"appId":"19860220","userSig":"cukpovu1a37hpofg6sjg","version":"1.0.0","os":"iOS","deviceId":"cuucleu1a37r47tqkm2g"}
+2025-02-25T03:38:35.071+0800 DEBUG logger/grpc.go:103 a0ca16a7fe4c433a205d40148299fcc8 grpc client /pb.UserApi/Login output:{"code":2001,"message":"user sig not found json: cannot unmarshal number into Go struct field User.Os of type string"}
+2025-02-25T03:38:35.072+0800 DEBUG broker/server.go:187 a0ca16a7fe4c433a205d40148299fcc8 [127.0.0.1:49812#] encode:{"type":2,"commandBody":{"id":"cuucleu1a37r47tqkm30","cType":"USER_LOGIN","code":2001,"message":"user sig not found json: cannot unmarshal number into Go struct field User.Os of type string "}}
+2025-02-25T03:42:38.131+0800 INFO broker/deliver.go:107 deliver start
+2025-02-25T03:42:38.132+0800 INFO kafka/kafka.go:41 consumer start,topic:{127.0.0.1-7539 127.0.0.1-7539-group}
+2025-02-25T03:42:41.654+0800 DEBUG broker/server.go:168 0cea0d9393e181007b17b2278e5627e8 [127.0.0.1:50093#] decode:{"type":2,"commandBody":{"id":"cuucnce1a37r4tmg0870","cType":"USER_LOGIN","loginRequest":{"appId":"19860220","userSig":"cukpovu1a37hpofg6sjg","version":"1.0.0","os":"iOS","deviceId":"cuucnce1a37r4tmg086g"}}}
+2025-02-25T03:42:41.654+0800 DEBUG logger/grpc.go:90 0cea0d9393e181007b17b2278e5627e8 grpc client /pb.UserApi/Login input:{"appId":"19860220","userSig":"cukpovu1a37hpofg6sjg","version":"1.0.0","os":"iOS","deviceId":"cuucnce1a37r4tmg086g"}
+2025-02-25T03:42:41.656+0800 DEBUG logger/grpc.go:103 0cea0d9393e181007b17b2278e5627e8 grpc client /pb.UserApi/Login output:{"code":2001,"message":"user sig not found json: cannot unmarshal number into Go struct field User.Os of type string"}
+2025-02-25T03:44:50.760+0800 INFO kafka/kafka.go:41 consumer start,topic:{127.0.0.1-7539 127.0.0.1-7539-group}
+2025-02-25T03:44:50.760+0800 INFO broker/deliver.go:107 deliver start
+2025-02-25T03:44:56.704+0800 DEBUG broker/server.go:168 18e41779a091bb5e61336483c4ebc476 [127.0.0.1:50346#] decode:{"type":2,"commandBody":{"id":"cuucoe61a37r5iiv3jrg","cType":"USER_LOGIN","loginRequest":{"appId":"19860220","userSig":"cukpovu1a37hpofg6sjg","version":"1.0.0","os":"iOS","deviceId":"cuucoe61a37r5iiv3jr0"}}}
+2025-02-25T03:44:56.704+0800 DEBUG logger/grpc.go:90 18e41779a091bb5e61336483c4ebc476 grpc client /pb.UserApi/Login input:{"appId":"19860220","userSig":"cukpovu1a37hpofg6sjg","version":"1.0.0","os":"iOS","deviceId":"cuucoe61a37r5iiv3jr0"}

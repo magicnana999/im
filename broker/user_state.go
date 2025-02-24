@@ -2,7 +2,6 @@ package broker
 
 import (
 	"context"
-	"github.com/magicnana999/im/constants"
 	"github.com/magicnana999/im/domain"
 	"github.com/magicnana999/im/redis"
 	"sync"
@@ -25,7 +24,7 @@ func initUserState() *userState {
 	return defaultUserState
 }
 
-func (s *userState) storeUser(ctx context.Context, u *domain.UserConnection, appId string, userId int64, os constants.OSType) error {
+func (s *userState) storeUser(ctx context.Context, u *domain.UserConnection, appId string, userId int64, os string) error {
 
 	lock, e := s.storage.Lock(ctx, appId, u.Label())
 	if e != nil {

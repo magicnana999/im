@@ -1,6 +1,4 @@
-name: im-broker
-logger:
-    level: -1
+name: im-service
 broker:
     addr: "127.0.0.1:7539"
     ServerInterval: 30

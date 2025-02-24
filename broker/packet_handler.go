@@ -3,7 +3,6 @@ package broker
 import (
 	"context"
 	"github.com/magicnana999/im/errors"
-	"github.com/magicnana999/im/logger"
 	"github.com/magicnana999/im/pb"
 	"strconv"
 	"sync"
@@ -38,7 +37,6 @@ func (p *packetHandlerImpl) isSupport(ctx context.Context, packetType int32) boo
 		}
 	}
 
-	logger.ErrorF("no handler support %d", packetType)
 	return false
 }
 

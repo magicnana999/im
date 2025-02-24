@@ -3,7 +3,6 @@ package redis
 import (
 	"context"
 	red "github.com/go-redis/redis/v8"
-	"github.com/magicnana999/im/logger"
 	"time"
 )
 
@@ -29,15 +28,14 @@ func (s *GroupMemberStorage) StoreMembers(ctx context.Context, appId string, gro
 	return ret.Val(), ret.Err()
 }
 
-func (s *GroupMemberStorage) Lock(ctx context.Context, appId string, groupId int64) bool {
+func (s *GroupMemberStorage) Lock(ctx context.Context, appId string, groupId int64) (bool, error) {
 	key := KeyGroupMembersLock(appId, groupId)
 	now := time.Now().Second()
 	ret := rds.Set(ctx, key, now, time.Hour)
 	if ret.Err() != nil {
-		logger.Error(ret.Err().Error())
-		return false
+		return false, ret.Err()
 	}
-	return true
+	return true, nil
 }
 
 func (s *GroupMemberStorage) UnLock(ctx context.Context, appId string, groupId int64) (int64, error) {

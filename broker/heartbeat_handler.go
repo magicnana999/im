@@ -38,7 +38,6 @@ func initHeartbeatHandler() *heartbeatHandler {
 		defaultHeartbeatHandler.userState = initUserState()
 		defaultHeartbeatHandler.interval = time.Duration(interval) * time.Second
 
-		logger.DebugF("heartbeatHandler init")
 	})
 
 	return defaultHeartbeatHandler
@@ -65,7 +64,6 @@ func (h *heartbeatHandler) startTicker(ctx context.Context, c gnet.Conn, uc *dom
 	_, exist := h.m.LoadOrStore(task.fd, task)
 	if exist {
 		task = nil
-		logger.WarnF("[%s#%s] heartbeatTask exist,skipping", task.remoteAddr, task.uc.Label())
 		return nil
 	}
 
@@ -87,21 +85,20 @@ func (h *heartbeatHandler) startTicker(ctx context.Context, c gnet.Conn, uc *dom
 		for {
 			select {
 			case <-ct.Done():
-				logger.InfoF("[%s#%s] heartbeatTask done",
-					task.remoteAddr,
-					task.uc.Label())
 				return
 
 			case <-task.ticker.C:
 
 				now := time.Now()
 				if now.UnixMilli()-task.lastHeartbeat > h.interval.Milliseconds() {
-					logger.ErrorF("[%s#%s] heartbeatTask timeout,now:%s,last:%s,interval:%d(ms)",
+
+					logger.Errorf("[%s#%s] heartbeatTask timeout,now:%s,last:%s,interval:%d(ms)",
 						task.remoteAddr,
 						task.uc.Label(),
 						format(now),
 						format(time.UnixMilli(task.lastHeartbeat)),
 						h.interval.Milliseconds())
+
 					h.stopTicker(task.c)
 				} else {
 					h.userState.refreshUser(task.ctx, task.uc)
@@ -122,8 +119,6 @@ func (h *heartbeatHandler) startTicker(ctx context.Context, c gnet.Conn, uc *dom
 
 		return errors.HeartbeatTaskError.DetailJson(errorMap)
 	}
-
-	logger.DebugF("[%s#%s] heartbeatTask started", task.remoteAddr, task.uc.Label())
 
 	return nil
 }
@@ -161,8 +156,6 @@ func (h *heartbeatHandler) stopTicker(c gnet.Conn) error {
 	if c != nil {
 		c.Close()
 	}
-	logger.InfoF("[%s#%s] heartbeatTask closed", t.remoteAddr, t.uc.Label())
-
 	return nil
 }
 

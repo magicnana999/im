@@ -56,7 +56,7 @@ func (s *GroupMemberSvc) LoadAndFetch(ctx context.Context, appId string, groupId
 		return ids, nil
 	}
 
-	if ok := s.storage.Lock(ctx, appId, groupId); ok {
+	if ok, e := s.storage.Lock(ctx, appId, groupId); ok && e == nil {
 		defer s.storage.UnLock(ctx, appId, groupId)
 	}
 

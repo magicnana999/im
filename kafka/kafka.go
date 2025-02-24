@@ -33,14 +33,12 @@ func InitConsumer(brokers []string, topic TopicInfo, handle MQMessageHandler) *C
 		brokers:   brokers,
 	}
 
-	logger.DebugF("consumer init")
-
 	return c
 }
 
 func (c *Consumer) Start(ctx context.Context) error {
 	go func() {
-		logger.InfoF("consumer start,topic:%s", c.topicInfo)
+		logger.Infof("consumer start,topic:%s", c.topicInfo)
 
 		reader := kafka.NewReader(kafka.ReaderConfig{
 			Brokers: c.brokers,
@@ -61,7 +59,7 @@ func (c *Consumer) Start(ctx context.Context) error {
 				}
 
 				if err := handleMessageRoute(ctx, c.topicInfo.Topic, c.handle, &message); err != nil {
-					logger.ErrorF("consume message,topic:%s,error:%v", c.topicInfo.Topic, err)
+					logger.Errorf("consume message,topic:%s,error:%v", c.topicInfo.Topic, err)
 					return
 				}
 				reader.CommitMessages(ctx, message)
@@ -78,7 +76,7 @@ func handleMessageRoute(ctx context.Context, topic string, h MQMessageHandler, m
 		return err
 	}
 
-	logger.DebugF("consume message,topic:%s,id:%s", topic, msg.Id)
+	logger.Debugf("consume message,topic:%s,id:%s", topic, msg.Id)
 
 	return h.Consume(ctx, &msg)
 }
@@ -119,7 +117,6 @@ func InitProducer(brokers []string) *Producer {
 			writer: writer,
 		}
 
-		logger.DebugF("producer init")
 	})
 	return defaultProducer
 }
@@ -149,7 +146,7 @@ func (p *Producer) send(ctx context.Context, topic string, m *pb.MessageBody, us
 		Time:       time.Time{},
 	}
 
-	logger.DebugF("produce message,topic:%s,id:%s", body.Topic, mq.Id)
+	logger.Debugf("produce message,topic:%s,id:%s", body.Topic, mq.Id)
 
 	return p.writer.WriteMessages(ctx, body)
 }

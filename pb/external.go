@@ -112,7 +112,7 @@ func (mb *CommandBody) Failure(e error) *CommandBody {
 	ee := imerror.Format(e)
 	if ee != nil {
 		ack.Code = int32(ee.Code)
-		ack.Message = ee.Message
+		ack.Message = ee.Message + " " + ee.Details
 	}
 
 	return ack

@@ -1,3 +1,11 @@
+name: im-router
+broker:
+    addr: "127.0.0.1:7539"
+    ServerInterval: 30
+    heartbeatInterval: 30
+    loggerLevel: debug
+service:
+    addr: 127.0.0.1:7540
 mysql:
     user: root
     password: root1234

@@ -14,13 +14,13 @@ var (
 )
 
 type Option struct {
-	Mysql    MySQL    `yaml:"mysql"`
-	Redis    Redis    `yaml:"redis"`
-	Kafka    Kafka    `yaml:"kafka"`
-	Broker   Broker   `yaml:"broker"`
-	Grpc     Grpc     `yaml:"grpc"`
-	Sequence Sequence `yaml:"sequence"`
-	Service  Service  `yaml:"service"`
+	Name    string  `yaml:"name"`
+	Logger  Logger  `yaml:"logger"`
+	Mysql   MySQL   `yaml:"mysql"`
+	Redis   Redis   `yaml:"redis"`
+	Kafka   Kafka   `yaml:"kafka"`
+	Broker  Broker  `yaml:"broker"`
+	Service Service `yaml:"service"`
 }
 
 type MySQL struct {
@@ -79,16 +79,12 @@ type Broker struct {
 	LoggerLevel       string `yaml:"loggerLevel"`
 }
 
-type Grpc struct {
-	UserApiHost string `yaml:"userApiHost"`
-}
-
-type Sequence struct {
-	Batch int64 `yaml:"batch"`
-}
-
 type Service struct {
 	Addr string `yaml:"addr"`
+}
+
+type Logger struct {
+	Level int8 `yaml:"level"`
 }
 
 func LoadConfig(path string) error {
@@ -115,8 +111,5 @@ func LoadConfig(path string) error {
 		config.Broker.Addr = fmt.Sprintf("%s:7539", i)
 	}
 
-	if config.Sequence.Batch == 0 {
-		config.Sequence.Batch = 100
-	}
 	return nil
 }

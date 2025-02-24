@@ -3,7 +3,6 @@ package broker
 import (
 	"context"
 	"github.com/magicnana999/im/conf"
-	"github.com/magicnana999/im/constants"
 	"github.com/magicnana999/im/errors"
 	"github.com/magicnana999/im/logger"
 	"github.com/magicnana999/im/pb"
@@ -25,19 +24,23 @@ type commandHandler struct {
 func initCommandHandler() *commandHandler {
 
 	cmdHandlerOnce.Do(func() {
-		defaultCommandHandler := &commandHandler{}
-		userApiHost := conf.Global.Grpc.UserApiHost
 
-		conn, err := grpc.NewClient(userApiHost, grpc.WithTransportCredentials(insecure.NewCredentials()))
+		defaultCommandHandler = &commandHandler{}
+		userApiHost := conf.Global.Service.Addr
+
+		conn, err := grpc.NewClient(
+			userApiHost,
+			grpc.WithTransportCredentials(insecure.NewCredentials()),
+			grpc.WithUnaryInterceptor(logger.UnaryClientInterceptor()))
+
 		if err != nil {
-			logger.FatalF("init command handler user api provider error: %v", err)
+			logger.Fatalf("init command handler user api provider error: %v", err)
 
 		}
 		defaultCommandHandler.conn = conn
 		defaultCommandHandler.userApiClient = pb.NewUserApiClient(conn)
 		defaultCommandHandler.userState = initUserState()
 
-		logger.DebugF("commandHandler init")
 	})
 
 	return defaultCommandHandler
@@ -49,9 +52,15 @@ func (c *commandHandler) handlePacket(ctx context.Context, packet *pb.Packet) (*
 	var err error
 
 	mb := packet.GetCommandBody()
+
 	switch mb.CType {
 	case pb.CTypeUserLogin:
 		reply, err = c.login(ctx, mb.GetLoginRequest())
+	case pb.CTypeUserLogout:
+		reply, err = c.logout(ctx, mb.GetLogoutRequest())
+	case pb.CTypeFriendAdd:
+	case pb.CTypeFriendAddAgree:
+	case pb.CTypeFriendReject:
 	default:
 		err = errors.CmdUnknownType
 	}
@@ -92,10 +101,28 @@ func (c *commandHandler) login(ctx context.Context, req *pb.LoginRequest) (proto
 
 	ret := rep.GetLoginReply()
 
-	if err = c.userState.storeUser(ctx, uc, ret.AppId, ret.UserId, constants.OSType(req.Os)); err != nil {
-		return nil, errors.CmdLoginError.Detail(err)
+	if err = c.userState.storeUser(ctx, uc, ret.AppId, ret.UserId, req.Os); err != nil {
+		return nil, errors.CmdError.Detail(err)
 	}
 
 	return ret, nil
 
+}
+
+func (c *commandHandler) logout(ctx context.Context, req *pb.LogoutRequest) (proto.Message, error) {
+	rep, err := c.userApiClient.Logout(ctx, req)
+
+	if err != nil {
+		return nil, errors.CmdError.Detail(err)
+	}
+
+	if rep == nil {
+		return nil, errors.CmdResponseNull
+	}
+
+	if rep.Code != 0 {
+		return nil, errors.New(int(rep.Code), rep.Message)
+	}
+
+	return nil, nil
 }

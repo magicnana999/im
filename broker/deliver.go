@@ -38,7 +38,7 @@ type deliver struct {
 	m                sync.Map
 	codec            codec
 	heartbeatHandler *heartbeatHandler
-	deliverFailed    func(delivery *delivery)
+	deliverFailed    func(delivery *delivery) error
 	userState        *userState
 	mqProducer       *kafka.Producer
 	mqConsumer       *kafka.Consumer
@@ -50,7 +50,7 @@ func initDeliver(ctx context.Context, codec codec) *deliver {
 		d := &deliver{}
 		pool, err := ants.NewPool(1024)
 		if err != nil {
-			logger.FatalF("init deliver err: %v", err)
+			logger.Fatalf("init deliver err: %v", err)
 		}
 
 		broker := []string{conf.Global.Kafka.String()}
@@ -64,14 +64,14 @@ func initDeliver(ctx context.Context, codec codec) *deliver {
 		d.userState = initUserState()
 		d.mqProducer = kafka.InitProducer(broker)
 		d.mqConsumer = kafka.InitConsumer(broker, topic, d)
-		d.deliverFailed = func(delivery *delivery) {
+		d.deliverFailed = func(delivery *delivery) error {
 			eee := d.mqProducer.SendOffline(ctx, delivery.packet.GetMessageBody(), []int64{delivery.uc.UserId})
 			if eee != nil {
-				logger.ErrorF("[%s#%s] deliver task creation error:%v", delivery.uc.ClientAddr, delivery.uc.Label(), err)
-
 				defaultInstance.eng.Stop(defaultInstance.ctx)
-
+				return eee
 			}
+
+			return nil
 		}
 
 		d.mqConsumer.Start(ctx)
@@ -95,8 +95,6 @@ func (s *deliver) send(delivery *delivery) {
 
 func (s *deliver) stopPacketRetry(id string) {
 
-	logger.DebugF("deliver retry task stop %s", id)
-
 	if task, ok := s.m.Load(id); ok && task != nil {
 		t := task.(*deliverTask)
 		t.cancel()
@@ -105,13 +103,13 @@ func (s *deliver) stopPacketRetry(id string) {
 }
 
 func (s *deliver) start() {
-	for {
 
-		logger.InfoF("deliver start")
+	logger.Infof("deliver start")
+
+	for {
 
 		select {
 		case <-s.ctx.Done():
-			logger.InfoF("deliver done")
 			s.stopAll()
 			return
 		case d, ok := <-s.delivery:
@@ -139,7 +137,7 @@ func (s *deliver) sendMessage(delivery *delivery) {
 		return
 	}
 
-	subCtx, cancel := context.WithCancel(s.ctx)
+	subCtx, cancel := context.WithCancel(delivery.ctx)
 
 	task := &deliverTask{id: packet.GetMessageBody().MessageId}
 	_, loaded := s.m.LoadOrStore(task.id, task)
@@ -149,8 +147,6 @@ func (s *deliver) sendMessage(delivery *delivery) {
 	}
 
 	s.write(uc.C, packet, uc)
-	logger.InfoF("[%s#%s] deliver,id:%s",
-		uc.ClientAddr, uc.Label(), packet.GetMessageBody().MessageId)
 
 	task.ctx = subCtx
 	task.cancel = cancel
@@ -161,8 +157,6 @@ func (s *deliver) sendMessage(delivery *delivery) {
 	task.conn = delivery.uc.C
 
 	err := s.executor.Submit(func() {
-
-		logger.DebugF("deliver retry task start %s %d", task.id, task.interval)
 
 		for {
 			select {
@@ -184,8 +178,6 @@ func (s *deliver) sendMessage(delivery *delivery) {
 
 				}
 				s.write(task.conn, packet, uc)
-				logger.InfoF("[%s#%s] deliver retry,id:%s",
-					uc.ClientAddr, uc.Label(), packet.GetMessageBody().MessageId)
 
 				task.interval = next
 				task.ticker.Reset(time.Duration(next) * time.Second)
@@ -194,7 +186,6 @@ func (s *deliver) sendMessage(delivery *delivery) {
 	})
 
 	if err != nil {
-		logger.ErrorF("[%s#%s] deliver task creation error:%v", uc.ClientAddr, uc.Label(), err)
 		defaultInstance.eng.Stop(defaultInstance.ctx)
 	}
 }
@@ -208,7 +199,6 @@ func (s *deliver) write(conn gnet.Conn, packet *pb.Packet, uc *domain.UserConnec
 
 	if err != nil {
 
-		logger.ErrorF("[%s#%s] deliver encode error:%v", uc.ClientAddr, uc.Label())
 		s.stopPacketRetry(mb.MessageId)
 		s.heartbeatHandler.stopTicker(conn)
 	}
@@ -218,7 +208,6 @@ func (s *deliver) write(conn gnet.Conn, packet *pb.Packet, uc *domain.UserConnec
 	for sent < total {
 		n, err := conn.Write(buffer.Bytes()[sent:])
 		if err != nil {
-			logger.ErrorF("[%s#%s] deliver write error:%v", uc.ClientAddr, uc.Label())
 			s.stopPacketRetry(mb.MessageId)
 			s.heartbeatHandler.stopTicker(conn)
 		}
@@ -245,7 +234,7 @@ func (s *deliver) Consume(ctx context.Context, msg *pb.MQMessage) error {
 				return e
 			}
 		} else {
-			s.send(&delivery{msg.Message.Wrap(), uc})
+			s.send(&delivery{msg.Message.Wrap(), uc, ctx})
 		}
 	}
 	return nil
@@ -277,4 +266,5 @@ func exponentialBackoff(retryCount int) int {
 type delivery struct {
 	packet *pb.Packet
 	uc     *domain.UserConnection
+	ctx    context.Context
 }

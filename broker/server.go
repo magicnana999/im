@@ -10,6 +10,8 @@ import (
 	"github.com/panjf2000/gnet/v2"
 	"github.com/panjf2000/gnet/v2/pkg/logging"
 	bb "github.com/panjf2000/gnet/v2/pkg/pool/bytebuffer"
+	"google.golang.org/protobuf/encoding/protojson"
+
 	//bbPool "github.com/panjf2000/gnet/v2/pkg/pool/bytebuffer"
 	goPool "github.com/panjf2000/gnet/v2/pkg/pool/goroutine"
 
@@ -42,6 +44,8 @@ type Instance struct {
 }
 
 func Start(ctx context.Context, cancel context.CancelFunc) {
+
+	initLogger()
 
 	i := conf.Global.Broker.ServerInterval
 	if i <= 0 {
@@ -86,12 +90,11 @@ func Start(ctx context.Context, cancel context.CancelFunc) {
 		gnet.WithSocketRecvBuffer(4096),
 		gnet.WithSocketSendBuffer(4096),
 		gnet.WithTicker(true),
-		gnet.WithLogger(logger.InitLogger("debug")),
 		gnet.WithLogLevel(logging.DebugLevel),
 		gnet.WithEdgeTriggeredIO(true),
 		gnet.WithEdgeTriggeredIOChunk(0))
 	if err != nil {
-		logger.FatalF("Start BrokerInstance error: %v", err)
+		logger.Fatalf("failed to start broker: %v", err)
 	}
 
 }
@@ -101,8 +104,7 @@ func (s *Instance) OnBoot(eng gnet.Engine) (action gnet.Action) {
 
 	brokerInfo := domain.BrokerInfo{Addr: s.addr, StartAt: time.Now().UnixMilli()}
 	if _, e := s.brokerState.StoreBroker(s.ctx, brokerInfo); e != nil {
-
-		logger.FatalF("failed to store broker info: %v", e)
+		logger.Fatalf("failed to store broker info: %v", e)
 	}
 
 	return gnet.None
@@ -120,7 +122,7 @@ func (s *Instance) OnOpen(c gnet.Conn) (out []byte, action gnet.Action) {
 		UserId:      0,
 		ClientAddr:  c.RemoteAddr().String(),
 		BrokerAddr:  c.LocalAddr().String(),
-		OS:          constants.OSType(0),
+		OS:          constants.Unknown,
 		ConnectTime: time.Now().UnixMilli(),
 		C:           c,
 	}
@@ -129,14 +131,14 @@ func (s *Instance) OnOpen(c gnet.Conn) (out []byte, action gnet.Action) {
 	c.SetContext(subCtx)
 
 	if err := s.heartbeatHandler.startTicker(subCtx, c, uc); err != nil {
-		logger.ErrorF("Connection open error: %v", err)
+		logger.Errorf("failed to open connection: %v", err)
 		s.heartbeatHandler.stopTicker(c)
+		s.eng.Stop(s.ctx)
 	}
 	return nil, gnet.None
 }
 
 func (s *Instance) OnClose(c gnet.Conn, err error) (action gnet.Action) {
-
 	s.heartbeatHandler.stopTicker(c)
 	return
 }
@@ -145,29 +147,32 @@ func (s *Instance) OnTraffic(c gnet.Conn) (action gnet.Action) {
 
 	ctx := c.Context().(context.Context)
 
-	user, err := currentUserFromConn(c)
-	if err != nil {
-		logger.ErrorF("Connection traffic error: %v", err)
-		s.heartbeatHandler.stopTicker(c)
-		return gnet.None
-	}
+	ctx = logger.NewSpan(ctx, "traffic")
+	defer logger.EndSpan(ctx)
 
 	packets, e := s.codec.decode(c)
 	if e != nil {
+		t, a := traffic(ctx, c, "decode error:%v", e)
+		logger.Errorf(t, a...)
 
-		logger.ErrorF("[%s#%s] Connection traffic error:%v",
-			c.RemoteAddr().String(),
-			user.Label(),
-			e)
 		s.heartbeatHandler.stopTicker(c)
 		return gnet.None
 	}
 
 	if packets != nil {
 		for _, packet := range packets {
+
+			if !packet.IsHeartbeat() && logger.IsDebugEnable() {
+				js, _ := protojson.Marshal(packet)
+				t, a := traffic(ctx, c, "decode:%s", string(js))
+				logger.Debugf(t, a...)
+			}
+
 			response, err11 := s.handler.handlePacket(ctx, packet)
 			if err11 != nil {
-				logger.ErrorF("[%s#%s] Connection traffic error:%v", c.RemoteAddr().String(), user.Label(), err11)
+				t, a := traffic(ctx, c, "handle error:%v", err11)
+				logger.Errorf(t, a...)
+
 				s.heartbeatHandler.stopTicker(c)
 				return gnet.None
 			}
@@ -176,16 +181,24 @@ func (s *Instance) OnTraffic(c gnet.Conn) (action gnet.Action) {
 				continue
 			}
 
+			//if !response.IsHeartbeat() && logger.IsDebugEnable() {
+			//	js, _ := protojson.Marshal(response)
+			//	t, a := traffic(ctx, c, "encode:%s", string(js))
+			//	logger.Debugf(t, a...)
+			//}
+
 			bs, err12 := s.codec.encode(c, response)
 			if err12 != nil {
-				logger.ErrorF("[%s#%s] Connection traffic error:%v", c.RemoteAddr().String(), user.Label(), err12)
+				t, a := traffic(ctx, c, "encode error:%v", err12)
+				logger.Errorf(t, a...)
 				s.heartbeatHandler.stopTicker(c)
 				return gnet.None
 			}
 
 			c.AsyncWrite(bs.Bytes(), func(c gnet.Conn, err error) error {
 				if err != nil {
-					logging.Fatalf("[%s#%s] Connection traffic,write error:%v", c.RemoteAddr().String(), user.Label(), err)
+					t, a := traffic(ctx, c, "write error:%v", err12)
+					logger.Errorf(t, a...)
 					s.heartbeatHandler.stopTicker(c)
 				}
 				return err
@@ -206,7 +219,7 @@ func (s *Instance) OnTick() (delay time.Duration, action gnet.Action) {
 	}
 	_, err := s.brokerState.RefreshBroker(s.ctx, broker)
 	if err != nil {
-		logger.FatalF("BrokerInstance ticking error: %v", err)
+		logger.Fatalf("failed to ticking error: %v", err)
 	}
 
 	return time.Duration(s.interval) * time.Second, gnet.None
