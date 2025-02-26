@@ -90,7 +90,6 @@ func UnaryClientInterceptor() grpc.UnaryClientInterceptor {
 			Debugf("%s grpc client %s input:%s", traceID, method, string(js))
 		}
 
-		// 传递 Trace ID
 		propagator := otel.GetTextMapPropagator()
 		md := metadata.New(nil)
 		propagator.Inject(ctx, metadataCarrier(md))

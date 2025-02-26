@@ -9,7 +9,7 @@ func main() {
 	c1 := &client.Client{
 		UserId:            1200121,
 		To:                1200120,
-		UserSig:           "cukpovu1a37hpofg6sjg",
+		UserSig:           "cuv0ele1a37rf7ccvan0",
 		ServerAddress:     "127.0.0.1:7539",
 		HeartbeatInterval: 10,
 	}

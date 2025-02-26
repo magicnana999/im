@@ -181,11 +181,11 @@ func (s *Instance) OnTraffic(c gnet.Conn) (action gnet.Action) {
 				continue
 			}
 
-			//if !response.IsHeartbeat() && logger.IsDebugEnable() {
-			//	js, _ := protojson.Marshal(response)
-			//	t, a := traffic(ctx, c, "encode:%s", string(js))
-			//	logger.Debugf(t, a...)
-			//}
+			if !response.IsHeartbeat() && logger.IsDebugEnable() {
+				js, _ := protojson.Marshal(response)
+				t, a := traffic(ctx, c, "encode:%s", string(js))
+				logger.Debugf(t, a...)
+			}
 
 			bs, err12 := s.codec.encode(c, response)
 			if err12 != nil {
