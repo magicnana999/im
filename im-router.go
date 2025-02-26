@@ -4,7 +4,6 @@ import (
 	"context"
 	"flag"
 	"github.com/magicnana999/im/conf"
-	"github.com/magicnana999/im/logger"
 	"github.com/magicnana999/im/router"
 	"sync"
 )
@@ -18,7 +17,6 @@ func main() {
 	flag.Parse()
 
 	conf.LoadConfig(confFile)
-	logger.InitLogger(conf.Global.Broker.LoggerLevel)
 	router.Start(ctx)
 
 	var wg sync.WaitGroup

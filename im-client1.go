@@ -7,8 +7,8 @@ import (
 func main() {
 
 	c1 := &client.Client{
-		UserId:            1200121,
-		To:                1200120,
+		UserId:            1200120,
+		To:                1200121,
 		UserSig:           "cuv0ele1a37rf7ccvan0",
 		ServerAddress:     "127.0.0.1:7539",
 		HeartbeatInterval: 10,

@@ -3,7 +3,6 @@ package redis
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"github.com/magicnana999/im/domain"
 	"github.com/magicnana999/im/entity"
 	"github.com/magicnana999/im/util/id"
@@ -73,9 +72,6 @@ func (s *UserStorage) StoreUserClients(ctx context.Context, uc *domain.UserConne
 	if err != nil {
 		return 0, err
 	}
-
-	ping := rds.Ping(ctx)
-	fmt.Println(ping)
 
 	ret := rds.HSet(ctx, key, uc.Label(), string(js))
 

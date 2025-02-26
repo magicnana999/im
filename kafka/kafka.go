@@ -5,6 +5,9 @@ import (
 	"github.com/magicnana999/im/logger"
 	"github.com/magicnana999/im/pb"
 	"github.com/segmentio/kafka-go"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/propagation"
+	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 	"strings"
 	"sync"
@@ -58,11 +61,37 @@ func (c *Consumer) Start(ctx context.Context) error {
 					continue
 				}
 
-				if err := handleMessageRoute(ctx, c.topicInfo.Topic, c.handle, &message); err != nil {
-					logger.Errorf("consume message,topic:%s,error:%v", c.topicInfo.Topic, err)
-					return
+				carrier := propagation.MapCarrier{}
+				var traceId string
+				for _, header := range message.Headers {
+					if header.Key == "X-B3-TraceId" {
+						traceId = string(header.Value)
+						carrier.Set("X-B3-TraceId", traceId)
+					}
 				}
+
+				subCtx, _ := context.WithCancel(ctx)
+				subCtx = otel.GetTextMapPropagator().Extract(subCtx, carrier)
+
+				sub, span := logger.Tracer.Start(ctx, c.topicInfo.Topic+"-consumer")
+
+				var msg pb.MQMessage
+				if err := proto.Unmarshal(message.Value, &msg); err != nil {
+					continue
+				}
+
+				if logger.IsDebugEnable() {
+					js, _ := protojson.Marshal(&msg)
+					logger.Debugf("%s consume message %s input:%s", traceId, c.topicInfo.Topic, string(js))
+				}
+
+				if err := c.handle.Consume(sub, &msg); err != nil && logger.IsDebugEnable() {
+					logger.Errorf("%s consume message %s error:%s", traceId, c.topicInfo.Topic, err.Error())
+				}
+
 				reader.CommitMessages(ctx, message)
+
+				span.End()
 
 			}
 		}
@@ -138,17 +167,34 @@ func (p *Producer) send(ctx context.Context, topic string, m *pb.MessageBody, us
 		return e
 	}
 
+	ctx, span := logger.Tracer.Start(ctx, topic)
+	defer span.End()
+
+	traceID := span.SpanContext().TraceID().String()
+
+	if logger.IsDebugEnable() {
+		js, _ := protojson.Marshal(mq)
+		logger.Debugf("%s produce message %s input:%s", traceID, topic, string(js))
+	}
+
 	body := kafka.Message{
 		Topic:      topic,
 		Value:      bs,
-		Headers:    nil,
 		WriterData: nil,
 		Time:       time.Time{},
+		Headers: []kafka.Header{
+			{Key: "X-B3-TraceId", Value: []byte(traceID)},
+		},
 	}
 
-	logger.Debugf("produce message,topic:%s,id:%s", body.Topic, mq.Id)
+	err := p.writer.WriteMessages(ctx, body)
+	if err != nil {
+		if logger.IsDebugEnable() && err != nil {
+			logger.Errorf("%s produce message %s error:%s", traceID, topic, err.Error())
+		}
+	}
 
-	return p.writer.WriteMessages(ctx, body)
+	return err
 }
 
 func (p *Producer) SendRoute(ctx context.Context, m *pb.MessageBody, count int32) error {

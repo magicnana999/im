@@ -2,7 +2,6 @@ package logger
 
 import (
 	"context"
-	"fmt"
 	"go.opentelemetry.io/otel"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
@@ -29,8 +28,6 @@ func UnaryServerInterceptor() grpc.UnaryServerInterceptor {
 
 		// 获取 Trace ID
 		traceID := span.SpanContext().TraceID().String()
-
-		fmt.Printf("222 %s\n", md)
 
 		if IsDebugEnable() {
 			js, _ := protojson.Marshal(req.(proto.Message))
@@ -96,8 +93,6 @@ func UnaryClientInterceptor() grpc.UnaryClientInterceptor {
 		propagator := otel.GetTextMapPropagator()
 		md := metadata.New(nil)
 		propagator.Inject(ctx, metadataCarrier(md))
-
-		fmt.Printf("111 %s\n", md)
 
 		ctx = metadata.NewOutgoingContext(ctx, md)
 		err := invoker(ctx, method, req, reply, cc, opts...)

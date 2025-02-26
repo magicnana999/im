@@ -53,7 +53,7 @@ func (s *messageRouter) routeMessage(ctx context.Context, delivery *pb.MQMessage
 		userIds = append(userIds, message.To)
 	}
 
-	logger.DebugF("receive userIds: %v", userIds)
+	logger.Debugf("receive userIds: %v", userIds)
 
 	online := make(map[string]*domain.UserConnection)
 	offline := make([]int64, 0)
@@ -73,8 +73,8 @@ func (s *messageRouter) routeMessage(ctx context.Context, delivery *pb.MQMessage
 		}
 	}
 
-	logger.DebugF("online users: %d", len(online))
-	logger.DebugF("offline users: %d", len(offline))
+	logger.Debugf("online users: %d", len(online))
+	logger.Debugf("offline users: %d", len(offline))
 
 	brokerMap := make(map[string][]string)
 	for _, uc := range online {
@@ -85,7 +85,7 @@ func (s *messageRouter) routeMessage(ctx context.Context, delivery *pb.MQMessage
 		brokerMap[uc.BrokerAddr] = append(brokerMap[uc.BrokerAddr], uc.Label())
 	}
 
-	logger.DebugF("online brokers: %d", len(brokerMap))
+	logger.Debugf("online brokers: %d", len(brokerMap))
 
 	for key, v := range brokerMap {
 		s.mqProducer.SendDeliver(ctx, key, message, v)

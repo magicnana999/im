@@ -33,6 +33,8 @@ func Start(ctx context.Context) *Server {
 
 		DefaultServer = s
 
+		initLogger()
+
 	})
 	return DefaultServer
 }

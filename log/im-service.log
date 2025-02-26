@@ -7,3 +7,17 @@
 2025-02-27T03:45:18.178+0800 DEBUG logger/grpc.go:43 5a6e64ec05f50bb56b623c44e4d40731 grpc server /pb.UserApi/Login output:{"loginReply":{"appId":"19860220","userId":"1200121"}}
 2025-02-27T03:47:23.378+0800 DEBUG logger/grpc.go:37 368c79230565fe7fe98d33f9323719b3 grpc server /pb.UserApi/Login input:{"appId":"19860220", "userSig":"cuv0ele1a37rf7ccvan0", "version":"1.0.0", "os":"iOS", "deviceId":"cuvmviu1a37su4tupqdg"}
 2025-02-27T03:47:23.383+0800 DEBUG logger/grpc.go:43 368c79230565fe7fe98d33f9323719b3 grpc server /pb.UserApi/Login output:{"loginReply":{"appId":"19860220", "userId":"1200120"}}
+2025-02-27T03:50:01.787+0800 DEBUG logger/grpc.go:37 57a8bc7396679ff1af6b7c03fd0fbf2f grpc server /pb.UserApi/Login input:{"appId":"19860220", "userSig":"cuv0ele1a37rf7ccvan0", "version":"1.0.0", "os":"iOS", "deviceId":"cuvn0qe1a37t0ds6t6og"}
+2025-02-27T03:50:01.792+0800 DEBUG logger/grpc.go:43 57a8bc7396679ff1af6b7c03fd0fbf2f grpc server /pb.UserApi/Login output:{"loginReply":{"appId":"19860220", "userId":"1200120"}}
+2025-02-27T04:38:06.829+0800 DEBUG logger/grpc.go:34 1d4ba19dddd7a5255cf71cda4c752e93 grpc server /pb.UserApi/Login input:{"appId":"19860220","userSig":"cuv0ele1a37rf7ccvan0","version":"1.0.0","os":"iOS","deviceId":"cuvnnbm1a37t462u8hsg"}
+2025-02-27T04:38:06.834+0800 DEBUG logger/grpc.go:40 1d4ba19dddd7a5255cf71cda4c752e93 grpc server /pb.UserApi/Login output:{"loginReply":{"appId":"19860220","userId":"1200120"}}
+2025-02-27T04:38:26.118+0800 DEBUG logger/grpc.go:34 13466e4c9972fd97583ca3825550de9b grpc server /pb.UserApi/Login input:{"appId":"19860220","userSig":"cuv0ele1a37rf7ccvang","version":"1.0.0","os":"iOS","deviceId":"cuvnngm1a37t4br77mog"}
+2025-02-27T04:38:26.121+0800 DEBUG logger/grpc.go:40 13466e4c9972fd97583ca3825550de9b grpc server /pb.UserApi/Login output:{"loginReply":{"appId":"19860220","userId":"1200121"}}
+2025-02-27T04:40:39.397+0800 DEBUG logger/grpc.go:34 1fa97bdba1a43836675db4dae8d3f259 grpc server /pb.UserApi/Login input:{"appId":"19860220","userSig":"cuv0ele1a37rf7ccvan0","version":"1.0.0","os":"iOS","deviceId":"cuvnohu1a37tb17knf80"}
+2025-02-27T04:40:39.402+0800 DEBUG logger/grpc.go:40 1fa97bdba1a43836675db4dae8d3f259 grpc server /pb.UserApi/Login output:{"loginReply":{"appId":"19860220","userId":"1200120"}}
+2025-02-27T04:40:45.129+0800 DEBUG logger/grpc.go:34 20c71f582a94e8c1df09cae1931a40dd grpc server /pb.UserApi/Login input:{"appId":"19860220","userSig":"cuv0ele1a37rf7ccvang","version":"1.0.0","os":"iOS","deviceId":"cuvnoje1a37tb61e3sn0"}
+2025-02-27T04:40:45.132+0800 DEBUG logger/grpc.go:40 20c71f582a94e8c1df09cae1931a40dd grpc server /pb.UserApi/Login output:{"loginReply":{"appId":"19860220","userId":"1200121"}}
+2025-02-27T04:44:19.801+0800 DEBUG logger/grpc.go:34 1b9e931fd96f810baad8878e41557c1b grpc server /pb.UserApi/Login input:{"appId":"19860220","userSig":"cuv0ele1a37rf7ccvan0","version":"1.0.0","os":"iOS","deviceId":"cuvnq8u1a37tc7jqck90"}
+2025-02-27T04:44:19.805+0800 DEBUG logger/grpc.go:40 1b9e931fd96f810baad8878e41557c1b grpc server /pb.UserApi/Login output:{"loginReply":{"appId":"19860220","userId":"1200120"}}
+2025-02-27T04:44:23.977+0800 DEBUG logger/grpc.go:34 352213f42d595442ccf3fadc5179ba92 grpc server /pb.UserApi/Login input:{"appId":"19860220","userSig":"cuv0ele1a37rf7ccvang","version":"1.0.0","os":"iOS","deviceId":"cuvnq9u1a37tccd99290"}
+2025-02-27T04:44:23.979+0800 DEBUG logger/grpc.go:40 352213f42d595442ccf3fadc5179ba92 grpc server /pb.UserApi/Login output:{"loginReply":{"appId":"19860220","userId":"1200121"}}
