@@ -45,7 +45,7 @@ type Instance struct {
 
 func Start(ctx context.Context, cancel context.CancelFunc) {
 
-	initLogger()
+	InitLogger()
 
 	i := conf.Global.Broker.ServerInterval
 	if i <= 0 {

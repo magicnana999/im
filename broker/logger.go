@@ -10,7 +10,7 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-func initLogger() {
+func InitLogger() {
 	writeSyncer := logger.Writer("log/im-broker.log")
 	encoder := logger.Encoder()
 

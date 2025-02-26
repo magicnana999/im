@@ -2,6 +2,7 @@ package logger
 
 import (
 	"context"
+	"fmt"
 	"go.opentelemetry.io/otel"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
@@ -29,6 +30,8 @@ func UnaryServerInterceptor() grpc.UnaryServerInterceptor {
 		// 获取 Trace ID
 		traceID := span.SpanContext().TraceID().String()
 
+		fmt.Printf("222 %s\n", md)
+
 		if IsDebugEnable() {
 			js, _ := protojson.Marshal(req.(proto.Message))
 			Debugf("%s grpc server %s input:%s", traceID, info.FullMethod, string(js))
@@ -36,12 +39,12 @@ func UnaryServerInterceptor() grpc.UnaryServerInterceptor {
 		reply, err := handler(ctx, req)
 
 		if IsDebugEnable() && err == nil {
-			js, _ := proto.Marshal(reply.(proto.Message))
-			Debugf("%s grpc client %s output:%s", traceID, info.FullMethod, string(js))
+			js, _ := protojson.Marshal(reply.(proto.Message))
+			Debugf("%s grpc server %s output:%s", traceID, info.FullMethod, string(js))
 		}
 
 		if IsDebugEnable() && err != nil {
-			Debugf("%s grpc client %s error:%s", traceID, info.FullMethod, err.Error())
+			Debugf("%s grpc server %s error:%s", traceID, info.FullMethod, err.Error())
 		}
 
 		return reply, err
@@ -94,6 +97,8 @@ func UnaryClientInterceptor() grpc.UnaryClientInterceptor {
 		md := metadata.New(nil)
 		propagator.Inject(ctx, metadataCarrier(md))
 
+		fmt.Printf("111 %s\n", md)
+
 		ctx = metadata.NewOutgoingContext(ctx, md)
 		err := invoker(ctx, method, req, reply, cc, opts...)
 
@@ -103,7 +108,7 @@ func UnaryClientInterceptor() grpc.UnaryClientInterceptor {
 		}
 
 		if IsDebugEnable() && err != nil {
-			Debugf("%s grpc client %s error:%s", traceID, method, err.Error())
+			Errorf("%s grpc client %s error:%s", traceID, method, err.Error())
 		}
 
 		return err

@@ -2,6 +2,7 @@ package logger
 
 import (
 	"context"
+	"go.opentelemetry.io/contrib/propagators/b3"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/sdk/trace"
 	traceing "go.opentelemetry.io/otel/trace"
@@ -16,6 +17,8 @@ func InitTracer(name string) {
 	Tracer = otel.Tracer(name)
 	tp := trace.NewTracerProvider(trace.WithSampler(trace.NeverSample()))
 	otel.SetTracerProvider(tp)
+	otel.SetTextMapPropagator(b3.New())
+
 }
 
 func NewSpan(ctx context.Context, name string) context.Context {

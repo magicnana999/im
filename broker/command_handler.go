@@ -76,9 +76,9 @@ func (c *commandHandler) isSupport(ctx context.Context, packetType int32) bool {
 
 func (c *commandHandler) login(ctx context.Context, req *pb.LoginRequest) (proto.Message, error) {
 
-	uc, e := currentUserFromCtx(ctx)
-	if e != nil {
-		return nil, errors.CurUserNotFound.Detail(e)
+	uc, err := currentUserFromCtx(ctx)
+	if err != nil {
+		return nil, errors.CurUserNotFound.Detail(err)
 	}
 
 	rep, err := c.userApiClient.Login(ctx, req)

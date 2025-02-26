@@ -149,3 +149,45 @@
 2025-02-26T17:04:27.915+0800 DEBUG logger/grpc.go:90 e7dbb7d516e1fbbaf482de1b4b85522e grpc client /pb.UserApi/Login input:{"appId":"19860220","userSig":"cuv0ele1a37rf7ccvan0","version":"1.0.0","os":"iOS","deviceId":"cuvdi6u1a37rst3mi790"}
 2025-02-26T17:04:27.923+0800 DEBUG logger/grpc.go:102 e7dbb7d516e1fbbaf482de1b4b85522e grpc client /pb.UserApi/Login output:{"loginReply":{"appId":"19860220","userId":"1200120"}}
 2025-02-26T17:04:27.925+0800 DEBUG broker/server.go:187 e7dbb7d516e1fbbaf482de1b4b85522e [127.0.0.1:63489#19860220#1200120#Mobile] encode:{"type":2,"commandBody":{"id":"cuvdi6u1a37rst3mi79g","cType":"USER_LOGIN","loginReply":{"appId":"19860220","userId":"1200120"}}}
+2025-02-27T03:33:08.058+0800 INFO kafka/kafka.go:41 consumer start,topic:{127.0.0.1-7539 127.0.0.1-7539-group}
+2025-02-27T03:33:08.058+0800 INFO broker/deliver.go:107 deliver start
+2025-02-27T03:33:16.241+0800 DEBUG broker/server.go:168 01ac627fe84d4e25aa8327cb04a5e967 [127.0.0.1:55272#] decode:{"type":2,"commandBody":{"id":"cuvmov61a37spka8km0g","cType":"USER_LOGIN","loginRequest":{"appId":"19860220","userSig":"cuv0ele1a37rf7ccvang","version":"1.0.0","os":"iOS","deviceId":"cuvmov61a37spka8km00"}}}
+2025-02-27T03:33:24.207+0800 DEBUG logger/grpc.go:93 01ac627fe84d4e25aa8327cb04a5e967 grpc client /pb.UserApi/Login input:{"appId":"19860220","userSig":"cuv0ele1a37rf7ccvang","version":"1.0.0","os":"iOS","deviceId":"cuvmov61a37spka8km00"}
+2025-02-27T03:33:46.240+0800 ERROR broker/heartbeat_handler.go:95 [127.0.0.1:55272#] heartbeatTask timeout,now:2025-02-27 03:33:46.3346,last:2025-02-27 03:33:16.3316,interval:30000(ms)
+2025-02-27T03:35:06.475+0800 DEBUG logger/grpc.go:107 01ac627fe84d4e25aa8327cb04a5e967 grpc client /pb.UserApi/Login output:{"loginReply":{"appId":"19860220","userId":"1200121"}}
+2025-02-27T03:35:33.386+0800 INFO broker/deliver.go:107 deliver start
+2025-02-27T03:35:33.386+0800 INFO kafka/kafka.go:41 consumer start,topic:{127.0.0.1-7539 127.0.0.1-7539-group}
+2025-02-27T03:36:02.265+0800 DEBUG broker/server.go:168 8381ff7369c21aa2c8135afebcfbc69b [127.0.0.1:55461#] decode:{"type":2,"commandBody":{"id":"cuvmq8m1a37sq4cllbqg","cType":"USER_LOGIN","loginRequest":{"appId":"19860220","userSig":"cuv0ele1a37rf7ccvan0","version":"1.0.0","os":"iOS","deviceId":"cuvmq8m1a37sq4cllbq0"}}}
+2025-02-27T03:36:02.265+0800 DEBUG logger/grpc.go:93 8381ff7369c21aa2c8135afebcfbc69b grpc client /pb.UserApi/Login input:{"appId":"19860220","userSig":"cuv0ele1a37rf7ccvan0","version":"1.0.0","os":"iOS","deviceId":"cuvmq8m1a37sq4cllbq0"}
+2025-02-27T03:38:17.727+0800 INFO kafka/kafka.go:41 consumer start,topic:{127.0.0.1-7539 127.0.0.1-7539-group}
+2025-02-27T03:38:17.727+0800 INFO broker/deliver.go:107 deliver start
+2025-02-27T03:38:22.466+0800 DEBUG broker/server.go:168 8ccf3a5df28de68b1fe17cbedbbc8a78 [127.0.0.1:55546#] decode:{"type":2,"commandBody":{"id":"cuvmrbm1a37sqorhbq1g","cType":"USER_LOGIN","loginRequest":{"appId":"19860220","userSig":"cuv0ele1a37rf7ccvan0","version":"1.0.0","os":"iOS","deviceId":"cuvmrbm1a37sqorhbq10"}}}
+2025-02-27T03:38:22.466+0800 DEBUG logger/grpc.go:93 8ccf3a5df28de68b1fe17cbedbbc8a78 grpc client /pb.UserApi/Login input:{"appId":"19860220","userSig":"cuv0ele1a37rf7ccvan0","version":"1.0.0","os":"iOS","deviceId":"cuvmrbm1a37sqorhbq10"}
+2025-02-27T03:38:22.472+0800 DEBUG logger/grpc.go:107 8ccf3a5df28de68b1fe17cbedbbc8a78 grpc client /pb.UserApi/Login output:{"loginReply":{"appId":"19860220","userId":"1200120"}}
+2025-02-27T03:40:16.713+0800 INFO broker/deliver.go:107 deliver start
+2025-02-27T03:40:16.713+0800 INFO kafka/kafka.go:41 consumer start,topic:{127.0.0.1-7539 127.0.0.1-7539-group}
+2025-02-27T03:40:20.146+0800 DEBUG broker/server.go:168 3ce0e397202a02a2d92de8620c59d792 [127.0.0.1:55677#] decode:{"type":2,"commandBody":{"id":"cuvms961a37srcfvmd70","cType":"USER_LOGIN","loginRequest":{"appId":"19860220","userSig":"cuv0ele1a37rf7ccvang","version":"1.0.0","os":"iOS","deviceId":"cuvms961a37srcfvmd6g"}}}
+2025-02-27T03:40:22.612+0800 DEBUG logger/grpc.go:93 3ce0e397202a02a2d92de8620c59d792 grpc client /pb.UserApi/Login input:{"appId":"19860220","userSig":"cuv0ele1a37rf7ccvang","version":"1.0.0","os":"iOS","deviceId":"cuvms961a37srcfvmd6g"}
+2025-02-27T03:40:22.626+0800 DEBUG logger/grpc.go:107 3ce0e397202a02a2d92de8620c59d792 grpc client /pb.UserApi/Login output:{"loginReply":{"appId":"19860220","userId":"1200121"}}
+2025-02-27T03:42:41.017+0800 INFO kafka/kafka.go:41 consumer start,topic:{127.0.0.1-7539 127.0.0.1-7539-group}
+2025-02-27T03:42:41.016+0800 INFO broker/deliver.go:107 deliver start
+2025-02-27T03:42:43.403+0800 DEBUG broker/server.go:168 22401ef22bc1ff6d4ff5be3eb45b9c0e [127.0.0.1:55759#] decode:{"type":2,"commandBody":{"id":"cuvmtcu1a37sscnccob0","cType":"USER_LOGIN","loginRequest":{"appId":"19860220","userSig":"cuv0ele1a37rf7ccvan0","version":"1.0.0","os":"iOS","deviceId":"cuvmtcu1a37sscnccoag"}}}
+2025-02-27T03:42:43.403+0800 DEBUG logger/grpc.go:93 22401ef22bc1ff6d4ff5be3eb45b9c0e grpc client /pb.UserApi/Login input:{"appId":"19860220","userSig":"cuv0ele1a37rf7ccvan0","version":"1.0.0","os":"iOS","deviceId":"cuvmtcu1a37sscnccoag"}
+2025-02-27T03:42:43.409+0800 DEBUG logger/grpc.go:107 22401ef22bc1ff6d4ff5be3eb45b9c0e grpc client /pb.UserApi/Login output:{"loginReply":{"appId":"19860220","userId":"1200120"}}
+2025-02-27T03:44:11.933+0800 INFO broker/deliver.go:107 deliver start
+2025-02-27T03:44:11.933+0800 INFO kafka/kafka.go:41 consumer start,topic:{127.0.0.1-7539 127.0.0.1-7539-group}
+2025-02-27T03:44:14.420+0800 DEBUG broker/server.go:168 49d546d85b77c1f8aee89edaeb6424c2 [127.0.0.1:55835#] decode:{"type":2,"commandBody":{"id":"cuvmu3m1a37st14kqnhg","cType":"USER_LOGIN","loginRequest":{"appId":"19860220","userSig":"cuv0ele1a37rf7ccvang","version":"1.0.0","os":"iOS","deviceId":"cuvmu3m1a37st14kqnh0"}}}
+2025-02-27T03:44:14.420+0800 DEBUG logger/grpc.go:93 49d546d85b77c1f8aee89edaeb6424c2 grpc client /pb.UserApi/Login input:{"appId":"19860220","userSig":"cuv0ele1a37rf7ccvang","version":"1.0.0","os":"iOS","deviceId":"cuvmu3m1a37st14kqnh0"}
+2025-02-27T03:44:14.427+0800 DEBUG logger/grpc.go:107 49d546d85b77c1f8aee89edaeb6424c2 grpc client /pb.UserApi/Login output:{"loginReply":{"appId":"19860220","userId":"1200121"}}
+2025-02-27T03:44:47.838+0800 ERROR broker/heartbeat_handler.go:95 [127.0.0.1:55835#] heartbeatTask timeout,now:2025-02-27 03:44:45.4445,last:2025-02-27 03:44:14.4414,interval:30000(ms)
+2025-02-27T03:45:14.320+0800 INFO kafka/kafka.go:41 consumer start,topic:{127.0.0.1-7539 127.0.0.1-7539-group}
+2025-02-27T03:45:14.320+0800 INFO broker/deliver.go:107 deliver start
+2025-02-27T03:45:18.173+0800 DEBUG broker/server.go:168 5a6e64ec05f50bb56b623c44e4d40731 [127.0.0.1:55903#] decode:{"type":2,"commandBody":{"id":"cuvmujm1a37stepap8i0","cType":"USER_LOGIN","loginRequest":{"appId":"19860220","userSig":"cuv0ele1a37rf7ccvang","version":"1.0.0","os":"iOS","deviceId":"cuvmujm1a37stepap8hg"}}}
+2025-02-27T03:45:18.173+0800 DEBUG logger/grpc.go:93 5a6e64ec05f50bb56b623c44e4d40731 grpc client /pb.UserApi/Login input:{"appId":"19860220","userSig":"cuv0ele1a37rf7ccvang","version":"1.0.0","os":"iOS","deviceId":"cuvmujm1a37stepap8hg"}
+2025-02-27T03:45:18.178+0800 DEBUG logger/grpc.go:107 5a6e64ec05f50bb56b623c44e4d40731 grpc client /pb.UserApi/Login output:{"loginReply":{"appId":"19860220","userId":"1200121"}}
+2025-02-27T03:47:19.210+0800 INFO broker/deliver.go:107 deliver start
+2025-02-27T03:47:19.210+0800 INFO kafka/kafka.go:41 consumer start,topic:{127.0.0.1-7539 127.0.0.1-7539-group}
+2025-02-27T03:47:23.375+0800 DEBUG broker/server.go:168 368c79230565fe7fe98d33f9323719b3 [127.0.0.1:56000#] decode:{"type":2, "commandBody":{"id":"cuvmviu1a37su4tupqe0", "cType":"USER_LOGIN", "loginRequest":{"appId":"19860220", "userSig":"cuv0ele1a37rf7ccvan0", "version":"1.0.0", "os":"iOS", "deviceId":"cuvmviu1a37su4tupqdg"}}}
+2025-02-27T03:47:23.375+0800 DEBUG logger/grpc.go:93 368c79230565fe7fe98d33f9323719b3 grpc client /pb.UserApi/Login input:{"appId":"19860220", "userSig":"cuv0ele1a37rf7ccvan0", "version":"1.0.0", "os":"iOS", "deviceId":"cuvmviu1a37su4tupqdg"}
+2025-02-27T03:47:23.383+0800 DEBUG logger/grpc.go:107 368c79230565fe7fe98d33f9323719b3 grpc client /pb.UserApi/Login output:{"loginReply":{"appId":"19860220", "userId":"1200120"}}
+2025-02-27T03:47:23.384+0800 DEBUG broker/server.go:187 368c79230565fe7fe98d33f9323719b3 [127.0.0.1:56000#19860220#1200120#Mobile] encode:{"type":2, "commandBody":{"id":"cuvmviu1a37su4tupqe0", "cType":"USER_LOGIN", "loginReply":{"appId":"19860220", "userId":"1200120"}}}
