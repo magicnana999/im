@@ -43,6 +43,7 @@ func (s *Server) Consume(ctx context.Context, msg *pb.MQMessage) error {
 
 	if msg.Count > 3 {
 		s.mqProducer.SendRouteDLQ(ctx, msg.Message)
+		return nil
 	}
 
 	s.executor.Submit(func() {

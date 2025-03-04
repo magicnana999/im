@@ -79,14 +79,14 @@ func (s *UserStorage) StoreUserClients(ctx context.Context, uc *domain.UserConne
 }
 
 func (s *UserStorage) Lock(ctx context.Context, appId, ucLabel string) (string, error) {
-	key := KeyUserLock(appId, ucLabel)
+	key := KeyUserConnLock(appId, ucLabel)
 	val := time.Now().UnixMilli()
 	ret := rds.SetNX(ctx, key, strconv.FormatInt(val, 10), time.Minute)
 	return strconv.FormatInt(val, 10), ret.Err()
 }
 
 func (s *UserStorage) UnLock(ctx context.Context, appId, ucLabel, lock string) (int64, error) {
-	key := KeyUserLock(appId, ucLabel)
+	key := KeyUserConnLock(appId, ucLabel)
 	ret := rds.Del(ctx, key)
 	return ret.Val(), ret.Err()
 }
@@ -111,5 +111,26 @@ func (s *UserStorage) StoreUserSig(ctx context.Context, appId string, user *enti
 	json1, _ := json.Marshal(user)
 
 	cmd := rds.Set(ctx, KeyUserSig(appId, sig), json1, -1)
+	return cmd.Val(), cmd.Err()
+}
+
+func (s *UserStorage) LoadByUserId(ctx context.Context, appId string, userId int64) (*entity.User, error) {
+	cmd := rds.Get(ctx, KeyUser(appId, userId))
+
+	if cmd.Err() != nil {
+		return nil, cmd.Err()
+	}
+
+	var user entity.User
+	err := json.Unmarshal([]byte(cmd.Val()), &user)
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
+func (s *UserStorage) StoreByUserId(ctx context.Context, user *entity.User) (string, error) {
+	json1, _ := json.Marshal(user)
+	cmd := rds.Set(ctx, KeyUser(user.AppId, user.UserId), json1, -1)
 	return cmd.Val(), cmd.Err()
 }

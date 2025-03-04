@@ -3,7 +3,7 @@ package entity
 import "time"
 
 type Conv struct {
-	ConvId      string    `gorm:"primaryKey",json:"userId"`
+	ConvId      string    `gorm:"primaryKey",json:"convId"`
 	AppId       string    `gorm:"primaryKey",json:"appId"`
 	ConvType    string    `gorm:"conv_type",json:"convType"`
 	Sequence    int64     `gorm:"sequence",json:"sequence"`

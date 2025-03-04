@@ -5,11 +5,13 @@ import "fmt"
 const (
 	broker           = "im:broker:%s"
 	userSig          = "im:%s:user:sig:%s"
+	user             = "im:%s:user:%d"
+	userLock         = "im:%s:user:%d:lock"
 	sequence         = "im:%s:sequence:%s"
 	sequenceLock     = "im:%s:sequence:%s:lock"
 	userConn         = "im:%s:user:connect:%s"
 	userClients      = "im:%s:user:clients:%d"
-	userLock         = "im:%s:user:lock:%s"
+	userConnLock     = "im:%s:user:connect:%s:lock"
 	groupMembers     = "im:%s:group:members:%d"
 	groupMembersLock = "im:%s:group:members:%d:lock"
 )
@@ -38,8 +40,8 @@ func KeyUserClients(appId string, userId int64) string {
 	return fmt.Sprintf(userClients, appId, userId)
 }
 
-func KeyUserLock(appId, ucLabel string) string {
-	return fmt.Sprintf(userLock, appId, ucLabel)
+func KeyUserConnLock(appId, ucLabel string) string {
+	return fmt.Sprintf(userConnLock, appId, ucLabel)
 }
 
 func KeyGroupMembers(appId string, groupId int64) string {
@@ -48,4 +50,12 @@ func KeyGroupMembers(appId string, groupId int64) string {
 
 func KeyGroupMembersLock(appId string, groupId int64) string {
 	return fmt.Sprintf(groupMembersLock, appId, groupId)
+}
+
+func KeyUser(appId string, userId int64) string {
+	return fmt.Sprintf(user, appId, userId)
+}
+
+func KeyUserLock(appId string, userId int64) string {
+	return fmt.Sprintf(userLock, appId, userId)
 }

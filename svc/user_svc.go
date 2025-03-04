@@ -33,6 +33,10 @@ func InitUserSvc() *UserSvc {
 	return DefaultUserSvc
 }
 
+func (s *UserSvc) LoadByUserId(ctx context.Context, appId string, userId int64) (*entity.User, error) {
+
+}
+
 func (s *UserSvc) Login(ctx context.Context, p *pb.LoginRequest) (*pb.LoginReply, error) {
 
 	user, e := s.storage.LoadUserSig(ctx, p.AppId, p.UserSig)

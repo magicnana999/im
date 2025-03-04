@@ -12,6 +12,9 @@ import (
 )
 
 func TestMain(m *testing.M) {
+
+	fmt.Println("test main before")
+
 	conf.LoadConfig("/Users/jinsong/source/github/im/conf/im-router.yaml")
 
 	exitCode := m.Run()
