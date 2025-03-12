@@ -9,21 +9,18 @@ import (
 )
 
 var DB *gorm.DB
-var once sync.Once
+var _dbOnce sync.Once
 
-func InitGorm() *gorm.DB {
-
-	once.Do(func() {
+func InitGorm(config *gorm.Config) *gorm.DB {
+	_dbOnce.Do(func() {
 
 		dsn := conf.Global.Mysql.String()
 
-		d, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+		d, err := gorm.Open(mysql.Open(dsn), config)
 		if err != nil {
 			logger.Z.Fatalf("Failed to connect to MySQL:%v", err)
 		}
 		DB = d
 	})
-
 	return DB
-
 }

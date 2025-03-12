@@ -2,7 +2,7 @@ package training
 
 import (
 	"fmt"
-	"github.com/magicnana999/im/util/id"
+	"github.com/magicnana999/im/pkg/utils"
 	"github.com/timandy/routine"
 	"strings"
 	"sync"
@@ -35,7 +35,7 @@ func LoadAndStore() {
 	key := "key"
 
 	f := func() {
-		val := strings.ToLower(id.GenerateXId())
+		val := strings.ToLower(utils.GenerateXId())
 		v, e := m.LoadOrStore(key, val)
 		fmt.Println(routine.Goid(), "当前routine:", val, "是否已存在", e, "map中的值", v)
 	}

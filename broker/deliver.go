@@ -2,6 +2,8 @@ package broker
 
 import (
 	"context"
+	"fmt"
+	"github.com/asynkron/protoactor-go/actor"
 	"github.com/magicnana999/im/conf"
 	"github.com/magicnana999/im/domain"
 	"github.com/magicnana999/im/kafka"
@@ -41,7 +43,8 @@ type deliver struct {
 	deliverFailed    func(delivery *delivery) error
 	userState        *userState
 	mqProducer       *kafka.Producer
-	mqConsumer       *kafka.Consumer
+	actor            *brokerActor
+	//mqConsumer       *kafka.Consumer
 }
 
 func initDeliver(ctx context.Context, codec codec) *deliver {
@@ -54,7 +57,6 @@ func initDeliver(ctx context.Context, codec codec) *deliver {
 		}
 
 		broker := []string{conf.Global.Kafka.String()}
-		topic := getTopic()
 
 		d.ctx = ctx
 		d.delivery = make(chan *delivery, 4096)
@@ -63,7 +65,8 @@ func initDeliver(ctx context.Context, codec codec) *deliver {
 		d.executor = pool
 		d.userState = initUserState()
 		d.mqProducer = kafka.InitProducer(broker)
-		d.mqConsumer = kafka.InitConsumer(broker, topic, d)
+		//d.mqConsumer = kafka.InitConsumer(broker, topic, d)
+		d.actor = InitBrokerActor(d)
 		d.deliverFailed = func(delivery *delivery) error {
 			eee := d.mqProducer.SendOffline(ctx, delivery.packet.GetMessageBody(), []int64{delivery.uc.UserId})
 			if eee != nil {
@@ -238,6 +241,16 @@ func (s *deliver) Consume(ctx context.Context, msg *pb.MQMessage) error {
 		}
 	}
 	return nil
+}
+
+func (s *deliver) Receive(ctx actor.Context) {
+	switch msg := ctx.Message().(type) {
+	case *pb.MQMessage:
+		fmt.Printf("Broker received message from %s: %s\n", msg.UserId, msg.Content)
+		reply := &shared.ChatResponse{Reply: "Broker handled message"}
+		ctx.Respond(reply)
+	}
+
 }
 
 func getTopic() kafka.TopicInfo {
