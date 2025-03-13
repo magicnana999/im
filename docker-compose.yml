@@ -1,6 +1,31 @@
 version: '3.8'
 
+
+
+
 services:
+
+
+  etcd:
+    container_name: dev-etcd
+    image: quay.io/coreos/etcd:v3.5.0
+    restart: unless-stopped
+    ports:
+      - 2379:2379
+      - 2380:2380
+    command: >
+      /usr/local/bin/etcd
+        --name node1
+        --data-dir=/etcd-data
+        --listen-client-urls    http://0.0.0.0:2379
+        --listen-peer-urls      http://0.0.0.0:2380
+        --advertise-client-urls http://127.0.0.1:2379
+        --initial-advertise-peer-urls http://127.0.0.1:2380
+        --initial-cluster node1=http://127.0.0.1:2380
+        --auto-compaction-mode=periodic 
+        --auto-compaction-retention=30m
+  
+
   mysql:
     image: mysql:8.0.29 # 使用 MySQL 8.x 的稳定版本
     container_name: mysql

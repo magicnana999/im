@@ -21,10 +21,11 @@ type ActorHandler interface {
 
 type ActorConfig struct {
 	clientv3.Config
-	ClusterName string `yaml:"clusterName"`
-	KindName    string `yaml:"kindName"`
-	ActorName   string `yaml:"actorName"`
-	Port        int    `yaml:"port"`
+	ClusterName     string `yaml:"clusterName"`
+	BrokerActorName string `yaml:"brokerActorName"`
+	KindName        string `yaml:"kindName"`
+	ActorName       string `yaml:"actorName"`
+	Port            int    `yaml:"port"`
 }
 
 type ActorCluster struct {
@@ -84,7 +85,9 @@ func response(ret any, err error) *pb.ActorResult {
 
 }
 
-func InitCluster(cfg *ActorConfig, handlers ...ActorHandler) *ActorCluster {
+func InitBrokerCluster(cfg *ActorConfig, handlers ...ActorHandler) *ActorCluster {
+
+	actorName := cfg.BrokerActorName
 	system := actor.NewActorSystem()
 	remoteConfig := remote.Configure("0.0.0.0", cfg.Port)
 
@@ -106,6 +109,8 @@ func InitCluster(cfg *ActorConfig, handlers ...ActorHandler) *ActorCluster {
 	ac := &ActorCluster{
 		cluster: c,
 	}
+
+	lookup.Get(cc)
 
 	ac.AddHandler(handlers...)
 	return ac
