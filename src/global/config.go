@@ -79,7 +79,7 @@ type Broker struct {
 	Name              string `yaml:"name"`
 	Addr              string `yaml:"addr"`
 	TickerInterval    string `yaml:"tickerInterval"`
-	HeartbeatInterval string `yaml:"heartbeatInterval"`
+	HeartbeatInterval int    `yaml:"heartbeatInterval"`
 }
 
 type Config struct {

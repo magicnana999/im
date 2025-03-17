@@ -5,6 +5,12 @@ import (
 	"github.com/magicnana999/im/api/kitex_gen/api"
 )
 
+var DefaultBrokerService = &BrokerServiceImpl{}
+
+func InitServiceImpl() *BrokerServiceImpl {
+	return DefaultBrokerService
+}
+
 type BrokerServiceImpl struct {
 	id int
 }

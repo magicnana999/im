@@ -21,13 +21,17 @@ type BrokerMS struct {
 	brokerSrv server.Server
 }
 
+func (s *BrokerMS) start() error {
+	return s.brokerSrv.Run()
+}
+
 func InitMicroService() *BrokerMS {
 	dmsOnce.Do(func() {
 
 		register := infrastructure.InitEtcdRegistry()
 
 		addr, _ := net.ResolveTCPAddr("tcp", global.GetMicroService().BrokerAddr)
-		svr := brokerservice.NewServer(&BrokerServiceImpl{},
+		svr := brokerservice.NewServer(InitServiceImpl(),
 			server.WithServiceAddr(addr),
 			server.WithRegistry(register),
 			server.WithServerBasicInfo(

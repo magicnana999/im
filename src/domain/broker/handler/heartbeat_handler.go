@@ -2,10 +2,14 @@ package broker
 
 import (
 	"context"
-	"github.com/magicnana999/im/conf"
-	"github.com/magicnana999/im/domain"
+	"github.com/magicnana999/im/api/kitex_gen/api"
+	"github.com/magicnana999/im/domain/broker"
+	"github.com/magicnana999/im/domain/broker/state"
+	dto "github.com/magicnana999/im/dto/broker"
 	"github.com/magicnana999/im/errors"
-	"github.com/magicnana999/im/logger"
+	"github.com/magicnana999/im/global"
+	"github.com/magicnana999/im/pb"
+	"github.com/magicnana999/im/pkg/logger"
 	"github.com/panjf2000/gnet/v2"
 	goPool "github.com/panjf2000/gnet/v2/pkg/pool/goroutine"
 	"sync"
@@ -17,7 +21,7 @@ var hhOnce sync.Once
 
 type heartbeatHandler struct {
 	heartbeatPool *goPool.Pool
-	userState     *userState
+	userState     *state.UserState
 	interval      time.Duration
 	m             sync.Map
 }
@@ -26,37 +30,35 @@ func initHeartbeatHandler() *heartbeatHandler {
 
 	hhOnce.Do(func() {
 
-		defaultHeartbeatHandler = &heartbeatHandler{}
-
-		interval := conf.Global.Broker.HeartbeatInterval
+		interval := global.GetBroker().HeartbeatInterval
 		if interval <= 0 {
 			interval = 30
 		}
-
-		defaultHeartbeatHandler.heartbeatPool = goPool.Default()
-		defaultHeartbeatHandler.userState = initUserState()
-		defaultHeartbeatHandler.interval = time.Duration(interval) * time.Second
-
+		defaultHeartbeatHandler = &heartbeatHandler{
+			heartbeatPool: goPool.Default(),
+			userState:     state.InitUserState(),
+			interval:      time.Duration(interval) * time.Second,
+		}
 	})
 
 	return defaultHeartbeatHandler
 }
 
-func (h *heartbeatHandler) handlePacket(ctx context.Context, packet *pb.Packet) (*pb.Packet, error) {
-	uc, err := currentUserFromCtx(ctx)
+func (h *heartbeatHandler) handlePacket(ctx context.Context, packet *api.Packet) (*api.Packet, error) {
+	uc, err := broker.UserFromCtx(ctx)
 	if err != nil {
-		return nil, errors.HeartbeatError.Detail(err)
+		return nil, errors.HeartbeatError.SetDetail(err)
 	}
 	h.setLastHeartbeat(uc)
 
-	return pb.NewHeartbeat(int32(1)), nil
+	return api.NewHeartbeat(int32(1)), nil
 }
 
 func (h *heartbeatHandler) isSupport(ctx context.Context, packetType int32) bool {
 	return packetType == pb.TypeHeartbeat
 }
 
-func (h *heartbeatHandler) startTicker(ctx context.Context, c gnet.Conn, uc *domain.UserConnection) error {
+func (h *heartbeatHandler) startTicker(ctx context.Context, c gnet.Conn, uc *dto.UserConnection) error {
 
 	task := &heartbeatTask{fd: c.Fd()}
 
@@ -100,7 +102,7 @@ func (h *heartbeatHandler) startTicker(ctx context.Context, c gnet.Conn, uc *dom
 
 					h.stopTicker(task.c)
 				} else {
-					h.userState.refreshUser(task.ctx, task.uc)
+					h.userState.RefreshUser(task.ctx, task.uc)
 				}
 			}
 		}
@@ -116,7 +118,7 @@ func (h *heartbeatHandler) startTicker(ctx context.Context, c gnet.Conn, uc *dom
 		errorMap["heartbeatPoolFree"] = h.heartbeatPool.Free()
 		errorMap["error"] = err.Error()
 
-		return errors.HeartbeatTaskError.DetailJson(errorMap)
+		return errors.HeartbeatTaskError.SetDetail(errorMap)
 	}
 
 	return nil
@@ -158,7 +160,7 @@ func (h *heartbeatHandler) stopTicker(c gnet.Conn) error {
 	return nil
 }
 
-func (h *heartbeatHandler) setLastHeartbeat(c *domain.UserConnection) {
+func (h *heartbeatHandler) setLastHeartbeat(c *dto.UserConnection) {
 	task, _ := h.m.Load(c.Fd)
 	if task == nil {
 		return
@@ -173,7 +175,7 @@ func (h *heartbeatHandler) isRunning(fd int) bool {
 }
 
 type heartbeatTask struct {
-	uc            *domain.UserConnection
+	uc            *dto.UserConnection
 	fd            int
 	remoteAddr    string
 	lastHeartbeat int64

@@ -55,7 +55,7 @@ func (s *UserState) StoreUser(ctx context.Context, u *broker.UserConnection, app
 	return nil
 }
 
-func (s *UserState) refreshUser(ctx context.Context, uc *broker.UserConnection) error {
+func (s *UserState) RefreshUser(ctx context.Context, uc *broker.UserConnection) error {
 	lock, e := s.storage.Lock(ctx, uc.AppId, uc.Label())
 	if e != nil {
 		return e
