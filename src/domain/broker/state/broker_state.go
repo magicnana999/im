@@ -5,17 +5,17 @@ import (
 	"sync"
 )
 
-var DefaultBrokerState *brokerState
+var DefaultBrokerState *BrokerState
 var dbsOnce sync.Once
 
-type brokerState struct {
+type BrokerState struct {
 	*storage.BrokerStorage
 }
 
-func InitBrokerState() *brokerState {
+func InitBrokerState() *BrokerState {
 
 	dbsOnce.Do(func() {
-		DefaultBrokerState = &brokerState{storage.InitBrokerStorage()}
+		DefaultBrokerState = &BrokerState{storage.InitBrokerStorage()}
 	})
 
 	return DefaultBrokerState

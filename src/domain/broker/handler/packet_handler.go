@@ -3,7 +3,6 @@ package broker
 import (
 	"context"
 	"github.com/magicnana999/im/errors"
-	"github.com/magicnana999/im/pb"
 	"strconv"
 	"sync"
 )

@@ -2,7 +2,6 @@ package broker
 
 import (
 	"context"
-	"github.com/magicnana999/im/pb"
 	"sync"
 )
 

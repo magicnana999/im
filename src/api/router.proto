@@ -1,0 +1,11 @@
+syntax = "proto3";
+package api;
+option go_package = "api";
+
+import "packet.proto";
+
+message RouteReply{}
+
+service RouterService{
+  rpc Route(Message) returns (RouteReply) {}
+}

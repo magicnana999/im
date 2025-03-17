@@ -11,14 +11,14 @@ const (
 	currentUserKey string = `CurrentUser`
 )
 
-func currentContext(c gnet.Conn) (context.Context, error) {
+func Context(c gnet.Conn) (context.Context, error) {
 	if ctx, o := c.Context().(context.Context); o {
 		return ctx, nil
 	}
 	return nil, errors.CurUserNotFound
 }
 
-func currentUserFromCtx(ctx context.Context) (*broker.UserConnection, error) {
+func UserFromCtx(ctx context.Context) (*broker.UserConnection, error) {
 	if u, ok := ctx.Value(currentUserKey).(*broker.UserConnection); ok {
 		return u, nil
 	}
@@ -26,11 +26,11 @@ func currentUserFromCtx(ctx context.Context) (*broker.UserConnection, error) {
 	return nil, errors.CurUserNotFound
 }
 
-func currentUserFromConn(c gnet.Conn) (*broker.UserConnection, error) {
+func UserFromConn(c gnet.Conn) (*broker.UserConnection, error) {
 
-	ctx, err := currentContext(c)
+	ctx, err := Context(c)
 	if err != nil {
 		return nil, err
 	}
-	return currentUserFromCtx(ctx)
+	return UserFromCtx(ctx)
 }

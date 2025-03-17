@@ -6,7 +6,6 @@ import (
 	"github.com/magicnana999/im/domain"
 	"github.com/magicnana999/im/errors"
 	"github.com/magicnana999/im/logger"
-	"github.com/magicnana999/im/pb"
 	"github.com/panjf2000/gnet/v2"
 	goPool "github.com/panjf2000/gnet/v2/pkg/pool/goroutine"
 	"sync"

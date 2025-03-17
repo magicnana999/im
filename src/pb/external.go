@@ -1,21 +1,62 @@
 package pb
 
 import (
+	imerror "github.com/magicnana999/im/pkg/error"
+	"github.com/magicnana999/im/pkg/id"
 	"google.golang.org/protobuf/proto"
 	"strings"
 	"time"
 )
 
+const (
+	FlowRequest int32 = iota + 1
+	FlowResponse
+)
+
+// Type
+const (
+	TypeHeartbeat int32 = iota + 1
+	TypeCommand
+	TypeMessage
+	TypeEvent
+)
+
+// NeedAck
+const (
+	NO int32 = iota
+	YES
+)
+
+const (
+	CTypeUserLogin      string = "USER_LOGIN"
+	CTypeUserLogout            = "USER_LOGOUT"
+	CTypeFriendAdd             = "FRIEND_ADD"
+	CTypeFriendAddAgree        = "FRIEND_ADD_AGREE"
+	CTypeFriendReject          = "FRIEND_ADD_REJECT"
+)
+
+const (
+	CTypeText  string = "TEXT"
+	CTypeImage string = "IMAGE"
+	CTypeAudio string = "AUDIO"
+	CTypeVideo string = "VIDEO"
+)
+
+const (
+	TTypeSingle int32 = iota + 1
+	TTypeGroup
+)
+
 func NewHeartbeat(v int32) *Packet {
 	return &Packet{
 		Type: TypeHeartbeat,
-		Body: &Packet_HeartbeatBody{HeartbeatBody: &HeartbeatBody{Value: v}},
+		Body: &Packet_Heartbeat{Heartbeat: &Heartbeat{Value: v}},
 	}
 }
 
 func NewCommand(data proto.Message) *Packet {
 
-	mb := &CommandBody{
+	mb := &Command{
 		Id: strings.ToLower(id.GenerateXId()),
 	}
 
@@ -26,9 +67,9 @@ func NewCommand(data proto.Message) *Packet {
 func NewMessage(
 	userId, to, groupId, sequence int64,
 	appId, cId string,
-	c proto.Message) *MessageBody {
+	c proto.Message) *Message {
 
-	mb := &MessageBody{
+	mb := &Message{
 		MessageId: strings.ToLower(id.GenerateXId()),
 		AppId:     appId,
 		UserId:    userId,
@@ -61,9 +102,9 @@ func (p *Packet) Failure(e error) *Packet {
 	case TypeHeartbeat:
 		return nil
 	case TypeCommand:
-		return p.GetCommandBody().Failure(e).Wrap()
+		return p.GetCommand().Failure(e).Wrap()
 	case TypeMessage:
-		return p.GetMessageBody().Failure(e).Wrap()
+		return p.GetMessage().Failure(e).Wrap()
 	default:
 		return nil
 	}
@@ -74,15 +115,15 @@ func (p *Packet) Success(c proto.Message) *Packet {
 	case TypeHeartbeat:
 		return nil
 	case TypeCommand:
-		return p.GetCommandBody().Success(c).Wrap()
+		return p.GetCommand().Success(c).Wrap()
 	case TypeMessage:
-		return p.GetMessageBody().Success(c).Wrap()
+		return p.GetMessage().Success(c).Wrap()
 	default:
 		return nil
 	}
 }
 
-func (mb *CommandBody) Response(reply proto.Message, e error) *CommandBody {
+func (mb *Command) Response(reply proto.Message, e error) *Command {
 	if e == nil {
 		return mb.Success(reply)
 	} else {
@@ -90,9 +131,9 @@ func (mb *CommandBody) Response(reply proto.Message, e error) *CommandBody {
 	}
 }
 
-func (mb *CommandBody) Success(reply proto.Message) *CommandBody {
+func (mb *Command) Success(reply proto.Message) *Command {
 
-	ack := &CommandBody{
+	ack := &Command{
 		Id:    mb.Id,
 		CType: mb.CType,
 		Code:  0,
@@ -103,26 +144,24 @@ func (mb *CommandBody) Success(reply proto.Message) *CommandBody {
 	return ack
 }
 
-func (mb *CommandBody) Failure(e error) *CommandBody {
+func (mb *Command) Failure(e error) *Command {
 
 	ack := mb.Success(nil)
 
 	ee := imerror.Format(e)
-	if ee != nil {
-		ack.Code = int32(ee.Code)
-		ack.Message = ee.Message + " " + ee.Details
-	}
+	ack.Code = int32(ee.Code)
+	ack.Message = ee.Message + "," + ee.Detail
 
 	return ack
 }
 
-func (mb *MessageBody) Success(content proto.Message) *MessageBody {
+func (mb *Message) Success(content proto.Message) *Message {
 
 	if mb.Flow == FlowResponse {
 		return mb
 	}
 
-	ack := &MessageBody{
+	ack := &Message{
 		MessageId: mb.MessageId,
 		Flow:      FlowResponse,
 		NeedAck:   NO,
@@ -133,38 +172,35 @@ func (mb *MessageBody) Success(content proto.Message) *MessageBody {
 	return ack
 }
 
-func (mb *MessageBody) Failure(e error) *MessageBody {
+func (mb *Message) Failure(e error) *Message {
 
 	ack := mb.Success(nil)
 
 	ee := imerror.Format(e)
-	if ee != nil {
-		ack.Code = int32(ee.Code)
-		ack.Message = ee.Message
-	}
-
+	ack.Code = int32(ee.Code)
+	ack.Message = ee.Message + "," + ee.Detail
 	return ack
 }
 
-func (mb *CommandBody) Wrap() *Packet {
+func (mb *Command) Wrap() *Packet {
 	return &Packet{
 		Type: TypeCommand,
-		Body: &Packet_CommandBody{
-			CommandBody: mb,
+		Body: &Packet_Command{
+			Command: mb,
 		},
 	}
 }
 
-func (mb *MessageBody) Wrap() *Packet {
+func (mb *Message) Wrap() *Packet {
 	return &Packet{
 		Type: TypeMessage,
-		Body: &Packet_MessageBody{
-			MessageBody: mb,
+		Body: &Packet_Message{
+			Message: mb,
 		},
 	}
 }
 
-func (mb *CommandBody) SetRequest(content proto.Message) {
+func (mb *Command) SetRequest(content proto.Message) {
 
 	if content == nil {
 		return
@@ -173,12 +209,12 @@ func (mb *CommandBody) SetRequest(content proto.Message) {
 	switch c := content.(type) {
 	case *LoginRequest:
 		mb.CType = CTypeUserLogin
-		mb.Request = &CommandBody_LoginRequest{LoginRequest: c}
+		mb.Request = &Command_LoginRequest{LoginRequest: c}
 	default:
 	}
 }
 
-func (mb *CommandBody) SetReply(content proto.Message) {
+func (mb *Command) SetReply(content proto.Message) {
 
 	if content == nil {
 		return
@@ -187,46 +223,46 @@ func (mb *CommandBody) SetReply(content proto.Message) {
 	switch c := content.(type) {
 	case *LoginReply:
 		mb.CType = CTypeUserLogin
-		mb.Reply = &CommandBody_LoginReply{LoginReply: c}
+		mb.Reply = &Command_LoginReply{LoginReply: c}
 	default:
 	}
 }
 
-func (mb *MessageBody) SetContent(content proto.Message) {
+func (mb *Message) SetContent(content proto.Message) {
 
 	if content == nil {
 		return
 	}
 
 	switch content := content.(type) {
-	case *TextContent:
+	case *Text:
 		mb.CType = CTypeText
-		mb.Content = &MessageBody_TextContent{TextContent: content}
-	case *ImageContent:
+		mb.Content = &Message_Text{Text: content}
+	case *Image:
 		mb.CType = CTypeImage
-		mb.Content = &MessageBody_ImageContent{ImageContent: content}
-	case *AudioContent:
+		mb.Content = &Message_Image{Image: content}
+	case *Audio:
 		mb.CType = CTypeAudio
-		mb.Content = &MessageBody_AudioContent{AudioContent: content}
-	case *VideoContent:
+		mb.Content = &Message_Audio{Audio: content}
+	case *Video:
 		mb.CType = CTypeVideo
-		mb.Content = &MessageBody_VideoContent{VideoContent: content}
+		mb.Content = &Message_Video{Video: content}
 	default:
 	}
 }
 
-func (mb *MessageBody) IsToGroup() bool {
+func (mb *Message) IsToGroup() bool {
 	return mb.GroupId > 0
 }
 
-func (mb *MessageBody) IsRequest() bool {
+func (mb *Message) IsRequest() bool {
 	if mb.Flow == FlowRequest {
 		return true
 	}
 	return false
 }
 
-func (mb *MessageBody) IsResponse() bool {
+func (mb *Message) IsResponse() bool {
 	if mb.Flow == FlowResponse {
 		return true
 	}

@@ -2,9 +2,8 @@ package conf
 
 import (
 	"fmt"
-	"github.com/magicnana999/im/util/ip"
-	"github.com/magicnana999/im/util/str"
-	"gopkg.in/yaml.v3"
+	"github.com/magicnana999/im/pkg/ip"
+	"github.com/magicnana999/im/pkg/str"
 	"os"
 	"strings"
 )

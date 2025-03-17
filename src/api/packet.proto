@@ -1,0 +1,133 @@
+syntax = "proto3";
+package api;
+option go_package = "api";
+
+
+message Heartbeat{
+  int32 value = 1;
+}
+
+
+
+
+
+
+
+message Command {
+  string id = 1;
+  string cType = 2;
+  int32 code = 3;
+  string message = 4;
+  oneof request {
+    LoginRequest loginRequest = 5;
+    //    LogoutRequest logoutRequest = 6;
+    //
+    //    FriendRequest friendRequest = 7;
+    //    FriendRequestAgree friendRequestAgree = 8;
+    //    FriendRequestReject friendRequestReject = 9;
+    //
+    //
+  }
+  oneof reply {
+    LoginReply loginReply = 6;
+  }
+}
+
+
+message LoginRequest {
+  string appId = 1;
+  string userSig = 2;
+  string version = 3;
+  string os = 4;
+  string deviceId = 5;
+}
+
+message LoginReply{
+  string appId = 1;
+  int64 userId = 2;
+}
+
+
+
+
+
+
+
+message Message{
+  string messageId = 1;
+  string appId = 2;
+  int64 userId = 3;
+  string convId = 4;
+  int64 to = 5;
+  int64 groupId = 6;
+  int64 sequence = 7;
+  int32 flow = 8;
+  int32 needAck = 9;
+  int64 cTime = 10;
+  int64 sTime = 11;
+  string cType = 12;
+  repeated At at = 13;
+  repeated Refer refer = 14;
+  int32 code = 15;
+  string message = 16;
+  oneof content {
+    Text text = 17;
+    Image image = 18;
+    Audio audio = 19;
+    Video video = 20;
+  }
+}
+
+
+message At {
+  int64 userId = 1;
+  string name = 2;
+  string avatar = 3;
+}
+
+message Refer {
+  int64 userId = 1;
+  string name = 2;
+  string avatar = 3;
+  string cType = 4;
+  oneof content {
+    Text text = 5;
+    Image image = 6;
+    Audio audio = 7;
+    Video video = 8;
+  }
+}
+
+message Text {
+  string text = 1;
+}
+
+message Image {
+  string url = 1;
+  int32 width = 2;
+  int32 height = 3;
+}
+
+message Audio {
+  string url = 1;
+  int32 length = 2;
+}
+
+message Video {
+  string url = 1;
+  string cover = 2;
+  int32 length = 3;
+  int32 width = 4;
+  int32 height = 5;
+}
+
+
+
+message Packet{
+  int32 type = 1;
+  oneof body{
+    Heartbeat heartbeat = 2;
+    Command command = 3;
+    Message message = 4;
+  }
+}

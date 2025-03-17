@@ -8,25 +8,25 @@ import (
 	"sync"
 )
 
-var DefaultUserState *userState
+var DefaultUserState *UserState
 var dusOnce sync.Once
 
-type userState struct {
+type UserState struct {
 	storage *storage.UserStorage
 	m       sync.Map
 }
 
-func InitUserState() *userState {
+func InitUserState() *UserState {
 
 	dusOnce.Do(func() {
-		DefaultUserState = &userState{
+		DefaultUserState = &UserState{
 			storage: storage.InitUserStorage(),
 		}
 	})
 	return DefaultUserState
 }
 
-func (s *userState) storeUser(ctx context.Context, u *broker.UserConnection, appId string, userId int64, os constants.OSType) error {
+func (s *UserState) StoreUser(ctx context.Context, u *broker.UserConnection, appId string, userId int64, os constants.OSType) error {
 
 	lock, e := s.storage.Lock(ctx, appId, u.Label())
 	if e != nil {
@@ -55,7 +55,7 @@ func (s *userState) storeUser(ctx context.Context, u *broker.UserConnection, app
 	return nil
 }
 
-func (s *userState) refreshUser(ctx context.Context, uc *broker.UserConnection) error {
+func (s *UserState) refreshUser(ctx context.Context, uc *broker.UserConnection) error {
 	lock, e := s.storage.Lock(ctx, uc.AppId, uc.Label())
 	if e != nil {
 		return e
@@ -69,7 +69,7 @@ func (s *userState) refreshUser(ctx context.Context, uc *broker.UserConnection) 
 	return nil
 }
 
-func (s *userState) loadLocalUser(label string) *broker.UserConnection {
+func (s *UserState) loadLocalUser(label string) *broker.UserConnection {
 	if val, ok := s.m.Load(label); ok {
 		return val.(*broker.UserConnection)
 	}

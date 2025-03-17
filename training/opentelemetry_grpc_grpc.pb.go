@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v4.25.3
-// source: opentelemetry_grpc.proto
+// source: opentelemetry_grpc.api
 
 package training
 
@@ -117,5 +117,5 @@ var Greeter_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "opentelemetry_grpc.proto",
+	Metadata: "opentelemetry_grpc.api",
 }

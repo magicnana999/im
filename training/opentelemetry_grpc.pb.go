@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.36.2
 // 	protoc        v4.25.3
-// source: opentelemetry_grpc.proto
+// source: opentelemetry_grpc.api
 
 package training
 

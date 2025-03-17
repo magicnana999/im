@@ -2,8 +2,8 @@ package broker
 
 import (
 	"encoding/binary"
+	"github.com/magicnana999/im/api/kitex_gen/api"
 	"github.com/magicnana999/im/errors"
-	"github.com/magicnana999/im/pb"
 	"github.com/panjf2000/gnet/v2"
 	bb "github.com/panjf2000/gnet/v2/pkg/pool/bytebuffer"
 	"google.golang.org/protobuf/proto"
@@ -12,8 +12,8 @@ import (
 var defaultCodec = &lengthFieldBasedFrameCodec{}
 
 type codec interface {
-	encode(c gnet.Conn, p *pb.Packet) (*bb.ByteBuffer, error)
-	decode(c gnet.Conn) ([]*pb.Packet, error)
+	encode(c gnet.Conn, p *api.Packet) (*bb.ByteBuffer, error)
+	decode(c gnet.Conn) ([]*api.Packet, error)
 }
 
 type lengthFieldBasedFrameCodec struct {
@@ -23,13 +23,13 @@ func initCodec() codec {
 	return defaultCodec
 }
 
-func (l *lengthFieldBasedFrameCodec) encode(c gnet.Conn, p *pb.Packet) (*bb.ByteBuffer, error) {
+func (l *lengthFieldBasedFrameCodec) encode(c gnet.Conn, p *api.Packet) (*bb.ByteBuffer, error) {
 
 	buffer := bb.Get()
 
 	if p.IsHeartbeat() {
 
-		hb := p.GetHeartbeatBody().Value
+		hb := p.GetHeartbeat().Value
 
 		binary.Write(buffer, binary.BigEndian, int32(4))
 		binary.Write(buffer, binary.BigEndian, int32(hb))
@@ -49,9 +49,9 @@ func (l *lengthFieldBasedFrameCodec) encode(c gnet.Conn, p *pb.Packet) (*bb.Byte
 	}
 }
 
-func (l *lengthFieldBasedFrameCodec) decode(c gnet.Conn) ([]*pb.Packet, error) {
+func (l *lengthFieldBasedFrameCodec) decode(c gnet.Conn) ([]*api.Packet, error) {
 
-	result := make([]*pb.Packet, 0)
+	result := make([]*api.Packet, 0)
 
 	for c.InboundBuffered() >= 4 {
 
@@ -63,7 +63,7 @@ func (l *lengthFieldBasedFrameCodec) decode(c gnet.Conn) ([]*pb.Packet, error) {
 			var heartbeat int32
 			binary.Read(c, binary.BigEndian, &heartbeat)
 
-			packet := pb.NewHeartbeat(int32(heartbeat))
+			packet := api.NewHeartbeat(int32(heartbeat))
 			result = append(result, packet)
 
 		}
@@ -80,7 +80,7 @@ func (l *lengthFieldBasedFrameCodec) decode(c gnet.Conn) ([]*pb.Packet, error) {
 				return nil, errors.DecodeError.FmtDetail("read length[%d] does not match length field[%d]", n, length)
 			}
 
-			var p pb.Packet
+			var p api.Packet
 			if e4 := proto.Unmarshal(bs, &p); e4 != nil {
 				return nil, errors.DecodeError.SetDetail(e4)
 			}

@@ -4,12 +4,12 @@ package infrastructure
 //import (
 //	"context"
 //	"github.com/magicnana999/im/logger"
-//	"github.com/magicnana999/im/pb"
+//	"github.com/magicnana999/im/api"
 //	"github.com/segmentio/kafka-go"
 //	"go.opentelemetry.io/otel"
 //	"go.opentelemetry.io/otel/propagation"
 //	"google.golang.org/protobuf/encoding/protojson"
-//	"google.golang.org/protobuf/proto"
+//	"google.golang.org/protobuf/api"
 //	"strings"
 //	"sync"
 //	"time"
@@ -20,7 +20,7 @@ package infrastructure
 //)
 //
 //type MQMessageHandler interface {
-//	Consume(ctx context.Context, msg *pb.MQMessage) error
+//	Consume(ctx context.Context, msg *api.MQMessage) error
 //}
 //
 //type Consumer struct {
@@ -76,8 +76,8 @@ package infrastructure
 //
 //				sub, span := logger.Tracer.Start(ctx, c.topicInfo.Topic+"-consumer")
 //
-//				var msg pb.MQMessage
-//				if err := proto.Unmarshal(message.Value, &msg); err != nil {
+//				var msg api.MQMessage
+//				if err := api.Unmarshal(message.Value, &msg); err != nil {
 //					continue
 //				}
 //
@@ -101,8 +101,8 @@ package infrastructure
 //}
 //
 //func handleMessageRoute(ctx context.Context, topic string, h MQMessageHandler, m *kafka.Message) error {
-//	var msg pb.MQMessage
-//	if err := proto.Unmarshal(m.Value, &msg); err != nil {
+//	var msg api.MQMessage
+//	if err := api.Unmarshal(m.Value, &msg); err != nil {
 //		return err
 //	}
 //
@@ -151,11 +151,11 @@ package infrastructure
 //	return defaultProducer
 //}
 //
-//func (p *Producer) send(ctx context.Context, topic string, m *pb.MessageBody, userIds []int64, userLabels []string, count int32) error {
+//func (p *Producer) send(ctx context.Context, topic string, m *api.MessageBody, userIds []int64, userLabels []string, count int32) error {
 //	if count == 0 {
 //		count = 1
 //	}
-//	mq := &pb.MQMessage{
+//	mq := &api.MQMessage{
 //		Id:         m.MessageId,
 //		Count:      count,
 //		UserIds:    userIds,
@@ -163,7 +163,7 @@ package infrastructure
 //		Message:    m,
 //	}
 //
-//	bs, e := proto.Marshal(mq)
+//	bs, e := api.Marshal(mq)
 //	if e != nil {
 //		return e
 //	}
@@ -198,27 +198,27 @@ package infrastructure
 //	return err
 //}
 //
-//func (p *Producer) SendRoute(ctx context.Context, m *pb.MessageBody, count int32) error {
+//func (p *Producer) SendRoute(ctx context.Context, m *api.MessageBody, count int32) error {
 //	return p.send(ctx, Route.Topic, m, nil, nil, count)
 //}
 //
-//func (p *Producer) SendRouteDLQ(ctx context.Context, m *pb.MessageBody) error {
+//func (p *Producer) SendRouteDLQ(ctx context.Context, m *api.MessageBody) error {
 //	return p.send(ctx, RouteDLQ.Topic, m, nil, nil, 0)
 //}
 //
-//func (p *Producer) SendStore(ctx context.Context, m *pb.MessageBody) error {
+//func (p *Producer) SendStore(ctx context.Context, m *api.MessageBody) error {
 //	return p.send(ctx, Store.Topic, m, nil, nil, 0)
 //}
 //
-//func (p *Producer) SendOffline(ctx context.Context, m *pb.MessageBody, userIds []int64) error {
+//func (p *Producer) SendOffline(ctx context.Context, m *api.MessageBody, userIds []int64) error {
 //	return p.send(ctx, Offline.Topic, m, userIds, nil, 0)
 //}
 //
-//func (p *Producer) SendPush(ctx context.Context, m *pb.MessageBody) error {
+//func (p *Producer) SendPush(ctx context.Context, m *api.MessageBody) error {
 //	return p.send(ctx, Push.Topic, m, nil, nil, 0)
 //}
 //
-//func (p *Producer) SendDeliver(ctx context.Context, topic string, m *pb.MessageBody, labels []string) error {
+//func (p *Producer) SendDeliver(ctx context.Context, topic string, m *api.MessageBody, labels []string) error {
 //	topic = strings.Replace(topic, ":", "-", -1)
 //	return p.send(ctx, topic, m, nil, labels, 0)
 //}
