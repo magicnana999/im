@@ -19,9 +19,9 @@ type MinHeap[T any] struct {
 
 // Option 配置选项
 type Option[T any] struct {
-	MaxSize    int            // 最大容量，默认无限制
-	OnOverflow func(t T) bool // 溢出处理回调，默认拒绝
-	Logger     *log.Logger    // 日志，默认标准输出
+	MaxSize    int
+	OnOverflow func(t T) bool
+	Logger     *log.Logger
 }
 
 func NewMinHeap[T any](less func(i, j T) bool, opts ...Option[T]) *MinHeap[T] {
@@ -30,7 +30,7 @@ func NewMinHeap[T any](less func(i, j T) bool, opts ...Option[T]) *MinHeap[T] {
 		opt = opts[0]
 	}
 	if opt.MaxSize <= 0 {
-		opt.MaxSize = 0 // 0 表示无限制
+		opt.MaxSize = 0
 	}
 	if opt.OnOverflow == nil {
 		opt.OnOverflow = func(t T) bool { return false }
@@ -46,84 +46,59 @@ func NewMinHeap[T any](less func(i, j T) bool, opts ...Option[T]) *MinHeap[T] {
 		onOverflow: opt.OnOverflow,
 		logger:     opt.Logger,
 	}
-	heap.Init(h)
+	heap.Init(h) // 无需锁，创建时单线程且 data 为空
 	return h
 }
 
-func (h *MinHeap[T]) Len() int {
-	h.mu.RLock()
-	defer h.mu.RUnlock()
-	return len(h.data)
-}
+// --- heap.Interface 方法，实现 container/heap 所需接口 ---
 
-func (h *MinHeap[T]) Less(i, j int) bool {
-	h.mu.RLock()
-	defer h.mu.RUnlock()
-	return h.less(h.data[i], h.data[j])
-}
-
-func (h *MinHeap[T]) Swap(i, j int) {
-	h.mu.Lock()
-	defer h.mu.Unlock()
-	h.data[i], h.data[j] = h.data[j], h.data[i]
-}
-
-func (h *MinHeap[T]) Push(x interface{}) {
-	h.mu.Lock()
-	defer h.mu.Unlock()
-	h.data = append(h.data, x.(T))
-}
-
+func (h *MinHeap[T]) Len() int           { return len(h.data) }
+func (h *MinHeap[T]) Less(i, j int) bool { return h.less(h.data[i], h.data[j]) }
+func (h *MinHeap[T]) Swap(i, j int)      { h.data[i], h.data[j] = h.data[j], h.data[i] }
+func (h *MinHeap[T]) Push(x interface{}) { h.data = append(h.data, x.(T)) }
 func (h *MinHeap[T]) Pop() interface{} {
-	h.mu.Lock()
-	defer h.mu.Unlock()
 	n := len(h.data)
 	x := h.data[n-1]
 	h.data = h.data[0 : n-1]
 	return x
 }
 
+// --- 业务方法，提供工程化功能 ---
+
+// Add 添加元素
 func (h *MinHeap[T]) Add(item T) error {
-	// 先检查容量，不锁
-	if h.maxSize > 0 {
-		h.mu.RLock()
-		size := len(h.data)
-		h.mu.RUnlock()
-		if h.maxSize > 0 && size >= h.maxSize {
-			h.logger.Printf("WARN: Heap size %d exceeds maxSize %d", size, h.maxSize)
-			if !h.onOverflow(item) {
-				return errors.New("heap is full and overflow handler rejected item")
-			}
-			return nil
+	h.mu.Lock()
+	defer h.mu.Unlock()
+
+	if h.maxSize > 0 && len(h.data) >= h.maxSize {
+		h.logger.Printf("WARN: Heap size %d exceeds maxSize %d", len(h.data), h.maxSize)
+		if !h.onOverflow(item) {
+			return errors.New("heap is full and overflow handler rejected item")
 		}
+		return nil
 	}
 
-	// 只在修改时加锁
-	h.mu.Lock()
 	heap.Push(h, item)
-	size := len(h.data)
-	h.mu.Unlock()
-
-	h.logger.Printf("DEBUG: Add item, heap size: %d", size)
+	h.logger.Printf("DEBUG: Added item, heap size: %d", len(h.data))
 	return nil
 }
 
-func (h *MinHeap[T]) Del() (T, error) {
+// Remove 移除并返回堆顶
+func (h *MinHeap[T]) Remove() (T, error) {
 	h.mu.Lock()
+	defer h.mu.Unlock()
+
 	if len(h.data) == 0 {
-		h.mu.Unlock()
 		return *new(T), errors.New("heap is empty")
 	}
-	item := heap.Pop(h).(T)
-	size := len(h.data)
-	h.mu.Unlock()
 
-	h.logger.Printf("DEBUG: Popped item, heap size: %d", size)
+	item := heap.Pop(h).(T)
+	h.logger.Printf("DEBUG: Removed item, heap size: %d", len(h.data))
 	return item, nil
 }
 
-// Peek 查看堆顶（不移除）
-func (h *MinHeap[T]) Peek() (T, error) {
+// Top 查看堆顶（不移除）
+func (h *MinHeap[T]) Top() (T, error) {
 	h.mu.RLock()
 	defer h.mu.RUnlock()
 
@@ -133,8 +108,8 @@ func (h *MinHeap[T]) Peek() (T, error) {
 	return h.data[0], nil
 }
 
-// Size 返回当前大小
-func (h *MinHeap[T]) Size() int {
+// Count 返回当前大小
+func (h *MinHeap[T]) Count() int {
 	h.mu.RLock()
 	defer h.mu.RUnlock()
 	return len(h.data)
