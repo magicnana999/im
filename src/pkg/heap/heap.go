@@ -83,14 +83,13 @@ func (h *MinHeap[T]) Pop() interface{} {
 	return x
 }
 
-// PushTask 添加元素
-func (h *MinHeap[T]) PushTask(item T) error {
+func (h *MinHeap[T]) Add(item T) error {
 	// 先检查容量，不锁
 	if h.maxSize > 0 {
 		h.mu.RLock()
 		size := len(h.data)
 		h.mu.RUnlock()
-		if size >= h.maxSize {
+		if h.maxSize > 0 && size >= h.maxSize {
 			h.logger.Printf("WARN: Heap size %d exceeds maxSize %d", size, h.maxSize)
 			if !h.onOverflow(item) {
 				return errors.New("heap is full and overflow handler rejected item")
@@ -105,12 +104,11 @@ func (h *MinHeap[T]) PushTask(item T) error {
 	size := len(h.data)
 	h.mu.Unlock()
 
-	h.logger.Printf("DEBUG: Pushed item, heap size: %d", size)
+	h.logger.Printf("DEBUG: Add item, heap size: %d", size)
 	return nil
 }
 
-// PopTask 移除并返回堆顶
-func (h *MinHeap[T]) PopTask() (T, error) {
+func (h *MinHeap[T]) Del() (T, error) {
 	h.mu.Lock()
 	if len(h.data) == 0 {
 		h.mu.Unlock()

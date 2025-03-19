@@ -15,6 +15,30 @@ type Task struct {
 	expireTime int64
 }
 
+func TestHeap(t *testing.T) {
+	logger := log.New(os.Stderr, "", log.LstdFlags)
+	less := func(i, j Task) bool { return i.expireTime < j.expireTime }
+	onOverflow := func(t Task) bool {
+		fmt.Println(t)
+		return true
+	}
+
+	heap := NewMinHeap(less, Option[Task]{
+		MaxSize:    100,
+		OnOverflow: onOverflow,
+		Logger:     logger,
+	})
+
+	for i := 0; i < 100; i++ {
+		now := time.Now().UnixNano()
+		fmt.Sprintf("%d", now)
+		heap.Add(Task{clientID: fmt.Sprintf("%d", now), expireTime: now})
+	}
+
+	fmt.Printf("heap size: %d\n", heap.Size())
+
+}
+
 func TestMinHeapConcurrent(t *testing.T) {
 	logger := log.New(os.Stderr, "", log.LstdFlags)
 	less := func(i, j Task) bool { return i.expireTime < j.expireTime }
@@ -56,7 +80,7 @@ func TestMinHeapConcurrent(t *testing.T) {
 							clientID:   fmt.Sprintf("worker%d-task%d", workerID, j),
 							expireTime: time.Now().UnixMilli() + int64((workerID+j)*100),
 						}
-						if err := h.PushTask(task); err != nil {
+						if err := h.Add(task); err != nil {
 							t.Errorf("PushTask failed: %v", err)
 						}
 					}
@@ -75,7 +99,7 @@ func TestMinHeapConcurrent(t *testing.T) {
 						t.Logf("Worker%d timeout", workerID)
 						return
 					default:
-						if _, err := h.PopTask(); err != nil && err.Error() != "heap is empty" {
+						if _, err := h.Del(); err != nil && err.Error() != "heap is empty" {
 							t.Errorf("PopTask failed: %v", err)
 						}
 					}
