@@ -3,59 +3,51 @@ package heap
 import (
 	"container/heap"
 	"errors"
-	"log"
 	"sync"
+)
+
+var (
+	EmptyHeap = errors.New("heap is empty")
+	FullHeap  = errors.New("heap is full")
 )
 
 // MinHeap 通用的工程化小顶堆
 type MinHeap[T any] struct {
-	data       []T
-	less       func(i, j T) bool // 比较函数
-	mu         sync.RWMutex      // 线程安全锁
-	maxSize    int               // 最大容量
-	onOverflow func(t T) bool    // 溢出处理回调
-	logger     *log.Logger       // 标准日志
+	data    []T
+	less    func(i, j T) bool // 比较函数
+	mu      sync.RWMutex      // 线程安全锁
+	maxSize int               // 最大容量
 }
 
-// Option 配置选项
-type Option[T any] struct {
-	MaxSize    int
-	OnOverflow func(t T) bool
-	Logger     *log.Logger
-}
-
-func NewMinHeap[T any](less func(i, j T) bool, opts ...Option[T]) *MinHeap[T] {
-	opt := Option[T]{}
-	if len(opts) > 0 {
-		opt = opts[0]
-	}
-	if opt.MaxSize <= 0 {
-		opt.MaxSize = 0
-	}
-	if opt.OnOverflow == nil {
-		opt.OnOverflow = func(t T) bool { return false }
-	}
-	if opt.Logger == nil {
-		opt.Logger = log.Default()
-	}
+func NewMinHeap[T any](less func(i, j T) bool, maxSize int) *MinHeap[T] {
 
 	h := &MinHeap[T]{
-		data:       make([]T, 0),
-		less:       less,
-		maxSize:    opt.MaxSize,
-		onOverflow: opt.OnOverflow,
-		logger:     opt.Logger,
+		data:    make([]T, 0),
+		less:    less,
+		maxSize: maxSize,
 	}
-	heap.Init(h) // 无需锁，创建时单线程且 data 为空
+	heap.Init(h)
 	return h
 }
 
-// --- heap.Interface 方法，实现 container/heap 所需接口 ---
+// implement heap.Interface begin...
 
-func (h *MinHeap[T]) Len() int           { return len(h.data) }
-func (h *MinHeap[T]) Less(i, j int) bool { return h.less(h.data[i], h.data[j]) }
-func (h *MinHeap[T]) Swap(i, j int)      { h.data[i], h.data[j] = h.data[j], h.data[i] }
-func (h *MinHeap[T]) Push(x interface{}) { h.data = append(h.data, x.(T)) }
+func (h *MinHeap[T]) Len() int {
+	return len(h.data)
+}
+
+func (h *MinHeap[T]) Less(i, j int) bool {
+	return h.less(h.data[i], h.data[j])
+}
+
+func (h *MinHeap[T]) Swap(i, j int) {
+	h.data[i], h.data[j] = h.data[j], h.data[i]
+}
+
+func (h *MinHeap[T]) Push(x interface{}) {
+	h.data = append(h.data, x.(T))
+}
+
 func (h *MinHeap[T]) Pop() interface{} {
 	n := len(h.data)
 	x := h.data[n-1]
@@ -63,7 +55,7 @@ func (h *MinHeap[T]) Pop() interface{} {
 	return x
 }
 
-// --- 业务方法，提供工程化功能 ---
+// implement heap.Interface end...
 
 // Add 添加元素
 func (h *MinHeap[T]) Add(item T) error {
@@ -71,15 +63,10 @@ func (h *MinHeap[T]) Add(item T) error {
 	defer h.mu.Unlock()
 
 	if h.maxSize > 0 && len(h.data) >= h.maxSize {
-		h.logger.Printf("WARN: Heap size %d exceeds maxSize %d", len(h.data), h.maxSize)
-		if !h.onOverflow(item) {
-			return errors.New("heap is full and overflow handler rejected item")
-		}
-		return nil
+		return FullHeap
 	}
 
 	heap.Push(h, item)
-	h.logger.Printf("DEBUG: Added item, heap size: %d", len(h.data))
 	return nil
 }
 
@@ -89,11 +76,11 @@ func (h *MinHeap[T]) Remove() (T, error) {
 	defer h.mu.Unlock()
 
 	if len(h.data) == 0 {
-		return *new(T), errors.New("heap is empty")
+		var zero T
+		return zero, EmptyHeap
 	}
 
 	item := heap.Pop(h).(T)
-	h.logger.Printf("DEBUG: Removed item, heap size: %d", len(h.data))
 	return item, nil
 }
 
@@ -103,7 +90,8 @@ func (h *MinHeap[T]) Top() (T, error) {
 	defer h.mu.RUnlock()
 
 	if len(h.data) == 0 {
-		return *new(T), errors.New("heap is empty")
+		var zero T
+		return zero, EmptyHeap
 	}
 	return h.data[0], nil
 }
@@ -113,4 +101,27 @@ func (h *MinHeap[T]) Count() int {
 	h.mu.RLock()
 	defer h.mu.RUnlock()
 	return len(h.data)
+}
+
+func (h *MinHeap[T]) Iterate() []T {
+	h.mu.RLock()
+	dataCopy := make([]T, len(h.data))
+	copy(dataCopy, h.data)
+	h.mu.RUnlock()
+
+	// 创建临时堆
+	tempHeap := &MinHeap[T]{
+		data:    dataCopy,
+		less:    h.less,
+		maxSize: 0, // 无需容量限制
+	}
+	heap.Init(tempHeap)
+
+	// 反复移除堆顶，构建有序切片
+	result := make([]T, 0, len(dataCopy))
+	for tempHeap.Len() > 0 {
+		item := heap.Pop(tempHeap).(T)
+		result = append(result, item)
+	}
+	return result
 }

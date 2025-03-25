@@ -19,7 +19,7 @@ const (
 )
 
 var (
-	Z       *zap.Logger // 改为 *zap.Logger
+	Z       *zap.SugaredLogger
 	tracing = false
 )
 
@@ -59,8 +59,8 @@ func getDefaultConfig(c *Config) *Config {
 	return c
 }
 
-// Init 返回 *zap.Logger
-func Init(c *Config) *zap.Logger {
+func Init(c *Config) *zap.SugaredLogger {
+
 	c = getDefaultConfig(c)
 
 	writeSyncer := Writer(c.File)
@@ -73,7 +73,7 @@ func Init(c *Config) *zap.Logger {
 	core := zapcore.NewCore(encoder, writeSyncer, zapcore.Level(c.Level))
 	zp := zap.New(core, zap.AddCaller(), zap.AddCallerSkip(1))
 
-	Z = zp // 直接赋值给全局 Z
+	Z = zp.Sugar()
 
 	if c.TracerName != "" {
 		tracing = true
@@ -83,8 +83,8 @@ func Init(c *Config) *zap.Logger {
 	return Z
 }
 
-// Encoder 保持不变
 func Encoder(et EncodeType, format string) zapcore.Encoder {
+
 	if format == "" {
 		format = YYYYMMDDHHMMSS
 	}
@@ -111,7 +111,6 @@ func Encoder(et EncodeType, format string) zapcore.Encoder {
 	}
 }
 
-// Writer 保持不变
 func Writer(file string) zapcore.WriteSyncer {
 	lumberJackLogger := &lumberjack.Logger{
 		Filename:   file,
@@ -125,46 +124,105 @@ func Writer(file string) zapcore.WriteSyncer {
 		zapcore.AddSync(lumberJackLogger))
 }
 
-// Level 返回日志级别
 func Level() zapcore.Level {
 	return Z.Level()
 }
 
-// With 返回带上下文字段的新 Logger
-func With(fields ...zap.Field) *zap.Logger {
-	return Z.With(fields...)
+func With(args ...any) *zap.SugaredLogger {
+	return Z.With(args...)
+
 }
 
-// 基本日志方法，使用 zap.Field
-func Debug(msg string, fields ...zap.Field) {
-	Z.Debug(msg, fields...)
+func Debug(args ...any) {
+	Z.Debug(args...)
 }
 
-func Info(msg string, fields ...zap.Field) {
-	Z.Info(msg, fields...)
+func Info(args ...any) {
+	Z.Info(args...)
 }
 
-func Warn(msg string, fields ...zap.Field) {
-	Z.Warn(msg, fields...)
+func Warn(args ...any) {
+	Z.Warn(args...)
 }
 
-func Error(msg string, fields ...zap.Field) {
-	Z.Error(msg, fields...)
+func Error(args ...any) {
+	Z.Error(args...)
 }
 
-func DPanic(msg string, fields ...zap.Field) {
-	Z.DPanic(msg, fields...)
+func DPanic(args ...any) {
+	Z.DPanic(args...)
 }
 
-func Panic(msg string, fields ...zap.Field) {
-	Z.Panic(msg, fields...)
+func Panic(args ...any) {
+	Z.Panic(args...)
 }
 
-func Fatal(msg string, fields ...zap.Field) {
-	Z.Fatal(msg, fields...)
+func Fatal(args ...any) {
+	Z.Fatal(args...)
 }
 
-// IsDebugEnable 检查是否启用 Debug 级别
+func Debugf(template string, args ...any) {
+	Z.Debugf(template, args...)
+}
+
+func Infof(template string, args ...any) {
+	Z.Infof(template, args...)
+}
+
+func Warnf(template string, args ...any) {
+	Z.Warnf(template, args...)
+
+}
+
+func Errorf(template string, args ...any) {
+	Z.Errorf(template, args...)
+
+}
+
+func DPanicf(template string, args ...any) {
+	Z.DPanicf(template, args...)
+
+}
+
+func Panicf(template string, args ...any) {
+	Z.Panicf(template, args...)
+
+}
+
+func Fatalf(template string, args ...any) {
+	Z.Fatalf(template, args...)
+
+}
+
+func Debugw(msg string, keysAndValues ...any) {
+	Z.Debugw(msg, keysAndValues...)
+
+}
+
+func Infow(msg string, keysAndValues ...any) {
+	Z.Infow(msg, keysAndValues...)
+}
+
+func Warnw(msg string, keysAndValues ...any) {
+	Z.Warnw(msg, keysAndValues...)
+}
+
+func Errorw(msg string, keysAndValues ...any) {
+	Z.Errorw(msg, keysAndValues...)
+}
+
+func DPanicw(msg string, keysAndValues ...any) {
+	Z.DPanicw(msg, keysAndValues...)
+}
+
+func Panicw(msg string, keysAndValues ...any) {
+	Z.Panicw(msg, keysAndValues...)
+}
+
+func Fatalw(msg string, keysAndValues ...any) {
+	Z.Fatalw(msg, keysAndValues...)
+}
+
 func IsDebugEnable() bool {
 	return Z.Level() == zapcore.DebugLevel
 }
