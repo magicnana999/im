@@ -2,15 +2,16 @@ package queue
 
 import (
 	"errors"
+	"runtime"
 	"sync/atomic"
-	"time"
 	"unsafe"
 )
 
 var ErrQueueFull = errors.New("queue is full")
+var ErrQueueEmpty = errors.New("queue is empty")
 
-// LockFreeNode 泛型节点
-type LockFreeNode[T any] struct {
+// lockFreeNode 泛型节点
+type lockFreeNode[T any] struct {
 	value T
 	next  unsafe.Pointer
 }
@@ -24,9 +25,9 @@ type LockFreeQueue[T any] struct {
 }
 
 // NewLockFreeQueue 创建泛型无锁队列
-func NewLockFreeQueue[T any]() *LockFreeQueue[T] {
-	dummy := unsafe.Pointer(&LockFreeNode[T]{})
-	return &LockFreeQueue[T]{head: dummy, tail: dummy}
+func NewLockFreeQueue[T any](maxSize int64) *LockFreeQueue[T] {
+	dummy := unsafe.Pointer(&lockFreeNode[T]{})
+	return &LockFreeQueue[T]{head: dummy, tail: dummy, maxSize: maxSize}
 }
 
 // Enqueue 入队
@@ -36,21 +37,22 @@ func (q *LockFreeQueue[T]) Enqueue(value T) error {
 		return ErrQueueFull
 	}
 
-	node := &LockFreeNode[T]{value: value}
+	node := &lockFreeNode[T]{value: value}
+
 	retries := 0
+
 	for {
 		tail := atomic.LoadPointer(&q.tail)
-		next := atomic.LoadPointer(&(*LockFreeNode[T])(tail).next)
+		next := atomic.LoadPointer(&(*lockFreeNode[T])(tail).next)
 		if tail != atomic.LoadPointer(&q.tail) {
-			// 快速失败
-			if retries > 5 {
-				time.Sleep(time.Duration(retries) * time.Nanosecond) // 初始轻退避
+			if retries > 100 {
+				runtime.Gosched() // 高竞争时让出 CPU
 			}
 			retries++
 			continue
 		}
 		if next == nil {
-			if atomic.CompareAndSwapPointer(&(*LockFreeNode[T])(tail).next, nil, unsafe.Pointer(node)) {
+			if atomic.CompareAndSwapPointer(&(*lockFreeNode[T])(tail).next, nil, unsafe.Pointer(node)) {
 				atomic.AddInt64(&q.length, 1)
 				atomic.CompareAndSwapPointer(&q.tail, tail, unsafe.Pointer(node))
 				return nil
@@ -58,54 +60,45 @@ func (q *LockFreeQueue[T]) Enqueue(value T) error {
 		} else {
 			atomic.CompareAndSwapPointer(&q.tail, tail, next)
 		}
-		// 统一线性退避
-		if retries > 0 {
-			delay := retries * 10
-			if delay > 100 { // 最大 100 ns
-				delay = 100
-			}
-			time.Sleep(time.Duration(delay) * time.Nanosecond)
-		}
 		retries++
+
 	}
 }
 
 // Dequeue 出队
-func (q *LockFreeQueue[T]) Dequeue() (T, bool) {
+func (q *LockFreeQueue[T]) Dequeue() (T, error) {
+
 	var zero T // 默认零值
+
+	if q.Len() == 0 {
+		return zero, ErrQueueEmpty
+	}
+
 	retries := 0
+
 	for {
 		head := atomic.LoadPointer(&q.head)
 		tail := atomic.LoadPointer(&q.tail)
-		next := atomic.LoadPointer(&(*LockFreeNode[T])(head).next)
+		next := atomic.LoadPointer(&(*lockFreeNode[T])(head).next)
 		if head != atomic.LoadPointer(&q.head) {
-			// 快速失败，重试
-			if retries > 5 {
-				time.Sleep(time.Duration(retries) * time.Nanosecond) // 线性退避
+
+			if retries > 100 {
+				runtime.Gosched() // 高竞争时让出 CPU
 			}
 			retries++
 			continue
 		}
 		if head == tail {
 			if next == nil {
-				return zero, false // 队列为空
+				return zero, ErrQueueEmpty // 队列为空
 			}
-			// 帮助移动 tail
 			atomic.CompareAndSwapPointer(&q.tail, tail, next)
 		} else {
-			value := (*LockFreeNode[T])(next).value
+			value := (*lockFreeNode[T])(next).value
 			if atomic.CompareAndSwapPointer(&q.head, head, next) {
 				atomic.AddInt64(&q.length, -1)
-				return value, true
+				return value, nil
 			}
-		}
-		// 退避优化：线性增长，限制上限
-		if retries > 0 {
-			delay := retries * 10
-			if delay > 100 { // 最大 100 ns
-				delay = 100
-			}
-			time.Sleep(time.Duration(delay) * time.Nanosecond)
 		}
 		retries++
 	}

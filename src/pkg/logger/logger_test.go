@@ -2,30 +2,33 @@ package logger
 
 import (
 	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 	"sync"
 	"testing"
 )
 
 func TestConsoleEncode(t *testing.T) {
 
-	log := Init(&Config{File: "console.log", Encode: ConsoleEncode})
-	log.Debug("debug")
-	log.Info("info")
-	log.Warn("warn")
-	log.Error("error")
+	log := Init(nil)
+	defer log.Sync()
 
-	Debug("debug")
-	Info("info")
-	Warn("warn")
-	Error("error")
+	for i := 0; i < 3; i++ {
 
-	With(zap.String("key", "value"), zap.Int("haha", 100)).Info("debug333")
+		log.Debug("debug1")
+		log.Info("info1")
+		log.Warn("warn1")
+		log.Error("error1")
+
+		Debug("debug2")
+		Info("info2")
+		Warn("warn2")
+		Error("error2")
+
+	}
 
 }
 
 func TestJsonEncode(t *testing.T) {
-	log := Init(&Config{File: "json.json"})
+	log := Init(nil)
 
 	log.Debug("debug")
 	log.Info("info")
@@ -42,14 +45,7 @@ func TestJsonEncode(t *testing.T) {
 
 // go test -v -race -run TestConcurrentConsoleLoggingRace
 func TestConcurrentConsoleLoggingRace(t *testing.T) {
-	config := &Config{
-		File:       "console_logger.log",
-		Encode:     ConsoleEncode,
-		Level:      int8(zapcore.InfoLevel),
-		TimeFormat: YYYYMMDDHHMMSS,
-	}
-
-	logger := Init(config)
+	logger := Init(nil)
 
 	var wg sync.WaitGroup
 	numWorkers := 100
@@ -69,14 +65,8 @@ func TestConcurrentConsoleLoggingRace(t *testing.T) {
 
 // go test -v -race -run TestConcurrentJSONLoggingRace
 func TestConcurrentJSONLoggingRace(t *testing.T) {
-	config := &Config{
-		File:       "json_logger.log",
-		Encode:     JSONEncode,
-		Level:      int8(zapcore.InfoLevel),
-		TimeFormat: YYYYMMDDHHMMSS,
-	}
 
-	logger := Init(config)
+	logger := Init(nil)
 
 	var wg sync.WaitGroup
 	numWorkers := 100
@@ -102,14 +92,7 @@ func TestConcurrentJSONLoggingRace(t *testing.T) {
 //	435 B/op		每次操作分配内存大小（字节）		每次分配435字节
 //	10 allocs/op	每次操作内存分配次数（次数）		每次涉及10次内存分配
 func BenchmarkConsoleEncoding(b *testing.B) {
-	// 初始化 logger 配置为 Console 编码
-	config := &Config{
-		File:       "/dev/null", // 输出到 /dev/null，避免实际写文件影响性能
-		Level:      int8(zapcore.InfoLevel),
-		Encode:     ConsoleEncode,
-		TimeFormat: YYYYMMDDHHMMSS,
-	}
-	logger := Init(config)
+	logger := Init(nil)
 	defer logger.Sync() // 确保日志同步
 
 	// 重置计时器，避免初始化影响结果
@@ -125,14 +108,7 @@ func BenchmarkConsoleEncoding(b *testing.B) {
 //
 // 116582             29181 ns/op             265 B/op          2 allocs/op
 func BenchmarkJSONEncoding(b *testing.B) {
-	// 初始化 logger 配置为 JSON 编码
-	config := &Config{
-		File:       "/dev/null", // 输出到 /dev/null，避免实际写文件影响性能
-		Level:      int8(zapcore.InfoLevel),
-		Encode:     JSONEncode,
-		TimeFormat: YYYYMMDDHHMMSS,
-	}
-	logger := Init(config)
+	logger := Init(nil)
 	defer logger.Sync() // 确保日志同步
 
 	// 重置计时器

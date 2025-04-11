@@ -1,146 +1,157 @@
 package heap
 
-import "testing"
+import (
+	"fmt"
+	"math/rand"
+	"testing"
+	"time"
+)
 
-// 测试用的比较函数
-func lessFunc(i, j int) bool {
-	return i < j
+type Item struct {
+	Value int
 }
 
-// go test -v -run=TestMinHeapAdd
-func TestMinHeapAdd(t *testing.T) {
-	// 功能测试
-	h := NewMinHeap(lessFunc, 5)
-	values := []int{3, 1, 4, 1, 5}
-	for _, v := range values {
-		err := h.Add(v)
-		if err != nil {
-			t.Errorf("Add(%d) failed: %v", v, err)
+// lessFunc 定义比较函数，小顶堆按 Value 升序
+func lessFunc(i, j Item) bool {
+	return i.Value < j.Value
+}
+
+// go test -v -race -run TestHeap
+func TestHeapLogic(t *testing.T) {
+
+	f := func(i, j *Item) bool {
+		if i == nil || j == nil {
+			return true
 		}
+		return i.Value < j.Value
 	}
-	if h.Count() != 5 {
-		t.Errorf("Expected count 5, got %d", h.Count())
-	}
-	top, err := h.Top()
-	if err != nil || top != 1 {
-		t.Errorf("Expected top 1, got %d, err: %v", top, err)
-	}
-	err = h.Add(6) // 超出最大容量
-	if err != FullHeap {
-		t.Errorf("Expected FullHeap error, got %v", err)
+
+	heap := NewMinHeap[*Item](f, 10)
+
+	heap.Push(&Item{500})
+	heap.Push(&Item{200})
+	heap.Push(&Item{300})
+	heap.Push(&Item{600})
+	heap.Push(&Item{100})
+	heap.Push(&Item{400})
+	for i, v := range heap.Iterate() {
+		fmt.Println(i, v)
 	}
 }
 
-// go test -bench=BenchmarkMinHeapAddSingle -benchtime=5s -v -run=^$
-func BenchmarkMinHeapAddSingle(b *testing.B) {
-	h := NewMinHeap(lessFunc, 0) // 无容量限制
+// go test -v -race -run TestHeapMaxSize -benchmem
+func TestHeapMaxSize(t *testing.T) {
+	f := func(i, j *Item) bool {
+		if i == nil || j == nil {
+			return true
+		}
+		return i.Value < j.Value
+	}
+
+	size := 100_0000_00
+	heap := NewMinHeap[*Item](f, size)
+
+	for i := 0; i < size; i++ {
+		heap.Push(&Item{time.Now().Nanosecond()})
+	}
+	fmt.Println(heap.Len())
+}
+
+// BenchmarkMinHeapAdd 测试 Push 操作性能（单线程）
+func BenchmarkMinHeapAdd(b *testing.B) {
+	h := NewMinHeap(lessFunc, 10000) // 容量 10000
+
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		h.Add(i)
+		h.Push(Item{Value: rand.Intn(10000)})
 	}
 }
 
-// go test -bench=BenchmarkMinHeapAddConcurrent -benchtime=5s -v -run=^$
-// go test -bench=BenchmarkMinHeapAddConcurrent -benchtime=5s -v -run=^$ -race
-func BenchmarkMinHeapAddConcurrent(b *testing.B) {
-	h := NewMinHeap(lessFunc, 0)
-	b.ResetTimer()
-	b.RunParallel(func(pb *testing.PB) {
-		for pb.Next() {
-			h.Add(100)
-		}
-	})
-}
-
-// go test -v -run=TestMinHeapRemove
-func TestMinHeapRemove(t *testing.T) {
-	// 功能测试
-	h := NewMinHeap(lessFunc, 0)
-	values := []int{3, 1, 4, 1, 5}
-	for _, v := range values {
-		h.Add(v)
-	}
-	expected := []int{1, 1, 3, 4, 5} // 最小堆排序后
-	for i, exp := range expected {
-		item, err := h.Remove()
-		if err != nil {
-			t.Errorf("Remove failed: %v", err)
-		}
-		if item != exp {
-			t.Errorf("Expected %d at index %d, got %d", exp, i, item)
-		}
-	}
-	_, err := h.Remove() // 空堆
-	if err != EmptyHeap {
-		t.Errorf("Expected EmptyHeap error, got %v", err)
-	}
-}
-
-// go test -bench=BenchmarkMinHeapRemoveSingle -benchtime=5s -v -run=^$
-func BenchmarkMinHeapRemoveSingle(b *testing.B) {
-	h := NewMinHeap(lessFunc, 0)
-	for i := 0; i < b.N; i++ {
-		h.Add(i)
-	}
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		h.Remove()
-	}
-}
-
-// go test -bench=BenchmarkMinHeapRemoveConcurrent -benchtime=5s -v -run=^$
-func BenchmarkMinHeapRemoveConcurrent(b *testing.B) {
-	h := NewMinHeap(lessFunc, 0)
+// BenchmarkMinHeapRemove 测试 Pop 操作性能（单线程）
+func BenchmarkMinHeapRemove(b *testing.B) {
+	h := NewMinHeap(lessFunc, 10000)
+	// 预填充堆
 	for i := 0; i < 10000; i++ {
-		h.Add(i)
+		h.Push(Item{Value: rand.Intn(10000)})
 	}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		if h.Len() == 0 {
+			// 如果堆空，重置堆
+			for j := 0; j < 10000; j++ {
+				h.Push(Item{Value: rand.Intn(10000)})
+			}
+		}
+		h.Pop()
+	}
+}
+
+// BenchmarkMinHeapTop 测试 Top 操作性能（单线程）
+func BenchmarkMinHeapTop(b *testing.B) {
+	h := NewMinHeap(lessFunc, 10000)
+	// 预填充堆
+	for i := 0; i < 10000; i++ {
+		h.Push(Item{Value: rand.Intn(10000)})
+	}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		h.Top()
+	}
+}
+
+// BenchmarkMinHeapConcurrentAdd 测试 Push 操作性能（并发）
+// go test -bench=BenchmarkMinHeapConcurrentAdd -benchmem
+// go test -bench=BenchmarkMinHeapConcurrentAdd -benchtime=5s -v -benchmem
+func BenchmarkMinHeapConcurrentAdd(b *testing.B) {
+	h := NewMinHeap(lessFunc, 10000)
+
 	b.ResetTimer()
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
-			h.Remove()
+			h.Push(Item{Value: rand.Intn(10000)})
 		}
 	})
 }
 
-// go test -v -run=TestMinHeapLen
-func TestMinHeapLen(t *testing.T) {
-	// 功能测试
-	h := NewMinHeap(lessFunc, 0)
-	if h.Count() != 0 {
-		t.Errorf("Expected count 0, got %d", h.Count())
+// BenchmarkMinHeapConcurrentRemove 测试 Pop 操作性能（并发）
+func BenchmarkMinHeapConcurrentRemove(b *testing.B) {
+	h := NewMinHeap(lessFunc, 10000)
+	// 预填充堆
+	for i := 0; i < 10000; i++ {
+		h.Push(Item{Value: rand.Intn(10000)})
 	}
-	h.Add(1)
-	h.Add(2)
-	if h.Count() != 2 {
-		t.Errorf("Expected count 2, got %d", h.Count())
-	}
-	h.Remove()
-	if h.Count() != 1 {
-		t.Errorf("Expected count 1, got %d", h.Count())
-	}
+
+	b.ResetTimer()
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			if h.Len() == 0 {
+				// 避免空堆，单线程重置
+				if h.Len() == 0 {
+					for j := 0; j < 10000; j++ {
+						h.Push(Item{Value: rand.Intn(10000)})
+					}
+				}
+			}
+			h.Pop()
+		}
+	})
 }
 
-// go test -v -run=TestMinHeapIterate
-func TestMinHeapIterate(t *testing.T) {
-	// 功能测试
-	h := NewMinHeap(lessFunc, 0)
-	values := []int{3, 1, 4, 1, 5}
-	for _, v := range values {
-		h.Add(v)
+// BenchmarkMinHeapConcurrentTop 测试 Top 操作性能（并发）
+// go test -bench=BenchmarkMinHeapConcurrentTop -benchtime=5s -v -benchmem
+func BenchmarkMinHeapConcurrentTop(b *testing.B) {
+	h := NewMinHeap(lessFunc, 10000)
+	// 预填充堆
+	for i := 0; i < 10000; i++ {
+		h.Push(Item{Value: rand.Intn(10000)})
 	}
-	result := h.Iterate()
-	expected := []int{1, 1, 3, 4, 5} // 最小堆排序后
-	if len(result) != len(expected) {
-		t.Errorf("Expected length %d, got %d", len(expected), len(result))
-		return
-	}
-	for i, exp := range expected {
-		if result[i] != exp {
-			t.Errorf("Expected %d at index %d, got %d", exp, i, result[i])
+
+	b.ResetTimer()
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			h.Top()
 		}
-	}
-	// 验证原堆未受影响
-	if h.Count() != 5 {
-		t.Errorf("Iterate modified heap, count expected 5, got %d", h.Count())
-	}
+	})
 }

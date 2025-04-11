@@ -1,14 +1,22 @@
 package logger
 
 import (
-	"github.com/natefinch/lumberjack"
+	"fmt"
+	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"os"
+	"path/filepath"
+	"sync"
+	"time"
 )
 
 const (
 	YYYYMMDDHHMMSS = "2006-01-02 15:04:05"
+	RotationTime   = 24 * time.Hour      // 每天轮转
+	MaxAge         = 30 * 24 * time.Hour // 保留30天
+	RotationSize   = 100 * 1024 * 1024   // 100MB 分割
+	//RotationSize = 1024 // 10MB 分割
 )
 
 type EncodeType string
@@ -19,12 +27,18 @@ const (
 )
 
 var (
-	Z       *zap.Logger // 改为 *zap.Logger
-	tracing = false
+	z        *zap.Logger // 全局 Logger
+	instance *Logger
+	tracing  = false
+	once     sync.Once
 )
 
+type Logger struct {
+	*zap.Logger
+}
+
 type Config struct {
-	File       string     `json:"file"`
+	Dir        string     `json:"dir"` // 日志目录
 	TracerName string     `json:"tracerName"`
 	Level      int8       `json:"level"`
 	Encode     EncodeType `json:"encode"`
@@ -32,7 +46,7 @@ type Config struct {
 }
 
 var defaultConfig = Config{
-	File:       "./log/logger.log",
+	Dir:        "./logs",
 	TracerName: "",
 	Level:      0,
 	Encode:     JSONEncode,
@@ -44,8 +58,8 @@ func getDefaultConfig(c *Config) *Config {
 		return &defaultConfig
 	}
 
-	if c.File == "" {
-		c.File = "logger.log"
+	if c.Dir == "" {
+		c.Dir = "./logs"
 	}
 
 	if c.Encode == "" {
@@ -59,32 +73,100 @@ func getDefaultConfig(c *Config) *Config {
 	return c
 }
 
-// Init 返回 *zap.Logger
-func Init(c *Config) *zap.Logger {
+func Init(c *Config) *Logger {
+	once.Do(func() {
+		instance = _init(c)
+	})
+
+	return instance
+}
+
+func _init(c *Config) *Logger {
 	c = getDefaultConfig(c)
 
-	writeSyncer := Writer(c.File)
-	encoder := Encoder(c.Encode, c.TimeFormat)
-
-	if c.Level == 0 {
-		c.Level = int8(zapcore.InfoLevel)
+	// 确保日志目录存在
+	if err := os.MkdirAll(c.Dir, 0755); err != nil {
+		panic(fmt.Sprintf("create log dir failed: %v", err))
 	}
 
-	core := zapcore.NewCore(encoder, writeSyncer, zapcore.Level(c.Level))
-	zp := zap.New(core, zap.AddCaller(), zap.AddCallerSkip(1))
+	// 创建不同级别的 writer
+	infoWriter, err := rotatelogs.New(
+		filepath.Join(c.Dir, "info.%Y-%m-%d.log"),
+		rotatelogs.WithLinkName(filepath.Join(c.Dir, "info.log")),
+		rotatelogs.WithRotationTime(RotationTime),
+		rotatelogs.WithMaxAge(MaxAge),
+		rotatelogs.WithRotationSize(RotationSize),
+	)
+	if err != nil {
+		panic(fmt.Sprintf("init info writer failed: %v", err))
+	}
 
-	Z = zp // 直接赋值给全局 Z
+	errorWriter, err := rotatelogs.New(
+		filepath.Join(c.Dir, "error.%Y-%m-%d.log"),
+		rotatelogs.WithLinkName(filepath.Join(c.Dir, "error.log")),
+		rotatelogs.WithRotationTime(RotationTime),
+		rotatelogs.WithMaxAge(MaxAge),
+		rotatelogs.WithRotationSize(RotationSize),
+	)
+	if err != nil {
+		panic(fmt.Sprintf("init error writer failed: %v", err))
+	}
+
+	debugWriter, err := rotatelogs.New(
+		filepath.Join(c.Dir, "debug.%Y-%m-%d.log"),
+		rotatelogs.WithLinkName(filepath.Join(c.Dir, "debug.log")),
+		rotatelogs.WithRotationTime(RotationTime),
+		rotatelogs.WithMaxAge(MaxAge),
+		rotatelogs.WithRotationSize(RotationSize),
+	)
+	if err != nil {
+		panic(fmt.Sprintf("init debug writer failed: %v", err))
+	}
+
+	// 创建 encoder
+	encoder := encoder(c.Encode, c.TimeFormat)
+
+	// 设置默认日志级别
+	if c.Level == 0 {
+		c.Level = int8(zapcore.DebugLevel)
+	}
+
+	// 创建不同级别的 core
+	infoLevel := zap.LevelEnablerFunc(func(lvl zapcore.Level) bool {
+		return lvl == zapcore.InfoLevel && lvl >= zapcore.Level(c.Level)
+	})
+
+	errorLevel := zap.LevelEnablerFunc(func(lvl zapcore.Level) bool {
+		return lvl >= zapcore.ErrorLevel && lvl >= zapcore.Level(c.Level)
+	})
+
+	debugLevel := zap.LevelEnablerFunc(func(lvl zapcore.Level) bool {
+		return lvl >= zapcore.DebugLevel && lvl >= zapcore.Level(c.Level)
+	})
+
+	// 配置 core，同时输出到 stdout
+	cores := []zapcore.Core{
+		zapcore.NewCore(encoder, zapcore.AddSync(infoWriter), infoLevel),
+		zapcore.NewCore(encoder, zapcore.AddSync(errorWriter), errorLevel),
+		zapcore.NewCore(encoder, zapcore.AddSync(debugWriter), debugLevel),
+		zapcore.NewCore(encoder, zapcore.AddSync(os.Stdout), debugLevel),
+	}
+
+	core := zapcore.NewTee(cores...)
+	z = zap.New(core, zap.AddCaller(), zap.AddCallerSkip(1))
+
+	// 创建实例 Logger（用于返回，跳过0层）
+	instanceLogger := zap.New(core, zap.AddCaller()) // 无 AddCallerSkip
 
 	if c.TracerName != "" {
 		tracing = true
 		InitTracer(c.TracerName)
 	}
 
-	return Z
+	return &Logger{instanceLogger}
 }
 
-// Encoder 保持不变
-func Encoder(et EncodeType, format string) zapcore.Encoder {
+func encoder(et EncodeType, format string) zapcore.Encoder {
 	if format == "" {
 		format = YYYYMMDDHHMMSS
 	}
@@ -111,60 +193,51 @@ func Encoder(et EncodeType, format string) zapcore.Encoder {
 	}
 }
 
-// Writer 保持不变
-func Writer(file string) zapcore.WriteSyncer {
-	lumberJackLogger := &lumberjack.Logger{
-		Filename:   file,
-		MaxSize:    10, // 10M
-		MaxBackups: 5,  // 5个
-		MaxAge:     30, // 最多30天
-		Compress:   false,
-	}
-	return zapcore.NewMultiWriteSyncer(
-		zapcore.AddSync(os.Stdout),
-		zapcore.AddSync(lumberJackLogger))
-}
-
 // Level 返回日志级别
 func Level() zapcore.Level {
-	return Z.Level()
+	return z.Level()
 }
 
 // With 返回带上下文字段的新 Logger
 func With(fields ...zap.Field) *zap.Logger {
-	return Z.With(fields...)
+	return z.With(fields...)
 }
 
-// 基本日志方法，使用 zap.Field
 func Debug(msg string, fields ...zap.Field) {
-	Z.Debug(msg, fields...)
+	z.Debug(msg, fields...)
 }
 
 func Info(msg string, fields ...zap.Field) {
-	Z.Info(msg, fields...)
+	z.Info(msg, fields...)
 }
 
 func Warn(msg string, fields ...zap.Field) {
-	Z.Warn(msg, fields...)
+	z.Warn(msg, fields...)
 }
 
 func Error(msg string, fields ...zap.Field) {
-	Z.Error(msg, fields...)
+	z.Error(msg, fields...)
 }
 
 func DPanic(msg string, fields ...zap.Field) {
-	Z.DPanic(msg, fields...)
+	z.DPanic(msg, fields...)
 }
 
 func Panic(msg string, fields ...zap.Field) {
-	Z.Panic(msg, fields...)
+	z.Panic(msg, fields...)
 }
 
 func Fatal(msg string, fields ...zap.Field) {
-	Z.Fatal(msg, fields...)
+	z.Fatal(msg, fields...)
 }
 
-// IsDebugEnable 检查是否启用 Debug 级别
+func Sync() error {
+	if z != nil {
+		return z.Sync()
+	}
+	return nil
+}
+
 func IsDebugEnable() bool {
-	return Z.Level() == zapcore.DebugLevel
+	return z.Level() == zapcore.DebugLevel
 }

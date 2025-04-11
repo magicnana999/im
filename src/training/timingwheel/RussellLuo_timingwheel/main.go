@@ -2,25 +2,30 @@ package main
 
 import (
 	"fmt"
-	"github.com/asynkron/goconsole"
-	"time"
-
 	"github.com/RussellLuo/timingwheel"
+	"sync/atomic"
+	"time"
 )
 
 func main() {
-	tw := timingwheel.NewTimingWheel(1*time.Second, 60)
-	tw.Start()      // 启动时间轮
-	defer tw.Stop() // 程序结束时停止
 
-	for i := 1; i <= 60; i++ {
-		tw.AfterFunc(time.Duration(i)*time.Second, func() {
-			fmt.Printf("Hello, World! (%d seconds passed)\n", i)
+	var count atomic.Int64
+
+	wheelsize := int64(1)
+
+	tw := timingwheel.NewTimingWheel(1*time.Second, wheelsize)
+	tw.Start()
+	defer tw.Stop()
+
+	// 配置测试参数
+	connCount := 900000
+
+	for i := 0; i < connCount; i++ {
+		delay := time.Duration(i%int(wheelsize)) * time.Second
+		tw.AfterFunc(delay, func() {
+			count.Add(1)
 		})
-		fmt.Printf("add %d\n", i)
-
 	}
-
-	console.ReadLine()
-	fmt.Println("Main program ends.")
+	time.Sleep(1 * time.Second) // 运行 2 分钟
+	fmt.Println(count)
 }

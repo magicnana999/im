@@ -157,7 +157,7 @@ package infrastructure
 //	}
 //	mq := &api.MQMessage{
 //		Id:         m.MessageId,
-//		Count:      count,
+//		Len:      count,
 //		UserIds:    userIds,
 //		UserLabels: userLabels,
 //		Message:    m,

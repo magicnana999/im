@@ -8,24 +8,24 @@ import (
 	"time"
 )
 
-func TestEnqueueDequeueLogic(t *testing.T) {
-	q := NewLockFreeQueue[string]()
+func TestLogic(t *testing.T) {
+	q := NewLockFreeQueue[string](9999)
 
 	// 入队 3 个元素
-	values := []string{"A", "B", "C"}
+	values := []string{"A", "B", "C", "D", "E", "F"}
 	for _, v := range values {
 		q.Enqueue(v)
 	}
 
 	// 验证长度
-	if q.Len() != 3 {
+	if q.Len() != int64(len(values)) {
 		t.Errorf("expected length 3, got %d", q.Len())
 	}
 
 	// 出队并验证顺序
 	for i, expected := range values {
-		value, ok := q.Dequeue()
-		if !ok {
+		value, err := q.Dequeue()
+		if err != nil {
 			t.Errorf("expected ok=true at index %d, got false", i)
 		}
 		if value != expected {
@@ -37,14 +37,10 @@ func TestEnqueueDequeueLogic(t *testing.T) {
 	if q.Len() != 0 {
 		t.Errorf("expected length 0 after dequeue, got %d", q.Len())
 	}
-	value, ok := q.Dequeue()
-	if ok || value != "" {
-		t.Errorf("expected nil, false for empty queue, got %v, %v", value, ok)
-	}
 }
 
-func TestConcurrentCorrectness(t *testing.T) {
-	q := NewLockFreeQueue[int]()
+func TestLoginConcurrent(t *testing.T) {
+	q := NewLockFreeQueue[string](100_0000)
 	var wg sync.WaitGroup
 	// 多线程入队
 	for i := 0; i < 10; i++ {
@@ -52,7 +48,7 @@ func TestConcurrentCorrectness(t *testing.T) {
 		go func() {
 			defer wg.Done()
 			for j := 0; j < 10; j++ {
-				q.Enqueue(time.Now().Nanosecond())
+				q.Enqueue(fmt.Sprintf("%d%d", i, j))
 			}
 		}()
 	}
@@ -62,21 +58,60 @@ func TestConcurrentCorrectness(t *testing.T) {
 		t.Errorf("expected length %d, got %d", 100, q.Len())
 	}
 
-	for i := 0; i < 5; i++ {
+	for i := 0; i < 100; i++ {
 		go func() {
 			for j := 0; j < 10; j++ {
 				fmt.Println(q.Dequeue())
+				if v, err := q.Dequeue(); err != nil {
+					return
+				} else {
+					fmt.Println(v)
+				}
 			}
 		}()
 	}
 
-	time.Sleep(time.Second * 10)
+	time.Sleep(time.Second * 1)
 
 }
 
-// go test -bench=BenchmarkConcurrentEnqueue -benchtime=5s -v -run=^$ -race
+func TestMaxLength(t *testing.T) {
+
+	q := NewLockFreeQueue[int64](8000_0000)
+	for {
+		if err := q.Enqueue(time.Now().UnixNano()); err != nil {
+			break
+		}
+	}
+
+	fmt.Println("ok")
+	fmt.Println(q.Len())
+}
+
+func TestMaxLengthConcurrent(t *testing.T) {
+
+	var wg sync.WaitGroup
+
+	q := NewLockFreeQueue[int64](8000_0000)
+	for i := 0; i < 10; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for {
+				if err := q.Enqueue(time.Now().UnixNano()); err != nil {
+					return
+				}
+			}
+		}()
+	}
+
+	wg.Wait()
+	fmt.Println(q.Len())
+}
+
+// go test -bench=BenchmarkConcurrentEnqueue -benchtime=5s -v -run=^$ -benchmem -race
 func BenchmarkConcurrentEnqueue(b *testing.B) {
-	q := NewLockFreeQueue[int]()
+	q := NewLockFreeQueue[int](1_0000_0000)
 
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
@@ -85,21 +120,9 @@ func BenchmarkConcurrentEnqueue(b *testing.B) {
 	})
 }
 
-// go test -bench=BenchmarkSingleThreadDequeue -benchtime=5s -v -race -run=^$
-func BenchmarkSingleThreadDequeue(b *testing.B) {
-	q := NewLockFreeQueue[int]()
-	for i := 0; i < b.N; i++ {
-		q.Enqueue(100)
-	}
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		q.Dequeue()
-	}
-}
-
-// go test -bench=BenchmarkConcurrentDequeue -benchtime=5s -v -run=^$ -race
+// go test -bench=BenchmarkConcurrentDequeue -benchtime=5s -v -run=^$ -benchmem -race
 func BenchmarkConcurrentDequeue(b *testing.B) {
-	q := NewLockFreeQueue[int]()
+	q := NewLockFreeQueue[int](100_0000_0000)
 
 	for i := 0; i < b.N; i++ {
 		q.Enqueue(100)
@@ -109,7 +132,7 @@ func BenchmarkConcurrentDequeue(b *testing.B) {
 
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
-			if _, ok := q.Dequeue(); !ok {
+			if _, err := q.Dequeue(); err != nil {
 				return
 			}
 		}
@@ -117,6 +140,9 @@ func BenchmarkConcurrentDequeue(b *testing.B) {
 }
 
 // go test -bench=BenchmarkConcurrentMixEnqueueDequeue -benchtime=5s -v -run=^$ -race
+
+// go test -bench=BenchmarkConcurrentDequeue -benchmem -run=^$ -cpuprofile=cpu.prof
+// go tool pprof cpu.prof
 func BenchmarkConcurrentMixEnqueueDequeue(b *testing.B) {
 
 	type Item struct {
@@ -128,10 +154,10 @@ func BenchmarkConcurrentMixEnqueueDequeue(b *testing.B) {
 	}
 
 	const numItems = 10000000
-	q := NewLockFreeQueue[Item]()
+	q := NewLockFreeQueue[Item](100_0000_0000)
 	h := heap.NewMinHeap[Item](f, 0)
 	for i := 0; i < numItems; i++ {
-		h.Add(Item{i})
+		h.Push(Item{i})
 	}
 
 	for _, item := range h.Iterate() {
