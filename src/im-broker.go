@@ -30,6 +30,7 @@ func parseFlags() *config {
 
 func main() {
 	logger.Init(nil)
+	defer logger.Close()
 
 	c := parseFlags()
 	global.Load(c.conf)

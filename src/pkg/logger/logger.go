@@ -18,12 +18,12 @@ const (
 )
 
 const (
-	t       = "t"
-	level   = "lvl"
-	name    = "log"
-	message = "msg"
-	stack   = "stk"
-	caller  = "clr"
+	TimeKey       = "time"
+	LevelKey      = "level"
+	NameKey       = "name"
+	MessageKey    = "message"
+	StacktraceKey = "stacktrace"
+	CallerKey     = "caller"
 )
 
 type EncodeType string
@@ -177,12 +177,12 @@ func encoder(et EncodeType, format string) zapcore.Encoder {
 	}
 
 	encoderConfig := zap.NewProductionEncoderConfig()
-	encoderConfig.TimeKey = t
-	encoderConfig.LevelKey = level
-	encoderConfig.StacktraceKey = stack
-	encoderConfig.CallerKey = caller
-	encoderConfig.NameKey = name
-	encoderConfig.MessageKey = message
+	encoderConfig.TimeKey = TimeKey
+	encoderConfig.LevelKey = LevelKey
+	encoderConfig.StacktraceKey = StacktraceKey
+	encoderConfig.CallerKey = CallerKey
+	encoderConfig.NameKey = NameKey
+	encoderConfig.MessageKey = MessageKey
 	encoderConfig.EncodeTime = zapcore.TimeEncoderOfLayout(format)
 	encoderConfig.EncodeLevel = zapcore.CapitalLevelEncoder
 	encoderConfig.EncodeCaller = zapcore.ShortCallerEncoder

@@ -2,44 +2,34 @@ package infra
 
 import (
 	"context"
+	"fmt"
 	"github.com/magicnana999/im/global"
 	"github.com/magicnana999/im/pkg/logger"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"gorm.io/gorm/schema"
+	gormLogger "gorm.io/gorm/logger"
 	"time"
 )
 
 const (
-	DefaultDSN             = "root:root1234@tcp(127.0.0.1:3306)/im?charset=utf8mb4&parseTime=True&loc=Asia%2FShanghai"
+	DefaultDSN             = "root:root@tcp(127.0.0.1:3306)/im?charset=utf8mb4&parseTime=True&loc=Asia%2FShanghai"
 	DefaultMaxOpenConns    = 200                    // 高并发，增加连接数
 	DefaultMaxIdleConns    = 50                     // 适量空闲，减少创建开销
 	DefaultConnMaxLifetime = 30 * time.Minute       // 避免连接老化
 	DefaultConnMaxIdleTime = 10 * time.Minute       // 空闲连接回收
 	DefaultSlowThreshold   = 200 * time.Millisecond // 慢查询阈值
-	DefaultConnTimeout     = 5 * time.Second        // 连接超时
+	DefaultConnTimeout     = 1 * time.Second        // 连接超时
 )
 
-type GormConfig struct {
-	gorm.Config
-	Dsn             string        `yaml:"dsn"`
-	MaxOpenConns    int           `yaml:"maxOpenConns"`
-	MaxIdleConns    int           `yaml:"maxIdleConns"`
-	ConnMaxLifetime time.Duration `yaml:"connMaxLifetime"`
-	ConnMaxIdleTime time.Duration `yaml:"connMaxIdleTime"`
-	SlowThreshold   time.Duration `yaml:"slowThreshold"` // 慢查询阈值
-	ConnTimeout     time.Duration `yaml:"connTimeout"`   // 连接超时
-}
+// getOrDefaultConfig 返回 GORM 配置，优先使用全局配置，缺失时应用默认值。
+// 不会修改输入的 global.Config。
+func getOrDefaultGormConfig(g *global.Config) *global.GormConfig {
 
-func getOrDefaultConfig(global *global.Config) *GormConfig {
-
-	var c *GormConfig
-	if global == nil || global.Gorm == nil {
-		c = &GormConfig{}
-	} else {
-		c = global.Gorm
+	c := &global.GormConfig{}
+	if g != nil && g.Gorm != nil {
+		*c = *g.Gorm
 	}
 
 	if c.Dsn == "" {
@@ -68,62 +58,57 @@ func getOrDefaultConfig(global *global.Config) *GormConfig {
 		c.ConnTimeout = DefaultConnTimeout
 	}
 
-	c.Config = gorm.Config{
-		SkipDefaultTransaction:   true, // 禁用默认事务，高并发
-		PrepareStmt:              true, // 缓存 SQL
-		DisableNestedTransaction: true, // 禁用嵌套事务，简化逻辑
-		NamingStrategy: schema.NamingStrategy{
-			SingularTable: true, // 表名单数，如 message
-		},
-		// GORM 日志
-		Logger: logger.New(
-			zap.NewStdLog(logger.Named("gorm")),
-			logger.Config{
-				SlowThreshold:             c.SlowThreshold,
-				LogLevel:                  logger.Warn,
-				IgnoreRecordNotFoundError: true,
-				ParameterizedQueries:      true,
-			},
-		),
-	}
+	c.SkipDefaultTransaction = true
+	c.PrepareStmt = true
+	c.DisableNestedTransaction = true
+
+	c.Logger = newGormLogger(c.SlowThreshold)
+
 	return c
 }
 
-func NewGorm(g *global.Config, lc fx.Lifecycle) *gorm.DB {
+// NewGorm 初始化 GORM 数据库连接。
+// 使用 global.Config 提供配置，通过 fx.Lifecycle 管理生命周期。
+// 返回已配置的 gorm.DB 实例和错误（如果有）。
+func NewGorm(g *global.Config, lc fx.Lifecycle) (*gorm.DB, error) {
 
 	log := logger.Named("gorm")
 
-	c := getOrDefaultConfig(g)
+	c := getOrDefaultGormConfig(g)
 
 	db, err := gorm.Open(mysql.Open(c.Dsn), c)
 	if err != nil {
-		log.Fatal("failed to open gorm",
+		log.Error("failed to open gorm",
 			zap.String(logger.Op, logger.OpInit),
 			zap.Error(err))
+		return nil, err
 	}
 
 	sqlDB, err := db.DB()
 	if err != nil {
-		log.Fatal("failed to get sql db",
+		log.Error("failed to get sql db",
 			zap.String(logger.Op, logger.OpInit),
 			zap.Error(err))
+		return nil, err
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), c.ConnTimeout)
 	defer cancel()
 	if err := sqlDB.PingContext(ctx); err != nil {
-		log.Fatal("failed to ping sql db",
+		log.Error("failed to ping sql db",
 			zap.String(logger.Op, logger.OpInit),
 			zap.Error(err))
+		return nil, err
 	}
 
 	sqlDB.SetMaxOpenConns(c.MaxOpenConns)
 	sqlDB.SetMaxIdleConns(c.MaxIdleConns)
 	sqlDB.SetConnMaxLifetime(c.ConnMaxLifetime)
+	sqlDB.SetConnMaxIdleTime(c.ConnMaxIdleTime)
 
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
-			logger.Info("gorm connected",
+			log.Info("gorm connected",
 				zap.String(logger.Op, logger.OpInit))
 			return nil
 		},
@@ -140,5 +125,54 @@ func NewGorm(g *global.Config, lc fx.Lifecycle) *gorm.DB {
 			return nil
 		},
 	})
-	return db
+	return db, nil
+}
+
+type GormLogger struct {
+	logger      *logger.Logger
+	slowSQL     time.Duration
+	sourceField string
+}
+
+func newGormLogger(slowThreshold time.Duration) *GormLogger {
+	return &GormLogger{
+		logger:      logger.Named("gorm"),
+		slowSQL:     slowThreshold,
+		sourceField: "gorm",
+	}
+}
+
+func (l *GormLogger) LogMode(level gormLogger.LogLevel) gormLogger.Interface {
+	return l
+}
+
+func (l *GormLogger) Info(_ context.Context, msg string, data ...interface{}) {
+	l.logger.Info(fmt.Sprintf(msg, data...))
+}
+
+func (l *GormLogger) Warn(_ context.Context, msg string, data ...interface{}) {
+	l.logger.Warn(fmt.Sprintf(msg, data...))
+}
+
+func (l *GormLogger) Error(_ context.Context, msg string, data ...interface{}) {
+	l.logger.Error(fmt.Sprintf(msg, data...))
+}
+
+func (l *GormLogger) Trace(ctx context.Context, begin time.Time, fc func() (string, int64), err error) {
+	elapsed := time.Since(begin)
+	sql, rows := fc()
+	fields := []zap.Field{
+		zap.String("sql", sql),
+		zap.Int64("rows", rows),
+		zap.Duration("elapsed", elapsed),
+		zap.String("source", l.sourceField),
+	}
+	if err != nil {
+		fields = append(fields, zap.Error(err))
+		l.logger.Error("SQL 执行错误", fields...)
+		return
+	}
+	if elapsed > l.slowSQL {
+		l.logger.Warn(fmt.Sprintf("慢 SQL >= %v", l.slowSQL), fields...)
+	}
 }
