@@ -1,12 +1,12 @@
 package logger
 
 import (
-	"fmt"
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"os"
 	"path/filepath"
+	"sync"
 	"time"
 )
 
@@ -17,6 +17,15 @@ const (
 	//RotationSize = 1024 // 10MB 分割
 )
 
+const (
+	t       = "t"
+	level   = "lvl"
+	name    = "log"
+	message = "msg"
+	stack   = "stk"
+	caller  = "clr"
+)
+
 type EncodeType string
 
 const (
@@ -25,38 +34,16 @@ const (
 )
 
 var (
-	z        *zap.Logger // 全局 Logger
 	instance *Logger
-	tracing  = false
+	once     sync.Once
 )
 
-type Logger struct {
-	*zap.Logger
-}
-
-func (s *Logger) Sync() {
-	s.Logger.Sync()
-}
-
-func (s *Logger) IsDebugEnabled() bool {
-	return s.Level() == zapcore.DebugLevel
-}
-
-type Interface interface {
-	Debug(msg string, fields ...zap.Field)
-	Info(msg string, fields ...zap.Field)
-	Warn(msg string, fields ...zap.Field)
-	Error(msg string, fields ...zap.Field)
-	Sync()
-	IsDebugEnabled() bool
-}
-
 type Config struct {
-	Dir        string     `json:"dir"` // 日志目录
-	TracerName string     `json:"tracerName"`
-	Level      int8       `json:"level"`
-	Encode     EncodeType `json:"encode"`
-	TimeFormat string     `json:"timeFormat"`
+	Dir        string        `json:"dir"` // 日志目录
+	TracerName string        `json:"tracerName"`
+	Level      zapcore.Level `json:"level"`
+	Encode     EncodeType    `json:"encode"`
+	TimeFormat string        `json:"timeFormat"`
 }
 
 var defaultConfig = Config{
@@ -87,89 +74,101 @@ func getDefaultConfig(c *Config) *Config {
 	return c
 }
 
-func Init(c *Config) *Logger {
-	c = getDefaultConfig(c)
+func Init(c *Config) (*Logger, error) {
 
-	// 确保日志目录存在
-	if err := os.MkdirAll(c.Dir, 0755); err != nil {
-		panic(fmt.Sprintf("create log dir failed: %v", err))
-	}
+	var err error
+	once.Do(func() {
 
-	// 创建不同级别的 writer
-	infoWriter, err := rotatelogs.New(
-		filepath.Join(c.Dir, "info.%Y-%m-%d.log"),
-		rotatelogs.WithLinkName(filepath.Join(c.Dir, "info.log")),
-		rotatelogs.WithRotationTime(RotationTime),
-		rotatelogs.WithMaxAge(MaxAge),
-		rotatelogs.WithRotationSize(RotationSize),
-	)
-	if err != nil {
-		panic(fmt.Sprintf("init info writer failed: %v", err))
-	}
+		c = getDefaultConfig(c)
 
-	errorWriter, err := rotatelogs.New(
-		filepath.Join(c.Dir, "error.%Y-%m-%d.log"),
-		rotatelogs.WithLinkName(filepath.Join(c.Dir, "error.log")),
-		rotatelogs.WithRotationTime(RotationTime),
-		rotatelogs.WithMaxAge(MaxAge),
-		rotatelogs.WithRotationSize(RotationSize),
-	)
-	if err != nil {
-		panic(fmt.Sprintf("init error writer failed: %v", err))
-	}
+		// 确保日志目录存在
+		if err = os.MkdirAll(c.Dir, 0755); err != nil {
+			return
+		}
 
-	debugWriter, err := rotatelogs.New(
-		filepath.Join(c.Dir, "debug.%Y-%m-%d.log"),
-		rotatelogs.WithLinkName(filepath.Join(c.Dir, "debug.log")),
-		rotatelogs.WithRotationTime(RotationTime),
-		rotatelogs.WithMaxAge(MaxAge),
-		rotatelogs.WithRotationSize(RotationSize),
-	)
-	if err != nil {
-		panic(fmt.Sprintf("init debug writer failed: %v", err))
-	}
+		writers := make([]*rotatelogs.RotateLogs, 0)
+		// 创建不同级别的 writer
+		infoWriter, e := rotatelogs.New(
+			filepath.Join(c.Dir, "info.%Y-%m-%d.log"),
+			rotatelogs.WithLinkName(filepath.Join(c.Dir, "info.log")),
+			rotatelogs.WithRotationTime(RotationTime),
+			rotatelogs.WithMaxAge(MaxAge),
+			rotatelogs.WithRotationSize(RotationSize),
+		)
+		if e != nil {
+			err = e
+			return
+		}
 
-	// 创建 encoder
-	encoding := encoder(c.Encode, c.TimeFormat)
+		errorWriter, e := rotatelogs.New(
+			filepath.Join(c.Dir, "error.%Y-%m-%d.log"),
+			rotatelogs.WithLinkName(filepath.Join(c.Dir, "error.log")),
+			rotatelogs.WithRotationTime(RotationTime),
+			rotatelogs.WithMaxAge(MaxAge),
+			rotatelogs.WithRotationSize(RotationSize),
+		)
+		if e != nil {
+			err = e
+			return
+		}
 
-	// 设置默认日志级别
-	if c.Level == 0 {
-		c.Level = int8(zapcore.DebugLevel)
-	}
+		debugWriter, e := rotatelogs.New(
+			filepath.Join(c.Dir, "debug.%Y-%m-%d.log"),
+			rotatelogs.WithLinkName(filepath.Join(c.Dir, "debug.log")),
+			rotatelogs.WithRotationTime(RotationTime),
+			rotatelogs.WithMaxAge(MaxAge),
+			rotatelogs.WithRotationSize(RotationSize),
+		)
+		if e != nil {
+			err = e
+			return
+		}
 
-	// 创建不同级别的 core
-	infoLevel := zap.LevelEnablerFunc(func(lvl zapcore.Level) bool {
-		return lvl == zapcore.InfoLevel && lvl >= zapcore.Level(c.Level)
+		writers = append(writers, infoWriter, debugWriter, errorWriter)
+
+		// 创建 encoder
+		encoding := encoder(c.Encode, c.TimeFormat)
+
+		// 设置默认日志级别
+		if c.Level == 0 {
+			c.Level = zapcore.DebugLevel
+		}
+
+		// 创建不同级别的 core
+		infoLevel := zap.LevelEnablerFunc(func(lvl zapcore.Level) bool {
+			return lvl == zapcore.InfoLevel && lvl >= zapcore.Level(c.Level)
+		})
+
+		errorLevel := zap.LevelEnablerFunc(func(lvl zapcore.Level) bool {
+			return lvl >= zapcore.ErrorLevel && lvl >= zapcore.Level(c.Level)
+		})
+
+		debugLevel := zap.LevelEnablerFunc(func(lvl zapcore.Level) bool {
+			return lvl >= zapcore.DebugLevel && lvl >= zapcore.Level(c.Level)
+		})
+
+		// 配置 core，同时输出到 stdout
+		cores := []zapcore.Core{
+			zapcore.NewCore(encoding, zapcore.AddSync(infoWriter), infoLevel),
+			zapcore.NewCore(encoding, zapcore.AddSync(errorWriter), errorLevel),
+			zapcore.NewCore(encoding, zapcore.AddSync(debugWriter), debugLevel),
+			zapcore.NewCore(encoding, zapcore.AddSync(os.Stdout), debugLevel),
+		}
+
+		core := zapcore.NewTee(cores...)
+		//z = zap.New(core, zap.AddCaller(), zap.AddCallerSkip(1))
+
+		// 创建实例 Logger（用于返回，跳过0层）
+		instanceLogger := zap.New(core, zap.AddCaller()) // 无 AddCallerSkip
+
+		if c.TracerName != "" {
+			InitTracer(c.TracerName)
+		}
+
+		instance = &Logger{Logger: instanceLogger, writers: writers}
 	})
 
-	errorLevel := zap.LevelEnablerFunc(func(lvl zapcore.Level) bool {
-		return lvl >= zapcore.ErrorLevel && lvl >= zapcore.Level(c.Level)
-	})
-
-	debugLevel := zap.LevelEnablerFunc(func(lvl zapcore.Level) bool {
-		return lvl >= zapcore.DebugLevel && lvl >= zapcore.Level(c.Level)
-	})
-
-	// 配置 core，同时输出到 stdout
-	cores := []zapcore.Core{
-		zapcore.NewCore(encoding, zapcore.AddSync(infoWriter), infoLevel),
-		zapcore.NewCore(encoding, zapcore.AddSync(errorWriter), errorLevel),
-		zapcore.NewCore(encoding, zapcore.AddSync(debugWriter), debugLevel),
-		zapcore.NewCore(encoding, zapcore.AddSync(os.Stdout), debugLevel),
-	}
-
-	core := zapcore.NewTee(cores...)
-	z = zap.New(core, zap.AddCaller(), zap.AddCallerSkip(1))
-
-	// 创建实例 Logger（用于返回，跳过0层）
-	instanceLogger := zap.New(core, zap.AddCaller()) // 无 AddCallerSkip
-
-	if c.TracerName != "" {
-		tracing = true
-		InitTracer(c.TracerName)
-	}
-
-	return &Logger{instanceLogger}
+	return instance, err
 }
 
 func encoder(et EncodeType, format string) zapcore.Encoder {
@@ -178,12 +177,12 @@ func encoder(et EncodeType, format string) zapcore.Encoder {
 	}
 
 	encoderConfig := zap.NewProductionEncoderConfig()
-	encoderConfig.TimeKey = TIME
-	encoderConfig.LevelKey = LEVEL
-	encoderConfig.NameKey = NAME
-	encoderConfig.MessageKey = MESSAGE
-	encoderConfig.StacktraceKey = STACK
-	encoderConfig.CallerKey = CALLER
+	encoderConfig.TimeKey = t
+	encoderConfig.LevelKey = level
+	encoderConfig.StacktraceKey = stack
+	encoderConfig.CallerKey = caller
+	encoderConfig.NameKey = name
+	encoderConfig.MessageKey = message
 	encoderConfig.EncodeTime = zapcore.TimeEncoderOfLayout(format)
 	encoderConfig.EncodeLevel = zapcore.CapitalLevelEncoder
 	encoderConfig.EncodeCaller = zapcore.ShortCallerEncoder
@@ -199,51 +198,10 @@ func encoder(et EncodeType, format string) zapcore.Encoder {
 	}
 }
 
-// Level 返回日志级别
-func Level() zapcore.Level {
-	return z.Level()
+func Named(name string) *Logger {
+	return instance.Named(name)
 }
 
-// With 返回带上下文字段的新 Logger
-func With(fields ...zap.Field) *zap.Logger {
-	return z.With(fields...)
-}
-
-func Debug(msg string, fields ...zap.Field) {
-	z.Debug(msg, fields...)
-}
-
-func Info(msg string, fields ...zap.Field) {
-	z.Info(msg, fields...)
-}
-
-func Warn(msg string, fields ...zap.Field) {
-	z.Warn(msg, fields...)
-}
-
-func Error(msg string, fields ...zap.Field) {
-	z.Error(msg, fields...)
-}
-
-func DPanic(msg string, fields ...zap.Field) {
-	z.DPanic(msg, fields...)
-}
-
-func Panic(msg string, fields ...zap.Field) {
-	z.Panic(msg, fields...)
-}
-
-func Fatal(msg string, fields ...zap.Field) {
-	z.Fatal(msg, fields...)
-}
-
-func Sync() error {
-	if z != nil {
-		return z.Sync()
-	}
-	return nil
-}
-
-func IsDebugEnable() bool {
-	return z.Level() == zapcore.DebugLevel
+func Close() error {
+	return instance.Close()
 }

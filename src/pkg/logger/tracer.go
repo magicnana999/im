@@ -9,21 +9,21 @@ import (
 )
 
 var (
-	Tracer traceing.Tracer
+	tracer traceing.Tracer
 )
 
 func InitTracer(name string) {
 
-	Tracer = otel.Tracer(name)
+	tracer = otel.Tracer(name)
 	tp := trace.NewTracerProvider(trace.WithSampler(trace.NeverSample()))
 	otel.SetTracerProvider(tp)
 	otel.SetTextMapPropagator(b3.New())
 
 }
 
-func NewSpan(ctx context.Context, name string) context.Context {
-	c, _ := Tracer.Start(ctx, name)
-	return c
+func NewSpan(ctx context.Context, name string) (context.Context, traceing.Span) {
+	c, s := tracer.Start(ctx, name)
+	return c, s
 }
 
 func EndSpan(ctx context.Context) {
@@ -48,4 +48,11 @@ func SpanID(ctx context.Context) string {
 		return span.SpanID().String()
 	}
 	return ""
+}
+
+func ShutdownTracer() error {
+	if tp, ok := otel.GetTracerProvider().(*trace.TracerProvider); ok {
+		return tp.Shutdown(context.Background())
+	}
+	return nil
 }
