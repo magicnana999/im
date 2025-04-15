@@ -13,6 +13,9 @@ const (
 // define value of zap.field，and there are match to Op
 const (
 	OpInit    = "init"
+	OpStart   = "start"
+	OpAdvance = "advance"
+	OpSubmit  = "submit"
 	OpSlowSQL = "slow sql"
 	OpClose   = "close"
 	OpSend    = "send"

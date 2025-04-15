@@ -26,7 +26,7 @@ type MSSConfig struct {
 
 type MessageSendServer struct {
 	m        sync.Map
-	tw       *timewheel.TimeWheel
+	tw       *timewheel.Timewheel
 	interval int64
 	timeout  int64
 }

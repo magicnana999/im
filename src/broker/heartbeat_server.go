@@ -21,27 +21,35 @@ const (
 	Close = "close"
 )
 
-type HTSConfig struct {
-	Interval int64 `yaml:"interval"` // 秒
-	Timeout  int64 `yaml:"timeout"`  // 秒
-}
-
 type HeartbeatServer struct {
 	userHolder *holder.UserHolder
-	tw         *timewheel.TimeWheel
+	tw         *timewheel.Timewheel
 	interval   int64
 	timeout    int64
 }
 
-func NewHeartbeatServer(uh *holder.UserHolder, lc fx.Lifecycle) *HeartbeatServer {
-
-	c := global.GetHTS()
-
-	if c == nil {
-		logger.Fatal("heartbeat configuration not found",
-			zap.String(logger.SCOPE, HTS),
-			zap.String(logger.OP, Init))
+func getOrDefaultHTSConfig(g *global.Config) *global.HTSConfig {
+	c := &global.HTSConfig{}
+	if g != nil && g.HTS != nil {
+		*c = *g.HTS
 	}
+
+	if c.Interval == 0 {
+		c.Interval = time.Second * 30
+	}
+
+	if c.Timeout == 0 {
+		c.Timeout = time.Second * 60
+	}
+
+	return c
+}
+
+func NewHeartbeatServer(g *global.Config, uh *holder.UserHolder, lc fx.Lifecycle) (*HeartbeatServer, error) {
+
+	log := logger.Named("hts")
+
+	c := getOrDefaultHTSConfig(g)
 
 	tw, err := timewheel.NewTimeWheel(time.Second, 60, nil)
 	if err != nil {

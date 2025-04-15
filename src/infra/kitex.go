@@ -1,7 +1,6 @@
 package infra
 
 import (
-	"context"
 	"github.com/cloudwego/kitex/client"
 	"github.com/cloudwego/kitex/pkg/discovery"
 	"github.com/cloudwego/kitex/pkg/registry"
@@ -10,89 +9,70 @@ import (
 	"github.com/magicnana999/im/api/kitex_gen/api/routerservice"
 	"github.com/magicnana999/im/global"
 	"github.com/magicnana999/im/pkg/logger"
-	clientv3 "go.etcd.io/etcd/client/v3"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 	"time"
 )
 
-const (
-	Etcd           = "etcd"
-	BusinessClient = "businessclient"
-	RouterClient   = "routerclient"
-	BrokerClient   = "brokerclient"
-)
+// getOrDefaultEtcdConfig 返回 Etcd 配置，优先使用全局配置，缺失时应用默认值。
+// 不会修改输入的 global.Config。
+func getOrDefaultEtcdConfig(g *global.Config) *global.EtcdConfig {
 
-type EtcdConfig struct {
-	clientv3.Config
+	c := &global.EtcdConfig{}
+	if g != nil && g.Etcd != nil {
+		*c = *g.Etcd
+	}
+
+	if c.Endpoints == nil || len(c.Endpoints) == 0 {
+		logger.Named("kitex").Warn("etcd endpoints is empty")
+		c.Endpoints = []string{"127.0.0.1:2379"}
+	}
+
+	if c.DialTimeout == 0 {
+		c.DialTimeout = 5 * time.Second
+	}
+	return c
 }
 
-func NewEtcdRegistry(lc fx.Lifecycle) registry.Registry {
+func NewEtcdRegistry(g *global.Config, lc fx.Lifecycle) (registry.Registry, error) {
 
-	c := global.GetEtcd()
+	log := logger.Named("kitex")
 
-	if c == nil {
-		logger.Fatal("etcd configuration not found",
-			zap.String(logger.SCOPE, Etcd),
-			zap.String(logger.OP, Init))
-	}
+	c := getOrDefaultEtcdConfig(g)
 
 	reg, err := etcd.NewEtcdRegistry(c.Endpoints, etcd.WithDialTimeoutOpt(c.DialTimeout))
 	if err != nil {
-		logger.Fatal("etcd could not be open",
-			zap.String(logger.SCOPE, Etcd),
-			zap.String(logger.OP, Init),
+		log.Error("etcd could not be open",
+			zap.String(logger.Op, logger.OpInit),
 			zap.Error(err))
+		return nil, err
 	}
 
-	lc.Append(fx.Hook{
-		OnStart: func(ctx context.Context) error {
-			logger.Info("etcd connection established",
-				zap.String(logger.SCOPE, Etcd),
-				zap.String(logger.OP, Init))
-			return nil
-		},
-		OnStop: func(ctx context.Context) error {
-			if e := reg.Deregister(nil); e != nil {
-				logger.Error("etcd could not close",
-					zap.String(logger.SCOPE, Etcd),
-					zap.String(logger.OP, Close),
-					zap.Error(e))
-				return e
-			} else {
-				logger.Info("etcd closed",
-					zap.String(logger.SCOPE, Etcd),
-					zap.String(logger.OP, Close))
-				return nil
-			}
-		},
-	})
-
-	return reg
+	return reg, nil
 }
 
-func NewEtcdResolver(lc fx.Lifecycle) discovery.Resolver {
+func NewEtcdResolver(g *global.Config, lc fx.Lifecycle) (discovery.Resolver, error) {
 
-	c := global.GetEtcd()
+	log := logger.Named("kitex")
 
-	if c == nil {
-		logger.Fatal("etcd configuration not found",
-			zap.String(logger.SCOPE, Etcd),
-			zap.String(logger.OP, Init))
-	}
+	c := getOrDefaultEtcdConfig(g)
 
 	reg, err := etcd.NewEtcdResolver(c.Endpoints, etcd.WithDialTimeoutOpt(c.DialTimeout))
+
 	if err != nil {
-		logger.Fatal("etcd could not be open",
-			zap.String(logger.SCOPE, Etcd),
-			zap.String(logger.OP, Init),
+		log.Error("etcd could not be open",
+			zap.String(logger.Op, logger.OpInit),
 			zap.Error(err))
+		return nil, err
 	}
 
-	return reg
+	return reg, nil
 }
 
-func NewBusinessCli(resolver discovery.Resolver, lc fx.Lifecycle) businessservice.Client {
+func NewBusinessClient(resolver discovery.Resolver, lc fx.Lifecycle) (businessservice.Client, error) {
+
+	log := logger.Named("kitex")
+
 	cli, err := businessservice.NewClient(
 		"im.business",
 		client.WithResolver(resolver),
@@ -100,16 +80,18 @@ func NewBusinessCli(resolver discovery.Resolver, lc fx.Lifecycle) businessservic
 		client.WithRPCTimeout(3*time.Second),
 	)
 	if err != nil {
-		logger.Fatal("business client could not be open",
-			zap.String(logger.SCOPE, BusinessClient),
-			zap.String(logger.OP, Init),
+		log.Error("business client could not be open",
+			zap.String(logger.Op, logger.OpInit),
 			zap.Error(err))
+		return nil, err
 	}
 
-	return cli
+	return cli, nil
 }
 
-func NewRouterCli(resolver discovery.Resolver, lc fx.Lifecycle) routerservice.Client {
+func NewRouterClient(resolver discovery.Resolver, lc fx.Lifecycle) (routerservice.Client, error) {
+	log := logger.Named("kitex")
+
 	cli, err := routerservice.NewClient(
 		"im.router",
 		client.WithResolver(resolver),
@@ -117,11 +99,56 @@ func NewRouterCli(resolver discovery.Resolver, lc fx.Lifecycle) routerservice.Cl
 		client.WithRPCTimeout(3*time.Second),
 	)
 	if err != nil {
-		logger.Fatal("router client could not be open",
-			zap.String(logger.SCOPE, RouterClient),
-			zap.String(logger.OP, Init),
+		log.Error("router client could not be open",
+			zap.String(logger.Op, logger.OpInit),
 			zap.Error(err))
+		return nil, err
 	}
 
-	return cli
+	return cli, nil
 }
+
+// 以后再说
+//func loggerMiddleware(next endpoint.Endpoint) endpoint.Endpoint {
+//	return func(ctx context.Context, req, resp interface{}) (err error) {
+//		ri := rpcinfo.GetRPCInfo(ctx)
+//		// get real request
+//		klog.Infof("real request: %+v\n", req.(args).GetFirstArgument())
+//		// get local service information
+//		klog.Infof("local service name: %v\n", ri.From().ServiceName())
+//		// get remote service information
+//		klog.Infof("remote service name: %v, remote method: %v\n", ri.To().ServiceName(), ri.To().Method())
+//		if err := next(ctx, req, resp); err != nil {
+//			return err
+//		}
+//		// get real response
+//		klog.Infof("real response: %+v\n", resp.(result).GetResult())
+//		return nil
+//	}
+//}
+//
+//func ClientMiddleware(next endpoint.Endpoint) endpoint.Endpoint {
+//	return func(ctx context.Context, req, resp interface{}) (err error) {
+//		ri := rpcinfo.GetRPCInfo(ctx)
+//		// get timeout information
+//		klog.Infof("rpc timeout: %v, readwrite timeout: %v\n", ri.Config().RPCTimeout(), ri.Config().ConnectTimeout())
+//		if err := next(ctx, req, resp); err != nil {
+//			return err
+//		}
+//		// get server information
+//		klog.Infof("server address: %v\n", ri.To().Address())
+//		return nil
+//	}
+//}
+//
+//func ServerMiddleware(next endpoint.Endpoint) endpoint.Endpoint {
+//	return func(ctx context.Context, req, resp interface{}) (err error) {
+//		ri := rpcinfo.GetRPCInfo(ctx)
+//		// get client information
+//		klog.Infof("client address: %v\n", ri.From().Address())
+//		if err := next(ctx, req, resp); err != nil {
+//			return err
+//		}
+//		return nil
+//	}
+//}

@@ -2,8 +2,8 @@ package global
 
 import (
 	"fmt"
+	"github.com/go-redis/redis/v8"
 	"github.com/magicnana999/im/broker"
-	"github.com/magicnana999/im/infra"
 	"github.com/magicnana999/im/pkg/ip"
 	"github.com/magicnana999/im/pkg/logger"
 	"go.uber.org/zap"
@@ -31,14 +31,19 @@ type Broker struct {
 }
 
 type Config struct {
-	Broker       Broker             `yaml:"broker"`
-	MicroService MicroService       `yaml:"microService"`
-	Gorm         *GormConfig        `yaml:"gorm"`
-	Redis        *infra.RedisConfig `yaml:"redis"`
-	Kafka        *KafkaConfig       `yaml:"kafka"`
-	Etcd         *infra.EtcdConfig  `yaml:"etcd"`
-	HTS          *broker.HTSConfig  `yaml:"hts"`
-	MSS          *broker.MSSConfig  `yaml:"mss"`
+	Broker       Broker            `yaml:"broker"`
+	MicroService MicroService      `yaml:"microService"`
+	Gorm         *GormConfig       `yaml:"gorm"`
+	Redis        *RedisConfig      `yaml:"redis"`
+	Kafka        *KafkaConfig      `yaml:"kafka"`
+	Etcd         *EtcdConfig       `yaml:"etcd"`
+	HTS          *HTSConfig        `yaml:"hts"`
+	MSS          *broker.MSSConfig `yaml:"mss"`
+}
+
+type HTSConfig struct {
+	Interval time.Duration `yaml:"interval"` //心跳间隔
+	Timeout  time.Duration `yaml:"timeout"`  //心跳超时时间
 }
 
 // GormConfig infra.NewGorm()时使用
@@ -56,6 +61,27 @@ type GormConfig struct {
 // KafkaConfig infra.NewKafkaProducer() 时使用
 type KafkaConfig struct {
 	Brokers []string `yaml:"brokers"`
+}
+
+type EtcdConfig struct {
+	Endpoints   []string      `yaml:"endpoints"`
+	DialTimeout time.Duration `yaml:"dial-timeout"`
+}
+
+type RedisConfig struct {
+	Addr     string        `yaml:"addr"`     // Redis 地址，如 "127.0.0.1:6379"
+	Password string        `yaml:"password"` // Redis 密码
+	DB       int           `yaml:"db"`       // Redis 数据库编号
+	Timeout  time.Duration `yaml:"timeout"`  // 连接超时，可选
+}
+
+func (c *RedisConfig) ToOptions() *redis.Options {
+	return &redis.Options{
+		Addr:        c.Addr,
+		Password:    c.Password,
+		DB:          c.DB,
+		DialTimeout: c.Timeout,
+	}
 }
 
 func Load(path string) (*Config, error) {

@@ -7,45 +7,50 @@ import (
 	"github.com/magicnana999/im/pkg/logger"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
+	"time"
 )
 
-const (
-	Redis = "redis"
-)
-
-type RedisConfig struct {
-	*redis.Options
-}
-
-func NewRedisClient(lc fx.Lifecycle) *redis.Client {
-	c := global.GetRedis()
-
-	if c == nil {
-		logger.Fatal("redis configuration not found",
-			zap.String(logger.SCOPE, Redis),
-			zap.String(logger.OP, Init))
+func getOrDefaultRedisConfig(g *global.Config) *redis.Options {
+	c := &global.RedisConfig{}
+	if g != nil && g.Redis != nil {
+		*c = *g.Redis
 	}
 
-	rds := redis.NewClient(c.Options)
+	if c.Addr == "" {
+		c.Addr = "127.0.0.1:6379"
+	}
+
+	if c.Timeout == 0 {
+		c.Timeout = 1 * time.Second
+	}
+
+	return c.ToOptions()
+
+}
+
+func NewRedisClient(g *global.Config, lc fx.Lifecycle) *redis.Client {
+
+	log := logger.Named("redis")
+
+	c := getOrDefaultRedisConfig(g)
+
+	rds := redis.NewClient(c)
 
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
-			logger.Info("redis established",
-				zap.String(logger.SCOPE, Redis),
-				zap.String(logger.OP, Init))
+			log.Info("redis established",
+				zap.String(logger.Op, logger.OpInit))
 			return nil
 		},
 		OnStop: func(ctx context.Context) error {
 			if e := rds.Close(); e != nil {
-				logger.Error("reds could not close",
-					zap.String(logger.SCOPE, Redis),
-					zap.String(logger.OP, Close),
+				log.Error("reds could not close",
+					zap.String(logger.Op, logger.OpClose),
 					zap.Error(e))
 				return e
 			} else {
-				logger.Info("redis closed",
-					zap.String(logger.SCOPE, Redis),
-					zap.String(logger.OP, Close))
+				log.Info("redis closed",
+					zap.String(logger.Op, logger.OpClose))
 				return nil
 			}
 		},

@@ -28,10 +28,10 @@ func getOrDefaultKafkaConfig(g *global.Config) *global.KafkaConfig {
 	return c
 }
 
-// NewProducer 初始化 Kafka 生产者。
+// NewKafkaProducer 初始化 Kafka 生产者。
 // 使用 global.Config 提供配置，通过 fx.Lifecycle 管理生命周期。
 // 返回已配置的 kafka.Writer 实例和错误（如果有）。
-func NewProducer(g *global.Config, lc fx.Lifecycle) (*kafka.Writer, error) {
+func NewKafkaProducer(g *global.Config, lc fx.Lifecycle) (*kafka.Writer, error) {
 
 	logger := log.Named("kafka")
 

@@ -20,7 +20,7 @@ func NewMessageHandler(mss *broker.MessageSendServer) *MessageHandler {
 	return messageHandleSingleton.Get(func() *MessageHandler {
 		return &MessageHandler{
 			mss:       mss,
-			routerCli: infra.NewRouterCli(),
+			routerCli: infra.NewRouterClient(),
 		}
 	})
 }

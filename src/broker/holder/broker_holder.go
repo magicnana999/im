@@ -14,8 +14,8 @@ type BrokerHolder struct {
 	rds *redis.Client
 }
 
-func NewBrokerHolder(rds *redis.Client, lf fx.Lifecycle) *BrokerHolder {
-	return &BrokerHolder{rds: rds}
+func NewBrokerHolder(rds *redis.Client, lf fx.Lifecycle) (*BrokerHolder, error) {
+	return &BrokerHolder{rds: rds}, nil
 }
 
 func (s *BrokerHolder) StoreBroker(ctx context.Context, broker domain.BrokerInfo) (string, error) {

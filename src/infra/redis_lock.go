@@ -3,9 +3,7 @@ package infra
 import (
 	"context"
 	"github.com/go-redis/redis/v8"
-	"github.com/magicnana999/im/pkg/logger"
 	"go.uber.org/fx"
-	"go.uber.org/zap"
 	"math/rand"
 	"time"
 )
@@ -22,7 +20,6 @@ func (s *SpinLock) Acquire(ctx context.Context, lockKey string, value string, lo
 	for i := 0; i < maxRetry; i++ {
 		ok, err := s.rds.SetNX(ctx, lockKey, value, lockExpire).Result()
 		if err != nil {
-			logger.Error("Error acquiring", zap.Error(err))
 			return false
 		}
 		if ok {
@@ -47,7 +44,6 @@ func (s *SpinLock) Release(ctx context.Context, lockKey string, value string) bo
 	`
 	result, err := s.rds.Eval(ctx, script, []string{lockKey}, value).Result()
 	if err != nil {
-		logger.Error("Error releasing", zap.Error(err))
 		return false
 	}
 

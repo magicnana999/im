@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"github.com/magicnana999/im/broker/holder"
 	"github.com/magicnana999/im/broker/service"
 	"github.com/magicnana999/im/global"
 	"github.com/magicnana999/im/infra"
@@ -33,14 +34,25 @@ func main() {
 	defer logger.Close()
 
 	c := parseFlags()
-	global.Load(c.conf)
+	f := func() (*global.Config, error) {
+		return global.Load(c.conf)
+	}
 
+	log := logger.Named("main")
 	app := fx.New(
 		fx.NopLogger,
 		fx.Provide(
+			f,
 			infra.NewGorm,
-			infra.NewProducer,
-			service.NewUserService, // 新增 BusinessService
+			infra.NewKafkaProducer,
+			infra.NewEtcdRegistry,
+			infra.NewEtcdResolver,
+			infra.NewBusinessClient,
+			infra.NewRouterClient,
+			infra.NewRedisClient,
+			infra.NewSpinLock,
+			holder.NewBrokerHolder,
+			holder.NewUserHolder,
 		),
 		fx.Invoke(func(userService *service.BusinessService, producer *kafka.Writer) {
 			go func() {
@@ -57,12 +69,11 @@ func main() {
 	startCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := app.Start(startCtx); err != nil {
-		logger.Fatal("Failed to start app", zap.Error(err))
+		log.Fatal("Failed to start app", zap.Error(err))
 	}
 
-	// 等待信号
 	<-sigs
-	logger.Info("Received shutdown signal")
+	log.Info("shutdown...")
 
 	// 停止 Fx
 	stopCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)

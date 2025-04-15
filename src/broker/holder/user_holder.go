@@ -9,7 +9,6 @@ import (
 	entity "github.com/magicnana999/im/entities"
 	"github.com/magicnana999/im/infra"
 	"github.com/magicnana999/im/pkg/id"
-	"github.com/magicnana999/im/pkg/singleton"
 	"go.uber.org/fx"
 	"strconv"
 	"strings"
@@ -17,15 +16,13 @@ import (
 	"time"
 )
 
-var userHolderSingleton = singleton.NewSingleton[*UserHolder]
-
 type UserHolder struct {
 	rds *redis.Client
 	m   sync.Map
 }
 
-func NewUserHolder(rds *redis.Client, lf fx.Lifecycle) *UserHolder {
-	return &UserHolder{rds: rds, m: sync.Map{}}
+func NewUserHolder(rds *redis.Client, lf fx.Lifecycle) (*UserHolder, error) {
+	return &UserHolder{rds: rds, m: sync.Map{}}, nil
 }
 
 func (s *UserHolder) StoreUser(ctx context.Context, u *domain.UserConnection, appId string, userId int64, os string) error {

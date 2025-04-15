@@ -15,7 +15,7 @@ type base struct {
 func newBase() *base {
 	f := func() *base {
 		return &base{
-			businessClient: infra.NewBusinessCli(),
+			businessClient: infra.NewBusinessClient(),
 		}
 	}
 	return baseSingleton().Get(f)
