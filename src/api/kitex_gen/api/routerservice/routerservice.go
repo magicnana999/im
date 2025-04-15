@@ -180,14 +180,14 @@ func (p *RouteArgs) GetFirstArgument() interface{} {
 }
 
 type RouteResult struct {
-	Success *api.RouteReply
+	Success *api.Message
 }
 
-var RouteResult_Success_DEFAULT *api.RouteReply
+var RouteResult_Success_DEFAULT *api.Message
 
 func (p *RouteResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
 	if !p.IsSetSuccess() {
-		p.Success = new(api.RouteReply)
+		p.Success = new(api.Message)
 	}
 	return p.Success.FastRead(buf, _type, number)
 }
@@ -214,7 +214,7 @@ func (p *RouteResult) Marshal(out []byte) ([]byte, error) {
 }
 
 func (p *RouteResult) Unmarshal(in []byte) error {
-	msg := new(api.RouteReply)
+	msg := new(api.Message)
 	if err := proto.Unmarshal(in, msg); err != nil {
 		return err
 	}
@@ -222,7 +222,7 @@ func (p *RouteResult) Unmarshal(in []byte) error {
 	return nil
 }
 
-func (p *RouteResult) GetSuccess() *api.RouteReply {
+func (p *RouteResult) GetSuccess() *api.Message {
 	if !p.IsSetSuccess() {
 		return RouteResult_Success_DEFAULT
 	}
@@ -230,7 +230,7 @@ func (p *RouteResult) GetSuccess() *api.RouteReply {
 }
 
 func (p *RouteResult) SetSuccess(x interface{}) {
-	p.Success = x.(*api.RouteReply)
+	p.Success = x.(*api.Message)
 }
 
 func (p *RouteResult) IsSetSuccess() bool {
@@ -251,7 +251,7 @@ func newServiceClient(c client.Client) *kClient {
 	}
 }
 
-func (p *kClient) Route(ctx context.Context, Req *api.Message) (r *api.RouteReply, err error) {
+func (p *kClient) Route(ctx context.Context, Req *api.Message) (r *api.Message, err error) {
 	var _args RouteArgs
 	_args.Req = Req
 	var _result RouteResult

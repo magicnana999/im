@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/magicnana999/im/pkg/logger"
 	"github.com/magicnana999/im/pkg/utils"
+	"go.uber.org/zap"
 )
 
 type Error struct {
@@ -25,7 +26,7 @@ func (e Error) LongString() string {
 func (e Error) JsonString() string {
 	js, err := json.Marshal(e)
 	if err != nil {
-		logger.Errorf("error json marshal err: %v", err)
+		logger.Error("error json marshal", zap.String(logger.ERROR, err.Error()))
 		return "{}"
 	}
 	return string(js)

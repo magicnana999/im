@@ -1,9 +1,0 @@
-syntax = "proto3";
-package api;
-option go_package = "api";
-
-import "packet.proto";
-
-service ServerService{
-  rpc Login(LoginRequest) returns (LoginReply) {}
-}

@@ -34,7 +34,7 @@ func initCommandHandler() *commandHandler {
 			grpc.WithUnaryInterceptor(logger.UnaryClientInterceptor()))
 
 		if err != nil {
-			logger.Fatalf("init command handler user api provider error: %v", err)
+			logger.Fatalf("init service handler user api provider error: %v", err)
 
 		}
 		defaultCommandHandler.conn = conn

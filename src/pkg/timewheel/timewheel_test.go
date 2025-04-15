@@ -29,8 +29,8 @@ func (t *MyTask) Execute(now int64) error {
 // TestTimeWheelFunctionality verifies the functional correctness of TimeWheel.
 func TestTimeWheelFunctionality(t *testing.T) {
 
-	slot := 20
-	totalTask := 1000 * 1000
+	slot := 3
+	totalTask := 21
 	tick := time.Second
 
 	tw, _ := NewTimeWheel(tick, slot, nil)
@@ -40,13 +40,13 @@ func TestTimeWheelFunctionality(t *testing.T) {
 	var counter int64
 
 	for i := 0; i < totalTask; i++ {
-		if _, err := tw.Submit(&MyTask{&counter}); err != nil {
+		if _, err := tw.Submit(&MyTask{&counter}, 30); err != nil {
 			t.Fatalf("Failed to submit task: %v", err)
 		}
+		time.Sleep(time.Second)
 	}
 
-	time.Sleep(time.Second*time.Duration(slot) + 10)
-
+	time.Sleep(time.Second * 2)
 	fmt.Println(counter)
 }
 

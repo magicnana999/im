@@ -7,15 +7,13 @@ import (
 	"go.uber.org/zap/zapcore"
 	"os"
 	"path/filepath"
-	"sync"
 	"time"
 )
 
 const (
-	YYYYMMDDHHMMSS = "2006-01-02 15:04:05"
-	RotationTime   = 24 * time.Hour      // 每天轮转
-	MaxAge         = 30 * 24 * time.Hour // 保留30天
-	RotationSize   = 100 * 1024 * 1024   // 100MB 分割
+	RotationTime = 24 * time.Hour      // 每天轮转
+	MaxAge       = 30 * 24 * time.Hour // 保留30天
+	RotationSize = 500 * 1024 * 1024
 	//RotationSize = 1024 // 10MB 分割
 )
 
@@ -30,11 +28,27 @@ var (
 	z        *zap.Logger // 全局 Logger
 	instance *Logger
 	tracing  = false
-	once     sync.Once
 )
 
 type Logger struct {
 	*zap.Logger
+}
+
+func (s *Logger) Sync() {
+	s.Logger.Sync()
+}
+
+func (s *Logger) IsDebugEnabled() bool {
+	return s.Level() == zapcore.DebugLevel
+}
+
+type Interface interface {
+	Debug(msg string, fields ...zap.Field)
+	Info(msg string, fields ...zap.Field)
+	Warn(msg string, fields ...zap.Field)
+	Error(msg string, fields ...zap.Field)
+	Sync()
+	IsDebugEnabled() bool
 }
 
 type Config struct {
@@ -50,7 +64,7 @@ var defaultConfig = Config{
 	TracerName: "",
 	Level:      0,
 	Encode:     JSONEncode,
-	TimeFormat: YYYYMMDDHHMMSS,
+	TimeFormat: time.DateTime,
 }
 
 func getDefaultConfig(c *Config) *Config {
@@ -67,21 +81,13 @@ func getDefaultConfig(c *Config) *Config {
 	}
 
 	if c.TimeFormat == "" {
-		c.TimeFormat = YYYYMMDDHHMMSS
+		c.TimeFormat = time.DateTime
 	}
 
 	return c
 }
 
 func Init(c *Config) *Logger {
-	once.Do(func() {
-		instance = _init(c)
-	})
-
-	return instance
-}
-
-func _init(c *Config) *Logger {
 	c = getDefaultConfig(c)
 
 	// 确保日志目录存在
@@ -124,7 +130,7 @@ func _init(c *Config) *Logger {
 	}
 
 	// 创建 encoder
-	encoder := encoder(c.Encode, c.TimeFormat)
+	encoding := encoder(c.Encode, c.TimeFormat)
 
 	// 设置默认日志级别
 	if c.Level == 0 {
@@ -146,10 +152,10 @@ func _init(c *Config) *Logger {
 
 	// 配置 core，同时输出到 stdout
 	cores := []zapcore.Core{
-		zapcore.NewCore(encoder, zapcore.AddSync(infoWriter), infoLevel),
-		zapcore.NewCore(encoder, zapcore.AddSync(errorWriter), errorLevel),
-		zapcore.NewCore(encoder, zapcore.AddSync(debugWriter), debugLevel),
-		zapcore.NewCore(encoder, zapcore.AddSync(os.Stdout), debugLevel),
+		zapcore.NewCore(encoding, zapcore.AddSync(infoWriter), infoLevel),
+		zapcore.NewCore(encoding, zapcore.AddSync(errorWriter), errorLevel),
+		zapcore.NewCore(encoding, zapcore.AddSync(debugWriter), debugLevel),
+		zapcore.NewCore(encoding, zapcore.AddSync(os.Stdout), debugLevel),
 	}
 
 	core := zapcore.NewTee(cores...)
@@ -168,16 +174,16 @@ func _init(c *Config) *Logger {
 
 func encoder(et EncodeType, format string) zapcore.Encoder {
 	if format == "" {
-		format = YYYYMMDDHHMMSS
+		format = time.DateTime
 	}
 
 	encoderConfig := zap.NewProductionEncoderConfig()
-	encoderConfig.TimeKey = "t"
-	encoderConfig.LevelKey = "lvl"
-	encoderConfig.NameKey = "log"
-	encoderConfig.MessageKey = "m"
-	encoderConfig.StacktraceKey = "s"
-	encoderConfig.CallerKey = "c"
+	encoderConfig.TimeKey = TIME
+	encoderConfig.LevelKey = LEVEL
+	encoderConfig.NameKey = NAME
+	encoderConfig.MessageKey = MESSAGE
+	encoderConfig.StacktraceKey = STACK
+	encoderConfig.CallerKey = CALLER
 	encoderConfig.EncodeTime = zapcore.TimeEncoderOfLayout(format)
 	encoderConfig.EncodeLevel = zapcore.CapitalLevelEncoder
 	encoderConfig.EncodeCaller = zapcore.ShortCallerEncoder

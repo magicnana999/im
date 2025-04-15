@@ -6,7 +6,7 @@ import (
 	"github.com/cloudwego/kitex/server"
 	"github.com/magicnana999/im/api/kitex_gen/api/brokerservice"
 	"github.com/magicnana999/im/global"
-	"github.com/magicnana999/im/infrastructure"
+	"github.com/magicnana999/im/infra"
 	"net"
 	"sync"
 )
@@ -28,7 +28,7 @@ func (s *BrokerMS) start() error {
 func InitMicroService() *BrokerMS {
 	dmsOnce.Do(func() {
 
-		register := infrastructure.InitEtcdRegistry()
+		register := infra.InitEtcdRegistry()
 
 		addr, _ := net.ResolveTCPAddr("tcp", global.GetMicroService().BrokerAddr)
 		svr := brokerservice.NewServer(InitServiceImpl(),

@@ -41,9 +41,9 @@ services:
 
   redis:
     image: redis:latest # 使用 Redis 7.x 的稳定版本
-    container_name: redis
+    container_name: cache
     volumes:
-      - /Users/jinsong/volumes/im/redis:/data
+      - /Users/jinsong/volumes/im/cache:/data
     ports:
       - "6379:6379"
     networks:

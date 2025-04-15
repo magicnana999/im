@@ -16,7 +16,7 @@ type Option struct {
 	Name    string  `yaml:"name"`
 	Logger  Logger  `yaml:"logger"`
 	Mysql   MySQL   `yaml:"mysql"`
-	Redis   Redis   `yaml:"redis"`
+	Redis   Redis   `yaml:"cache"`
 	Kafka   Kafka   `yaml:"kafka"`
 	Broker  Broker  `yaml:"broker"`
 	Service Service `yaml:"service"`

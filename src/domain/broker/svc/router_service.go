@@ -2,7 +2,7 @@ package svc
 
 import (
 	"github.com/magicnana999/im/api/kitex_gen/api/routerservice"
-	"github.com/magicnana999/im/infrastructure"
+	"github.com/magicnana999/im/infra"
 	"sync"
 )
 
@@ -18,7 +18,7 @@ type RouterSvc struct {
 func InitRouterSvc() *RouterSvc {
 	rsvcOnce.Do(func() {
 		DefaultRouterSvc = &RouterSvc{
-			routerCli: infrastructure.InitRouterCli(),
+			routerCli: infra.InitRouterCli(),
 		}
 	})
 

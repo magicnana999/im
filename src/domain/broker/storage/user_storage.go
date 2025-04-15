@@ -3,9 +3,9 @@ package storage
 import (
 	"context"
 	"encoding/json"
-	"github.com/magicnana999/im/dto/broker"
+	"github.com/magicnana999/im/broker/domain"
 	entity "github.com/magicnana999/im/entities"
-	inf "github.com/magicnana999/im/infrastructure"
+	inf "github.com/magicnana999/im/infra"
 	"github.com/magicnana999/im/pkg/utils"
 	"strconv"
 	"strings"
@@ -23,22 +23,22 @@ type UserStorage struct {
 
 func InitUserStorage() *UserStorage {
 	udsOnce.Do(func() {
-		inf.InitRedis(nil)
+		inf.NewRedisClient(nil)
 		DefaultUserStorage = &UserStorage{}
 	})
 
 	return DefaultUserStorage
 }
 
-func (s *UserStorage) LoadUserConn(ctx context.Context, appId string, userId int64) (map[string]*broker.UserConnection, error) {
+func (s *UserStorage) LoadUserConn(ctx context.Context, appId string, userId int64) (map[string]*domain.UserConnection, error) {
 	key := inf.KeyUserClients(appId, userId)
 	cmd := inf.RDS.HGetAll(ctx, key)
 	if cmd.Err() == nil {
 		m := cmd.Val()
-		ret := make(map[string]*broker.UserConnection, len(m))
+		ret := make(map[string]*domain.UserConnection, len(m))
 		for k, v := range m {
 
-			var uc broker.UserConnection
+			var uc domain.UserConnection
 			ee := json.Unmarshal([]byte(v), &uc)
 			if ee != nil {
 				return nil, ee
@@ -52,7 +52,7 @@ func (s *UserStorage) LoadUserConn(ctx context.Context, appId string, userId int
 	}
 }
 
-func (s *UserStorage) StoreUserConn(ctx context.Context, uc *broker.UserConnection) (string, error) {
+func (s *UserStorage) StoreUserConn(ctx context.Context, uc *domain.UserConnection) (string, error) {
 
 	key := inf.KeyUserConn(uc.AppId, uc.Label())
 
@@ -66,14 +66,14 @@ func (s *UserStorage) StoreUserConn(ctx context.Context, uc *broker.UserConnecti
 	return ret.Val(), ret.Err()
 }
 
-func (s *UserStorage) RefreshUserConn(ctx context.Context, uc *broker.UserConnection) (bool, error) {
+func (s *UserStorage) RefreshUserConn(ctx context.Context, uc *domain.UserConnection) (bool, error) {
 	key := inf.KeyUserConn(uc.AppId, uc.Label())
 	ret := inf.RDS.Expire(ctx, key, time.Minute)
 	return ret.Val(), ret.Err()
 
 }
 
-func (s *UserStorage) StoreUserClients(ctx context.Context, uc *broker.UserConnection) (int64, error) {
+func (s *UserStorage) StoreUserClients(ctx context.Context, uc *domain.UserConnection) (int64, error) {
 
 	key := inf.KeyUserClients(uc.AppId, uc.UserId)
 

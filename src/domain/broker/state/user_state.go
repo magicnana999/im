@@ -2,9 +2,9 @@ package state
 
 import (
 	"context"
+	"github.com/magicnana999/im/broker/domain"
 	"github.com/magicnana999/im/constants"
 	"github.com/magicnana999/im/domain/broker/storage"
-	"github.com/magicnana999/im/dto/broker"
 	"sync"
 )
 
@@ -26,7 +26,7 @@ func InitUserState() *UserState {
 	return DefaultUserState
 }
 
-func (s *UserState) StoreUser(ctx context.Context, u *broker.UserConnection, appId string, userId int64, os constants.OSType) error {
+func (s *UserState) StoreUser(ctx context.Context, u *domain.UserConnection, appId string, userId int64, os constants.OSType) error {
 
 	lock, e := s.storage.Lock(ctx, appId, u.Label())
 	if e != nil {
@@ -55,7 +55,7 @@ func (s *UserState) StoreUser(ctx context.Context, u *broker.UserConnection, app
 	return nil
 }
 
-func (s *UserState) RefreshUser(ctx context.Context, uc *broker.UserConnection) error {
+func (s *UserState) RefreshUser(ctx context.Context, uc *domain.UserConnection) error {
 	lock, e := s.storage.Lock(ctx, uc.AppId, uc.Label())
 	if e != nil {
 		return e
@@ -69,9 +69,9 @@ func (s *UserState) RefreshUser(ctx context.Context, uc *broker.UserConnection) 
 	return nil
 }
 
-func (s *UserState) loadLocalUser(label string) *broker.UserConnection {
+func (s *UserState) loadLocalUser(label string) *domain.UserConnection {
 	if val, ok := s.m.Load(label); ok {
-		return val.(*broker.UserConnection)
+		return val.(*domain.UserConnection)
 	}
 	return nil
 }

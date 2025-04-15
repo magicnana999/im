@@ -11,7 +11,7 @@ import (
 
 // Client is designed to provide IDL-compatible methods with call-option parameter for kitex framework.
 type Client interface {
-	Route(ctx context.Context, Req *api.Message, callOptions ...callopt.Option) (r *api.RouteReply, err error)
+	Route(ctx context.Context, Req *api.Message, callOptions ...callopt.Option) (r *api.Message, err error)
 }
 
 // NewClient creates a client for the service defined in IDL.
@@ -43,7 +43,7 @@ type kRouterServiceClient struct {
 	*kClient
 }
 
-func (p *kRouterServiceClient) Route(ctx context.Context, Req *api.Message, callOptions ...callopt.Option) (r *api.RouteReply, err error) {
+func (p *kRouterServiceClient) Route(ctx context.Context, Req *api.Message, callOptions ...callopt.Option) (r *api.Message, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.Route(ctx, Req)
 }

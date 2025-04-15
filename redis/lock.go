@@ -29,8 +29,8 @@ func AcquireLock(ctx context.Context, lockKey string, value string, lockExpire t
 
 func ReleaseLock(ctx context.Context, lockKey string, value string) bool {
 	script := `
-		if redis.call("GET", KEYS[1]) == ARGV[1] then
-			return redis.call("DEL", KEYS[1])
+		if cache.call("GET", KEYS[1]) == ARGV[1] then
+			return cache.call("DEL", KEYS[1])
 		else
 			return 0
 		end

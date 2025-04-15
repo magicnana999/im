@@ -2,11 +2,11 @@ package main
 
 import (
 	"context"
-	etcd "github.com/api-contrib/registry-etcd"
 	console "github.com/asynkron/goconsole"
 	"github.com/cloudwego/kitex/client"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
 	"github.com/cloudwego/kitex/server"
+	etcd "github.com/kitex-contrib/registry-etcd"
 	"log"
 	"main/kitex_gen/api"
 	"main/kitex_gen/api/brokerservice"

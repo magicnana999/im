@@ -3,9 +3,9 @@ package broker
 import (
 	"context"
 	"github.com/magicnana999/im/api/kitex_gen/api"
+	dto "github.com/magicnana999/im/broker/domain"
 	"github.com/magicnana999/im/domain/broker"
 	"github.com/magicnana999/im/domain/broker/state"
-	dto "github.com/magicnana999/im/dto/broker"
 	"github.com/magicnana999/im/errors"
 	"github.com/magicnana999/im/global"
 	"github.com/magicnana999/im/pb"

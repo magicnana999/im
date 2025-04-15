@@ -35,13 +35,13 @@ func (c *CommandHandler) handlePacket(ctx context.Context, packet *api.Packet) (
 	mb := packet.GetCommand()
 
 	switch mb.CType {
-	case pb.CTypeUserLogin:
+	case pb.CommandTypeUserLogin:
 		reply, err = c.userSvc.Login(ctx, mb.GetLoginRequest())
-	case pb.CTypeUserLogout:
+	case pb.CommandTypeUserLogout:
 		//reply, err = c.logout(ctx, mb.GetLogoutRequest())
-	case pb.CTypeFriendAdd:
-	case pb.CTypeFriendAddAgree:
-	case pb.CTypeFriendReject:
+	case pb.CommandTypeFriendAdd:
+	case pb.CommandTypeFriendAddAgree:
+	case pb.CommandTypeFriendReject:
 	default:
 		err = errors.CmdUnknownType
 	}

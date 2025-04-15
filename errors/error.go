@@ -35,8 +35,8 @@ const (
 )
 
 var (
-	CmdError        = New(cmd, "command failed")
-	CmdUnknownType  = New(cmdUnknownType, "unknown command type")
+	CmdError        = New(cmd, "service failed")
+	CmdUnknownType  = New(cmdUnknownType, "unknown service type")
 	CmdResponseNull = New(cmdResponseNull, "response is null")
 	CmdReplyNull    = New(cmdReplyNull, "reply is null")
 )

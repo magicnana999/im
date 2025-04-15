@@ -2,7 +2,7 @@ package svc
 
 import (
 	"context"
-	red "github.com/go-redis/redis/v8"
+	red "github.com/go-cache/cache/v8"
 	"github.com/magicnana999/im/entity"
 	"github.com/magicnana999/im/redis"
 	"github.com/magicnana999/im/repository"

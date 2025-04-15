@@ -8,7 +8,7 @@ import (
 	"github.com/magicnana999/im/domain/broker"
 	"github.com/magicnana999/im/domain/broker/state"
 	"github.com/magicnana999/im/errors"
-	"github.com/magicnana999/im/infrastructure"
+	"github.com/magicnana999/im/infra"
 	"google.golang.org/protobuf/proto"
 	"sync"
 )
@@ -27,7 +27,7 @@ func InitUserSvc() *UserSvc {
 	usvcOnce.Do(func() {
 		DefaultUserSvc = &UserSvc{
 			userState: state.InitUserState(),
-			serverCli: infrastructure.InitServerCli(),
+			serverCli: infra.InitServerCli(),
 		}
 	})
 

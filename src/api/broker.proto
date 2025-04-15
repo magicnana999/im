@@ -1,16 +1,19 @@
 syntax = "proto3";
 package api;
-option go_package = "api";
+option go_package = "/api";
 
 import "packet.proto";
 
 message DeliverRequest{
-  string id = 1;
+  string messageId = 1;
   repeated string userLabels = 2;
   Message message = 3;
 }
 
 message DeliverReply{
+  string messageId = 1;
+  int32 code = 2;
+  string message = 3;
 }
 
 service BrokerService{

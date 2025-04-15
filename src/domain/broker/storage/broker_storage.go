@@ -3,8 +3,8 @@ package storage
 import (
 	"context"
 	"encoding/json"
-	"github.com/magicnana999/im/dto/broker"
-	inf "github.com/magicnana999/im/infrastructure"
+	"github.com/magicnana999/im/broker/domain"
+	inf "github.com/magicnana999/im/infra"
 	"sync"
 	"time"
 )
@@ -20,13 +20,13 @@ type BrokerStorage struct {
 func InitBrokerStorage() *BrokerStorage {
 
 	dbsOnce.Do(func() {
-		inf.InitRedis(nil)
+		inf.NewRedisClient(nil)
 		DefaultBrokerStorage = &BrokerStorage{}
 	})
 	return DefaultBrokerStorage
 }
 
-func (s *BrokerStorage) StoreBroker(ctx context.Context, broker broker.BrokerInfo) (string, error) {
+func (s *BrokerStorage) StoreBroker(ctx context.Context, broker domain.BrokerInfo) (string, error) {
 	json, err := json.Marshal(broker)
 	if err != nil {
 		return "", err
@@ -38,7 +38,7 @@ func (s *BrokerStorage) StoreBroker(ctx context.Context, broker broker.BrokerInf
 	return ret.Val(), ret.Err()
 }
 
-func (s *BrokerStorage) RefreshBroker(ctx context.Context, broker broker.BrokerInfo) (bool, error) {
+func (s *BrokerStorage) RefreshBroker(ctx context.Context, broker domain.BrokerInfo) (bool, error) {
 
 	key := inf.KeyBroker(broker.Addr)
 

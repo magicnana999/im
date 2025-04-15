@@ -1,9 +1,8 @@
 # im
 
 ```shell
-$ protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative heartbeat.proto
-
-$ protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative message.proto  
+$ cd src/api
+$ protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative packet.proto
 
 
 ```
@@ -22,7 +21,7 @@ $ protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt
 * Redis
 ```shell
 cd $redis_home
-redis-server
+cache-server
 ```
 
 
