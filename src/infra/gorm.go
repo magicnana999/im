@@ -3,6 +3,7 @@ package infra
 import (
 	"context"
 	"fmt"
+	"github.com/magicnana999/im/define"
 	"github.com/magicnana999/im/global"
 	"github.com/magicnana999/im/pkg/logger"
 	"go.uber.org/fx"
@@ -79,7 +80,7 @@ func NewGorm(g *global.Config, lc fx.Lifecycle) (*gorm.DB, error) {
 	db, err := gorm.Open(mysql.Open(c.Dsn), c)
 	if err != nil {
 		log.Error("failed to open gorm",
-			zap.String(logger.Op, logger.OpInit),
+			zap.String(define.OP, define.OpInit),
 			zap.Error(err))
 		return nil, err
 	}
@@ -87,7 +88,7 @@ func NewGorm(g *global.Config, lc fx.Lifecycle) (*gorm.DB, error) {
 	sqlDB, err := db.DB()
 	if err != nil {
 		log.Error("failed to get sql db",
-			zap.String(logger.Op, logger.OpInit),
+			zap.String(define.OP, define.OpInit),
 			zap.Error(err))
 		return nil, err
 	}
@@ -96,7 +97,7 @@ func NewGorm(g *global.Config, lc fx.Lifecycle) (*gorm.DB, error) {
 	defer cancel()
 	if err := sqlDB.PingContext(ctx); err != nil {
 		log.Error("failed to ping sql db",
-			zap.String(logger.Op, logger.OpInit),
+			zap.String(define.OP, define.OpInit),
 			zap.Error(err))
 		return nil, err
 	}
@@ -109,19 +110,19 @@ func NewGorm(g *global.Config, lc fx.Lifecycle) (*gorm.DB, error) {
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
 			log.Info("gorm connected",
-				zap.String(logger.Op, logger.OpInit))
+				zap.String(define.OP, define.OpInit))
 			return nil
 		},
 		OnStop: func(ctx context.Context) error {
 
 			if err := sqlDB.Close(); err != nil {
 				log.Error("failed to close gorm",
-					zap.String(logger.Op, logger.OpInit),
+					zap.String(define.OP, define.OpInit),
 					zap.Error(err))
 				return err
 			}
 
-			log.Info("gorm closed", zap.String(logger.Op, logger.OpInit))
+			log.Info("gorm closed", zap.String(define.OP, define.OpInit))
 			return nil
 		},
 	})

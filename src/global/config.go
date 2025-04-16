@@ -3,7 +3,7 @@ package global
 import (
 	"fmt"
 	"github.com/go-redis/redis/v8"
-	"github.com/magicnana999/im/broker"
+	"github.com/magicnana999/im/define"
 	"github.com/magicnana999/im/pkg/ip"
 	"github.com/magicnana999/im/pkg/logger"
 	"go.uber.org/zap"
@@ -31,14 +31,19 @@ type Broker struct {
 }
 
 type Config struct {
-	Broker       Broker            `yaml:"broker"`
-	MicroService MicroService      `yaml:"microService"`
-	Gorm         *GormConfig       `yaml:"gorm"`
-	Redis        *RedisConfig      `yaml:"redis"`
-	Kafka        *KafkaConfig      `yaml:"kafka"`
-	Etcd         *EtcdConfig       `yaml:"etcd"`
-	HTS          *HTSConfig        `yaml:"hts"`
-	MSS          *broker.MSSConfig `yaml:"mss"`
+	Broker       Broker       `yaml:"broker"`
+	MicroService MicroService `yaml:"microService"`
+	Gorm         *GormConfig  `yaml:"gorm"`
+	Redis        *RedisConfig `yaml:"redis"`
+	Kafka        *KafkaConfig `yaml:"kafka"`
+	Etcd         *EtcdConfig  `yaml:"etcd"`
+	HTS          *HTSConfig   `yaml:"hts"`
+	MSS          *MSSConfig   `yaml:"mss"`
+}
+
+type MSSConfig struct {
+	Interval time.Duration `yaml:"interval"` //重发间隔
+	Timeout  time.Duration `yaml:"timeout"`  //重发超时时间
 }
 
 type HTSConfig struct {
@@ -93,7 +98,7 @@ func Load(path string) (*Config, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		log.Error("load config failed",
-			zap.String(logger.Op, logger.OpInit),
+			zap.String(define.OP, define.OpInit),
 			zap.Error(err))
 		return nil, err
 	}
@@ -101,7 +106,7 @@ func Load(path string) (*Config, error) {
 	err = yaml.Unmarshal(data, &c)
 	if err != nil {
 		log.Error("unmarshal config failed",
-			zap.String(logger.Op, logger.OpInit),
+			zap.String(define.OP, define.OpInit),
 			zap.Error(err))
 		return nil, err
 	}
@@ -110,7 +115,7 @@ func Load(path string) (*Config, error) {
 		i, err := ip.GetLocalIP()
 		if err != nil {
 			log.Error("get localIP failed",
-				zap.String(logger.Op, logger.OpInit),
+				zap.String(define.OP, define.OpInit),
 				zap.Error(err))
 			return nil, err
 

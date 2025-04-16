@@ -7,6 +7,7 @@ import (
 	etcd "github.com/kitex-contrib/registry-etcd"
 	"github.com/magicnana999/im/api/kitex_gen/api/businessservice"
 	"github.com/magicnana999/im/api/kitex_gen/api/routerservice"
+	"github.com/magicnana999/im/define"
 	"github.com/magicnana999/im/global"
 	"github.com/magicnana999/im/pkg/logger"
 	"go.uber.org/fx"
@@ -43,7 +44,7 @@ func NewEtcdRegistry(g *global.Config, lc fx.Lifecycle) (registry.Registry, erro
 	reg, err := etcd.NewEtcdRegistry(c.Endpoints, etcd.WithDialTimeoutOpt(c.DialTimeout))
 	if err != nil {
 		log.Error("etcd could not be open",
-			zap.String(logger.Op, logger.OpInit),
+			zap.String(define.OP, define.OpInit),
 			zap.Error(err))
 		return nil, err
 	}
@@ -61,7 +62,7 @@ func NewEtcdResolver(g *global.Config, lc fx.Lifecycle) (discovery.Resolver, err
 
 	if err != nil {
 		log.Error("etcd could not be open",
-			zap.String(logger.Op, logger.OpInit),
+			zap.String(define.OP, define.OpInit),
 			zap.Error(err))
 		return nil, err
 	}
@@ -81,7 +82,7 @@ func NewBusinessClient(resolver discovery.Resolver, lc fx.Lifecycle) (businessse
 	)
 	if err != nil {
 		log.Error("business client could not be open",
-			zap.String(logger.Op, logger.OpInit),
+			zap.String(define.OP, define.OpInit),
 			zap.Error(err))
 		return nil, err
 	}
@@ -100,7 +101,7 @@ func NewRouterClient(resolver discovery.Resolver, lc fx.Lifecycle) (routerservic
 	)
 	if err != nil {
 		log.Error("router client could not be open",
-			zap.String(logger.Op, logger.OpInit),
+			zap.String(define.OP, define.OpInit),
 			zap.Error(err))
 		return nil, err
 	}

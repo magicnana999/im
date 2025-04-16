@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/magicnana999/im/api/kitex_gen/api"
 	"github.com/magicnana999/im/broker/domain"
+	"github.com/magicnana999/im/define"
 	"github.com/magicnana999/im/errors"
 	"github.com/magicnana999/im/global"
 	"github.com/magicnana999/im/pkg/logger"
@@ -12,78 +13,89 @@ import (
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
-const (
-	MSS = "mss"
-)
+func getOrDefaultMSSConfig(g *global.Config) *global.MSSConfig {
+	c := &global.MSSConfig{}
+	if g != nil && g.MSS != nil {
+		*c = *g.MSS
+	}
 
-type MSSConfig struct {
-	Interval int64 `yaml:"interval"` // 秒
-	Timeout  int64 `yaml:"timeout"`  // 秒
+	if c.Interval <= 0 {
+		c.Interval = time.Second * 1
+	}
+
+	if c.Timeout <= 0 {
+		c.Timeout = time.Second * 2
+	}
+
+	return c
 }
 
 type MessageSendServer struct {
-	m        sync.Map
-	tw       *timewheel.Timewheel
-	interval int64
-	timeout  int64
+	m      sync.Map
+	tw     *timewheel.Timewheel
+	cfg    *global.MSSConfig
+	logger *logger.Logger
 }
 
-func NewMessageSendServer(lc fx.Lifecycle) *MessageSendServer {
+func NewMessageSendServer(g *global.Config, lc fx.Lifecycle) (*MessageSendServer, error) {
 
-	c := global.GetMSS()
+	log := logger.Named("mss")
 
-	if c == nil {
-		logger.Fatal("mss configuration not found",
-			zap.String(logger.SCOPE, MSS),
-			zap.String(logger.OP, Init))
+	c := getOrDefaultMSSConfig(g)
+
+	twc := &timewheel.Config{
+		Tick:                time.Millisecond * 100,
+		SlotCount:           30,
+		MaxLengthOfEachSlot: 100_0000,
 	}
 
-	tw, err := timewheel.NewTimeWheel(time.Millisecond*100, 30, nil)
+	tw, err := timewheel.NewTimeWheel(twc, log, nil)
 	if err != nil {
-		logger.Fatal("timewheel could not be open",
-			zap.String(logger.SCOPE, MSS),
-			zap.String(logger.OP, Init),
+		log.Error("failed to init timewheel",
+			zap.String(define.OP, define.OpInit),
 			zap.Error(err))
+		return nil, err
 	}
 
 	hs := &MessageSendServer{
-		m:        sync.Map{},
-		tw:       tw,
-		interval: c.Interval,
-		timeout:  c.Timeout,
+		m:      sync.Map{},
+		tw:     tw,
+		cfg:    c,
+		logger: log,
 	}
-
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
-			logger.Info("heartbeat server is ready",
-				zap.String(logger.SCOPE, HTS),
-				zap.String(logger.OP, Init))
+			if e := hs.Start(ctx); e != nil {
+				log.Error("mss start failed", zap.String(define.OP, define.OpStart), zap.Error(e))
+				return e
+			}
+			log.Info("mss is started", zap.String(define.OP, define.OpStart))
 			return nil
 		},
 		OnStop: func(ctx context.Context) error {
 			if e := hs.Stop(); e != nil {
-				logger.Error("heartbeat server could not close",
-					zap.String(logger.SCOPE, HTS),
-					zap.String(logger.OP, Close),
+				log.Error("mss cloud not close",
+					zap.String(define.OP, define.OpClose),
 					zap.Error(e))
 				return e
 			} else {
-				logger.Info("heartbeat server closed",
-					zap.String(logger.SCOPE, HTS),
-					zap.String(logger.OP, Close))
+				log.Info("mss is closed",
+					zap.String(define.OP, define.OpClose))
 				return nil
 			}
 		},
 	})
 
-	return hs
+	return hs, nil
 }
 
-func (s *MessageSendServer) Start(ctx context.Context) {
+func (s *MessageSendServer) Start(ctx context.Context) error {
 	go s.tw.Start(ctx)
+	return nil
 }
 
 func (s *MessageSendServer) Stop() error {
@@ -109,12 +121,20 @@ type messageSendTask struct {
 	c        gnet.Conn
 	uc       *domain.UserConnection
 	msg      *api.Message
-	interval int64
-	timeout  int64
+	isOK     atomic.Bool
+	lastSend atomic.Int64
+	interval time.Duration
+	timeout  time.Duration
 }
 
-func (t *messageSendTask) Execute(nowSecond int64) (timewheel.TaskResult, error) {
-	if nowSecond-t.lastHeartbeat.Load() > (t.interval * 2) {
+func (t *messageSendTask) Execute(now time.Time) (timewheel.TaskResult, error) {
+
+	if t.isOK.Load() {
+		return timewheel.Break, nil
+	}
+
+	t.c.Write()
+	if now.UnixMilli()-t.lastSend.Load() > (t.timeout.Milliseconds()) {
 		t.c.Close()
 		return timewheel.Break, errors.HeartbeatTimeout
 	} else {

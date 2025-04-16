@@ -1,16 +1,17 @@
-package logger
+package define
 
 // define key of zap.field
 const (
-	Op  = "op"
-	Url = "url"
-	Arg = "arg"
-	Ret = "ret"
-	Req = "req"
-	Res = "res"
+	OP   = "op"
+	Conn = "conn"
+	Url  = "url"
+	Arg  = "arg"
+	Ret  = "ret"
+	Req  = "req"
+	Res  = "res"
 )
 
-// define value of zap.field，and there are match to Op
+// define value of zap.field，and there are match to OP
 const (
 	OpInit    = "init"
 	OpStart   = "start"

@@ -188,3 +188,7 @@ func (s *UserHolder) StoreByUserId(ctx context.Context, user *entity.User) (stri
 	cmd := s.rds.Set(ctx, infra.KeyUser(user.AppId, user.UserId), json1, -1)
 	return cmd.Val(), cmd.Err()
 }
+
+func (s *UserHolder) Close(ctx context.Context, uc *domain.UserConnection) error {
+	return nil
+}

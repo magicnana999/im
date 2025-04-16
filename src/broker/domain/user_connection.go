@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"fmt"
 	"github.com/magicnana999/im/constants"
 	"github.com/panjf2000/gnet/v2"
 	"strconv"
@@ -16,9 +17,13 @@ type UserConnection struct {
 	OS            constants.OSType `json:"os"`
 	ConnectTime   int64            `json:"connectTime"`
 	IsLogin       atomic.Bool      `json:"isLogin"`
-	IsClose       atomic.Bool      `json:"isClose"`
-	C             gnet.Conn        `json:"-"`
+	IsClosed      atomic.Bool      `json:"isClosed"`
 	LastHeartbeat atomic.Int64     `json:"lastHeartbeat"`
+	C             gnet.Conn        `json:"-"`
+}
+
+func (u *UserConnection) Conn() string {
+	return fmt.Sprintf("%s#%s", u.ClientAddr, u.Label())
 }
 
 func (u *UserConnection) Label() string {
@@ -35,5 +40,5 @@ func (u *UserConnection) Label() string {
 		return ""
 	}
 
-	return u.AppId + "#" + strconv.FormatInt(u.UserId, 10) + "#" + dt.String()
+	return fmt.Sprintf("%s#%s#%s", u.AppId, strconv.FormatInt(u.UserId, 10), dt.String())
 }

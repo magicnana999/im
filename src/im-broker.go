@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"github.com/magicnana999/im/broker"
 	"github.com/magicnana999/im/broker/holder"
 	"github.com/magicnana999/im/broker/service"
 	"github.com/magicnana999/im/global"
@@ -53,6 +54,7 @@ func main() {
 			infra.NewSpinLock,
 			holder.NewBrokerHolder,
 			holder.NewUserHolder,
+			broker.NewHeartbeatServer,
 		),
 		fx.Invoke(func(userService *service.BusinessService, producer *kafka.Writer) {
 			go func() {

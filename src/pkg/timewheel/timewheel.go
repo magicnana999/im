@@ -3,6 +3,7 @@ package timewheel
 import (
 	"context"
 	"fmt"
+	"github.com/magicnana999/im/define"
 	"github.com/magicnana999/im/pkg/logger"
 	"github.com/magicnana999/im/pkg/queue"
 	"github.com/panjf2000/ants/v2"
@@ -109,7 +110,7 @@ func (tw *Timewheel) Start(ctx context.Context) {
 		}()
 
 		if tw.logger != nil {
-			tw.logger.Info("started", zap.String(logger.Op, logger.OpStart))
+			tw.logger.Info("started", zap.String(define.OP, define.OpStart))
 		}
 	})
 }
@@ -127,7 +128,7 @@ func (tw *Timewheel) Stop() {
 	}
 
 	if tw.logger != nil {
-		tw.logger.Info("closed", zap.String(logger.Op, logger.OpClose))
+		tw.logger.Info("closed", zap.String(define.OP, define.OpClose))
 	}
 
 }
@@ -145,7 +146,7 @@ func (tw *Timewheel) advance(now time.Time) {
 	if tw.logger != nil && tw.logger.IsDebugEnabled() {
 		msg := fmt.Sprintf("ticking slot[%d], now:%s, len:%d", slot, now.Format(time.StampMilli), tw.slots[slot].Len())
 		tw.logger.Debug(msg,
-			zap.String(logger.Op, logger.OpAdvance),
+			zap.String(define.OP, define.OpAdvance),
 			zap.Duration("tick", tw.cfg.Tick))
 	}
 
@@ -180,7 +181,7 @@ func (tw *Timewheel) Submit(task Task, delay time.Duration) (int, error) {
 		err := fmt.Errorf("delay %v exceeds max interval %v", delay, tw.cfg.maxIntervalOfSubmit)
 		if tw.logger != nil {
 			tw.logger.Error(err.Error(),
-				zap.String(logger.Op, logger.OpSubmit),
+				zap.String(define.OP, define.OpSubmit),
 			)
 		}
 		return -1, err
@@ -194,12 +195,12 @@ func (tw *Timewheel) Submit(task Task, delay time.Duration) (int, error) {
 	err := tw.slots[slot].Enqueue(task)
 	if tw.logger != nil && err != nil {
 		tw.logger.Error(err.Error(),
-			zap.String(logger.Op, logger.OpSubmit),
+			zap.String(define.OP, define.OpSubmit),
 		)
 	} else {
 		if tw.logger != nil && tw.logger.IsDebugEnabled() {
 			tw.logger.Debug(fmt.Sprintf("submit into slots[%d],len:%d", slot, tw.slots[slot].Len()),
-				zap.String(logger.Op, logger.OpSubmit),
+				zap.String(define.OP, define.OpSubmit),
 			)
 		}
 	}
