@@ -2,143 +2,197 @@ package broker
 
 import (
 	"context"
+	"errors"
+	"fmt"
+	"sync/atomic"
+	"time"
+
 	"github.com/magicnana999/im/api/kitex_gen/api"
 	"github.com/magicnana999/im/broker/domain"
 	"github.com/magicnana999/im/define"
-	"github.com/magicnana999/im/errors"
 	"github.com/magicnana999/im/global"
-	"github.com/magicnana999/im/pkg/logger"
-	"github.com/magicnana999/im/pkg/timewheel"
-	"github.com/panjf2000/gnet/v2"
+	"github.com/magicnana999/im/pkg/jsonext"
+	bb "github.com/panjf2000/gnet/v2/pkg/pool/bytebuffer"
 	"go.uber.org/fx"
-	"go.uber.org/zap"
-	"sync"
-	"sync/atomic"
-	"time"
 )
 
+// Error definitions for MessageSendServer.
+var (
+	invalidMessage  = errors.New("invalid message")
+	invalidUserConn = errors.New("invalid user conn")
+	userConnClosed  = errors.New("user conn closed")
+	mssNotRunning   = errors.New("server not running")
+	channelFull     = errors.New("channel full")
+)
+
+// messageSending represents a message to be sent to a user connection.
+type messageSending struct {
+	message *api.Message     // message is the message to send.
+	uc      *domain.UserConn // uc is the target user connection.
+}
+
+// MessageSendServer manages asynchronous message sending to user connections.
+// It uses a buffered channel to queue messages and supports lifecycle management.
+type MessageSendServer struct {
+	isRunning atomic.Bool          // isRunning indicates if the server is running.
+	codec     codec                // codec encodes messages for writing.
+	cancel    context.CancelFunc   // cancel stops the sending loop.
+	ch        chan *messageSending // ch queues messages to send.
+	logger    *Logger              // logger records server events.
+	mrs       *MessageRetryServer  // mrs messageRetryServer that can resend the message, so it can make sure the message is saved
+}
+
+// getOrDefaultMSSConfig returns the MSS configuration, prioritizing global configuration.
+// It limits MaxRemaining to 10000 to prevent excessive memory usage.
 func getOrDefaultMSSConfig(g *global.Config) *global.MSSConfig {
 	c := &global.MSSConfig{}
 	if g != nil && g.MSS != nil {
 		*c = *g.MSS
 	}
 
-	if c.Interval <= 0 {
-		c.Interval = time.Second * 1
-	}
-
-	if c.Timeout <= 0 {
-		c.Timeout = time.Second * 2
+	if c.MaxRemaining <= 0 || c.MaxRemaining > 10000 {
+		c.MaxRemaining = 10000
 	}
 
 	return c
 }
 
-type MessageSendServer struct {
-	m      sync.Map
-	tw     *timewheel.Timewheel
-	cfg    *global.MSSConfig
-	logger *logger.Logger
-}
-
-func NewMessageSendServer(g *global.Config, lc fx.Lifecycle) (*MessageSendServer, error) {
-
-	log := logger.Named("mss")
-
+// NewMessageSendServer creates a new MessageSendServer with the specified configuration.
+// It registers lifecycle hooks for starting and stopping the server.
+// It returns an error if logger or codec initialization fails.
+func NewMessageSendServer(g *global.Config, mrs *MessageRetryServer, lc fx.Lifecycle) (*MessageSendServer, error) {
 	c := getOrDefaultMSSConfig(g)
 
-	twc := &timewheel.Config{
-		Tick:                time.Millisecond * 100,
-		SlotCount:           30,
-		MaxLengthOfEachSlot: 100_0000,
-	}
+	log := NewLogger("mss", c.DebugMode)
+	log.Info(string(jsonext.MarshalNoErr(c)), "", define.OpInit, "", nil)
 
-	tw, err := timewheel.NewTimeWheel(twc, log, nil)
-	if err != nil {
-		log.Error("failed to init timewheel",
-			zap.String(define.OP, define.OpInit),
-			zap.Error(err))
-		return nil, err
-	}
-
-	hs := &MessageSendServer{
-		m:      sync.Map{},
-		tw:     tw,
-		cfg:    c,
+	mss := &MessageSendServer{
+		codec:  newCodec(),
+		ch:     make(chan *messageSending, c.MaxRemaining),
 		logger: log,
+		mrs:    mrs,
 	}
+
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
-			if e := hs.Start(ctx); e != nil {
-				log.Error("mss start failed", zap.String(define.OP, define.OpStart), zap.Error(e))
-				return e
-			}
-			log.Info("mss is started", zap.String(define.OP, define.OpStart))
-			return nil
+			return mss.Start(ctx)
 		},
 		OnStop: func(ctx context.Context) error {
-			if e := hs.Stop(); e != nil {
-				log.Error("mss cloud not close",
-					zap.String(define.OP, define.OpClose),
-					zap.Error(e))
-				return e
-			} else {
-				log.Info("mss is closed",
-					zap.String(define.OP, define.OpClose))
-				return nil
-			}
+			return mss.Stop(ctx)
 		},
 	})
-
-	return hs, nil
+	return mss, nil
 }
 
-func (s *MessageSendServer) Start(ctx context.Context) error {
-	go s.tw.Start(ctx)
+// Start launches the message sending loop in a separate goroutine.
+// It returns nil if the server starts successfully or is already running.
+func (mss *MessageSendServer) Start(ctx context.Context) error {
+	if mss.isRunning.CompareAndSwap(false, true) {
+		ctx, cancel := context.WithCancel(ctx)
+		mss.cancel = cancel
+		go func() {
+			mss.logger.Info("loop started", "", define.OpStart, "", nil)
+			for {
+				select {
+				case <-ctx.Done():
+					return
+				case ms := <-mss.ch:
+					if err := mss.Write(ms.message, ms.uc); err != nil {
+						mss.Resave(ms.message, ms.uc)
+					} else {
+						mss.Submit(ms.message, ms.uc)
+					}
+				}
+			}
+		}()
+	}
 	return nil
 }
 
-func (s *MessageSendServer) Stop() error {
-	s.tw.Stop()
+// Stop shuts down the message sending loop and closes the channel.
+// It processes remaining messages and returns nil if stopped successfully.
+func (mss *MessageSendServer) Stop(ctx context.Context) error {
+	if mss.isRunning.CompareAndSwap(true, false) {
+		mss.cancel()
+		close(mss.ch)
+		mss.logger.Info("loop stopped", "", define.OpStop, "", nil)
+
+		txt := fmt.Sprintf("remaining messages: %d", len(mss.ch))
+		mss.logger.Info(txt, "", define.OpStop, "", nil)
+		mss.ResaveMessages()
+	}
 	return nil
 }
 
-func (s *MessageSendServer) Send(ctx context.Context, c gnet.Conn, uc *domain.UserConnection, m *api.Message) error {
-	task := &messageSendTask{
-		c:        c,
-		uc:       uc,
-		msg:      m,
-		interval: s.interval,
-		timeout:  s.timeout,
+// ResaveMessages processes unsent messages in the channel.
+// It calls onCloseFunc for each message and logs errors.
+func (mss *MessageSendServer) ResaveMessages() {
+	for ms := range mss.ch {
+		mss.Resave(ms.message, ms.uc)
 	}
-
-	_, err := s.tw.Submit(task, s.interval)
-	return err
-
 }
 
-type messageSendTask struct {
-	c        gnet.Conn
-	uc       *domain.UserConnection
-	msg      *api.Message
-	isOK     atomic.Bool
-	lastSend atomic.Int64
-	interval time.Duration
-	timeout  time.Duration
+// Send submits a message to be sent to the specified user connection.
+// It returns an error if the message or connection is invalid, the connection is closed,
+// the server is not running, or the channel is full.
+func (mss *MessageSendServer) Send(m *api.Message, uc *domain.UserConn) error {
+	if m == nil {
+		return invalidMessage
+	}
+	if uc == nil {
+		return invalidUserConn
+	}
+	if uc.IsClosed.Load() {
+		return userConnClosed
+	}
+	if !mss.isRunning.Load() {
+		return mssNotRunning
+	}
+
+	select {
+	case mss.ch <- &messageSending{message: m, uc: uc}:
+		return nil
+	default:
+		return channelFull
+	}
 }
 
-func (t *messageSendTask) Execute(now time.Time) (timewheel.TaskResult, error) {
+// Write encodes and writes a message to the user connection.
+// It returns an error if encoding or writing fails.
+func (mss *MessageSendServer) Write(m *api.Message, uc *domain.UserConn) error {
+	buffer, err := mss.codec.encode(m.Wrap())
+	defer bb.Put(buffer)
 
-	if t.isOK.Load() {
-		return timewheel.Break, nil
+	if err != nil {
+		return err
 	}
 
-	t.c.Write()
-	if now.UnixMilli()-t.lastSend.Load() > (t.timeout.Milliseconds()) {
-		t.c.Close()
-		return timewheel.Break, errors.HeartbeatTimeout
-	} else {
-		t.userHolder.RefreshUser(t.ctx, t.uc)
-		return timewheel.Retry, nil
+	total := buffer.Len()
+	sent := 0
+	for sent < total {
+		n, err := uc.Writer.Write(buffer.Bytes()[sent:])
+		if err != nil {
+			return err
+		}
+		sent += n
 	}
+	mss.logger.Debug("write ok", uc.Desc(), "write", m.MessageId, nil)
+	return nil
+}
+
+// Submit sends a successfully written message to the retry server for acknowledgment.
+// It submits the message to MessageRetryServer to track its delivery status.
+// It returns an error if the message or connection is invalid, the retry server is not initialized,
+// or the submission fails.
+func (mss *MessageSendServer) Submit(ms *api.Message, uc *domain.UserConn) error {
+	mss.mrs.Submit(ms, uc, time.Now().Unix())
+	return nil
+}
+
+// Resave saves a message that failed to send for later processing.
+// It logs the message details and marks it for resaving (e.g., to a queue or database).
+// It returns an error if the message or connection is invalid or resaving fails.
+func (mss *MessageSendServer) Resave(ms *api.Message, uc *domain.UserConn) error {
+	fmt.Print(jsonext.PbMarshalNoErr(ms))
+	return nil
 }

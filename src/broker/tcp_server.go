@@ -29,7 +29,7 @@ type TcpServer struct {
 	ctx              context.Context
 }
 
-func NewTcpServer(mss *MessageSendServer, hts *HeartbeatServer) *TcpServer {
+func NewTcpServer(mss *MessageRetryServer, hts *HeartbeatServer) *TcpServer {
 	return tcpServerSingleton.Get(func() *TcpServer {
 		return &TcpServer{
 			interval:         30,
@@ -79,7 +79,7 @@ func (s *TcpServer) OnShutdown(eng gnet.Engine) {
 }
 
 func (s *TcpServer) OnOpen(c gnet.Conn) (out []byte, action gnet.Action) {
-	uc := &domain.UserConnection{
+	uc := &domain.UserConn{
 		Fd:          c.Fd(),
 		AppId:       "",
 		UserId:      0,

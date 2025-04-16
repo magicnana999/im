@@ -7,7 +7,6 @@ import (
 	"github.com/magicnana999/im/errors"
 	"github.com/magicnana999/im/logger"
 	"github.com/magicnana999/im/pb"
-	"github.com/panjf2000/gnet/v2"
 	goPool "github.com/panjf2000/gnet/v2/pkg/pool/goroutine"
 	"sync"
 	"time"
@@ -182,7 +181,7 @@ type heartbeatTask struct {
 	cancel        context.CancelFunc
 	ticker        *time.Ticker
 	c             gnet.Conn
-	//closeFunc     func(c gnet.Conn) error
+	//closeFunc     func(c gnet.Desc) error
 }
 
 func (t *heartbeatTask) setLastHeartbeat() {

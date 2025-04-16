@@ -38,17 +38,25 @@ type Config struct {
 	Kafka        *KafkaConfig `yaml:"kafka"`
 	Etcd         *EtcdConfig  `yaml:"etcd"`
 	HTS          *HTSConfig   `yaml:"hts"`
+	MRS          *MRSConfig   `yaml:"mrs"`
 	MSS          *MSSConfig   `yaml:"mss"`
 }
 
 type MSSConfig struct {
-	Interval time.Duration `yaml:"interval"` //重发间隔
-	Timeout  time.Duration `yaml:"timeout"`  //重发超时时间
+	MaxRemaining int  `yaml:"maxRemaining"`
+	DebugMode    bool `yaml:"debugMode"`
+}
+
+type MRSConfig struct {
+	Interval  time.Duration `yaml:"interval"` //重发间隔
+	Timeout   time.Duration `yaml:"timeout"`  //重发超时时间
+	DebugMode bool          `yaml:"debugMode"`
 }
 
 type HTSConfig struct {
-	Interval time.Duration `yaml:"interval"` //心跳间隔
-	Timeout  time.Duration `yaml:"timeout"`  //心跳超时时间
+	Interval  time.Duration `yaml:"interval"` //心跳间隔
+	Timeout   time.Duration `yaml:"timeout"`  //心跳超时时间
+	DebugMode bool          `yaml:"debugMode"`
 }
 
 // GormConfig infra.NewGorm()时使用

@@ -40,6 +40,6 @@ func (h *HeartbeatHandler) handlePacket(ctx context.Context, packet *api.Packet)
 	return pb.NewHeartbeat(int32(1)), nil
 }
 
-func (h *HeartbeatHandler) StartHeartbeat(ctx context.Context, c gnet.Conn, uc *domain.UserConnection) error {
+func (h *HeartbeatHandler) StartHeartbeat(ctx context.Context, c gnet.Conn, uc *domain.UserConn) error {
 	return h.htServer.Submit(ctx, c, uc)
 }

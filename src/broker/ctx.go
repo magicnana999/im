@@ -18,15 +18,15 @@ func CurContext(c gnet.Conn) (context.Context, error) {
 	return nil, errors.CurUserNotFound
 }
 
-func CurUserFromCtx(ctx context.Context) (*domain.UserConnection, error) {
-	if u, ok := ctx.Value(currentUserKey).(*domain.UserConnection); ok {
+func CurUserFromCtx(ctx context.Context) (*domain.UserConn, error) {
+	if u, ok := ctx.Value(currentUserKey).(*domain.UserConn); ok {
 		return u, nil
 	}
 
 	return nil, errors.CurUserNotFound
 }
 
-func CurUserFromConn(c gnet.Conn) (*domain.UserConnection, error) {
+func CurUserFromConn(c gnet.Conn) (*domain.UserConn, error) {
 
 	ctx, err := CurContext(c)
 	if err != nil {

@@ -30,15 +30,15 @@ func InitUserStorage() *UserStorage {
 	return DefaultUserStorage
 }
 
-func (s *UserStorage) LoadUserConn(ctx context.Context, appId string, userId int64) (map[string]*domain.UserConnection, error) {
+func (s *UserStorage) LoadUserConn(ctx context.Context, appId string, userId int64) (map[string]*domain.UserConn, error) {
 	key := inf.KeyUserClients(appId, userId)
 	cmd := inf.RDS.HGetAll(ctx, key)
 	if cmd.Err() == nil {
 		m := cmd.Val()
-		ret := make(map[string]*domain.UserConnection, len(m))
+		ret := make(map[string]*domain.UserConn, len(m))
 		for k, v := range m {
 
-			var uc domain.UserConnection
+			var uc domain.UserConn
 			ee := json.Unmarshal([]byte(v), &uc)
 			if ee != nil {
 				return nil, ee
@@ -52,7 +52,7 @@ func (s *UserStorage) LoadUserConn(ctx context.Context, appId string, userId int
 	}
 }
 
-func (s *UserStorage) StoreUserConn(ctx context.Context, uc *domain.UserConnection) (string, error) {
+func (s *UserStorage) StoreUserConn(ctx context.Context, uc *domain.UserConn) (string, error) {
 
 	key := inf.KeyUserConn(uc.AppId, uc.Label())
 
@@ -66,14 +66,14 @@ func (s *UserStorage) StoreUserConn(ctx context.Context, uc *domain.UserConnecti
 	return ret.Val(), ret.Err()
 }
 
-func (s *UserStorage) RefreshUserConn(ctx context.Context, uc *domain.UserConnection) (bool, error) {
+func (s *UserStorage) RefreshUserConn(ctx context.Context, uc *domain.UserConn) (bool, error) {
 	key := inf.KeyUserConn(uc.AppId, uc.Label())
 	ret := inf.RDS.Expire(ctx, key, time.Minute)
 	return ret.Val(), ret.Err()
 
 }
 
-func (s *UserStorage) StoreUserClients(ctx context.Context, uc *domain.UserConnection) (int64, error) {
+func (s *UserStorage) StoreUserClients(ctx context.Context, uc *domain.UserConn) (int64, error) {
 
 	key := inf.KeyUserClients(uc.AppId, uc.UserId)
 

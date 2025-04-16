@@ -55,6 +55,8 @@ func main() {
 			holder.NewBrokerHolder,
 			holder.NewUserHolder,
 			broker.NewHeartbeatServer,
+			broker.NewMessageRetryServer,
+			broker.NewMessageSendServer,
 		),
 		fx.Invoke(func(userService *service.BusinessService, producer *kafka.Writer) {
 			go func() {
@@ -81,9 +83,9 @@ func main() {
 	stopCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := app.Stop(stopCtx); err != nil {
-		logger.Error("Failed to stop app", zap.Error(err))
+		log.Error("Failed to stop app", zap.Error(err))
 	}
 
-	logger.Info("Shutdown complete")
+	log.Info("Shutdown complete")
 
 }

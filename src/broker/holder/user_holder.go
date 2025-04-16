@@ -25,7 +25,7 @@ func NewUserHolder(rds *redis.Client, lf fx.Lifecycle) (*UserHolder, error) {
 	return &UserHolder{rds: rds, m: sync.Map{}}, nil
 }
 
-func (s *UserHolder) StoreUser(ctx context.Context, u *domain.UserConnection, appId string, userId int64, os string) error {
+func (s *UserHolder) StoreUser(ctx context.Context, u *domain.UserConn, appId string, userId int64, os string) error {
 
 	lock, e := s.Lock(ctx, appId, u.Label())
 	if e != nil {
@@ -54,7 +54,7 @@ func (s *UserHolder) StoreUser(ctx context.Context, u *domain.UserConnection, ap
 	return nil
 }
 
-func (s *UserHolder) RefreshUser(ctx context.Context, uc *domain.UserConnection) error {
+func (s *UserHolder) RefreshUser(ctx context.Context, uc *domain.UserConn) error {
 	lock, e := s.Lock(ctx, uc.AppId, uc.Label())
 	if e != nil {
 		return e
@@ -68,22 +68,22 @@ func (s *UserHolder) RefreshUser(ctx context.Context, uc *domain.UserConnection)
 	return nil
 }
 
-func (s *UserHolder) LoadLocalUser(label string) *domain.UserConnection {
+func (s *UserHolder) LoadLocalUser(label string) *domain.UserConn {
 	if val, ok := s.m.Load(label); ok {
-		return val.(*domain.UserConnection)
+		return val.(*domain.UserConn)
 	}
 	return nil
 }
 
-func (s *UserHolder) LoadUserConn(ctx context.Context, appId string, userId int64) (map[string]*domain.UserConnection, error) {
+func (s *UserHolder) LoadUserConn(ctx context.Context, appId string, userId int64) (map[string]*domain.UserConn, error) {
 	key := infra.KeyUserClients(appId, userId)
 	cmd := s.rds.HGetAll(ctx, key)
 	if cmd.Err() == nil {
 		m := cmd.Val()
-		ret := make(map[string]*domain.UserConnection, len(m))
+		ret := make(map[string]*domain.UserConn, len(m))
 		for k, v := range m {
 
-			var uc domain.UserConnection
+			var uc domain.UserConn
 			ee := json.Unmarshal([]byte(v), &uc)
 			if ee != nil {
 				return nil, ee
@@ -97,7 +97,7 @@ func (s *UserHolder) LoadUserConn(ctx context.Context, appId string, userId int6
 	}
 }
 
-func (s *UserHolder) StoreUserConn(ctx context.Context, uc *domain.UserConnection) (string, error) {
+func (s *UserHolder) StoreUserConn(ctx context.Context, uc *domain.UserConn) (string, error) {
 
 	key := infra.KeyUserConn(uc.AppId, uc.Label())
 
@@ -111,14 +111,14 @@ func (s *UserHolder) StoreUserConn(ctx context.Context, uc *domain.UserConnectio
 	return ret.Val(), ret.Err()
 }
 
-func (s *UserHolder) RefreshUserConn(ctx context.Context, uc *domain.UserConnection) (bool, error) {
+func (s *UserHolder) RefreshUserConn(ctx context.Context, uc *domain.UserConn) (bool, error) {
 	key := infra.KeyUserConn(uc.AppId, uc.Label())
 	ret := s.rds.Expire(ctx, key, time.Minute)
 	return ret.Val(), ret.Err()
 
 }
 
-func (s *UserHolder) StoreUserClients(ctx context.Context, uc *domain.UserConnection) (int64, error) {
+func (s *UserHolder) StoreUserClients(ctx context.Context, uc *domain.UserConn) (int64, error) {
 
 	key := infra.KeyUserClients(uc.AppId, uc.UserId)
 
@@ -189,6 +189,6 @@ func (s *UserHolder) StoreByUserId(ctx context.Context, user *entity.User) (stri
 	return cmd.Val(), cmd.Err()
 }
 
-func (s *UserHolder) Close(ctx context.Context, uc *domain.UserConnection) error {
+func (s *UserHolder) Close(ctx context.Context, uc *domain.UserConn) error {
 	return nil
 }

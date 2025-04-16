@@ -58,7 +58,7 @@ func (h *heartbeatHandler) isSupport(ctx context.Context, packetType int32) bool
 	return packetType == pb.TypeHeartbeat
 }
 
-func (h *heartbeatHandler) startTicker(ctx context.Context, c gnet.Conn, uc *dto.UserConnection) error {
+func (h *heartbeatHandler) startTicker(ctx context.Context, c gnet.Conn, uc *dto.UserConn) error {
 
 	task := &heartbeatTask{fd: c.Fd()}
 
@@ -160,7 +160,7 @@ func (h *heartbeatHandler) stopTicker(c gnet.Conn) error {
 	return nil
 }
 
-func (h *heartbeatHandler) setLastHeartbeat(c *dto.UserConnection) {
+func (h *heartbeatHandler) setLastHeartbeat(c *dto.UserConn) {
 	task, _ := h.m.Load(c.Fd)
 	if task == nil {
 		return
@@ -175,7 +175,7 @@ func (h *heartbeatHandler) isRunning(fd int) bool {
 }
 
 type heartbeatTask struct {
-	uc            *dto.UserConnection
+	uc            *dto.UserConn
 	fd            int
 	remoteAddr    string
 	lastHeartbeat int64
@@ -183,7 +183,7 @@ type heartbeatTask struct {
 	cancel        context.CancelFunc
 	ticker        *time.Ticker
 	c             gnet.Conn
-	//closeFunc     func(c gnet.Conn) error
+	//closeFunc     func(c gnet.Desc) error
 }
 
 func (t *heartbeatTask) setLastHeartbeat() {

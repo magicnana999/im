@@ -10,7 +10,7 @@ import (
 )
 
 type codec interface {
-	encode(c gnet.Conn, p *api.Packet) (*bb.ByteBuffer, error)
+	encode(p *api.Packet) (*bb.ByteBuffer, error)
 	decode(c gnet.Conn) ([]*api.Packet, error)
 }
 
@@ -23,7 +23,7 @@ func newCodec() codec {
 	return defaultCodec
 }
 
-func (l *lengthFieldBasedFrameCodec) encode(c gnet.Conn, p *api.Packet) (*bb.ByteBuffer, error) {
+func (l *lengthFieldBasedFrameCodec) encode(p *api.Packet) (*bb.ByteBuffer, error) {
 
 	buffer := bb.Get()
 

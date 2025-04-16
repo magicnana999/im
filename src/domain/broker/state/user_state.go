@@ -26,7 +26,7 @@ func InitUserState() *UserState {
 	return DefaultUserState
 }
 
-func (s *UserState) StoreUser(ctx context.Context, u *domain.UserConnection, appId string, userId int64, os constants.OSType) error {
+func (s *UserState) StoreUser(ctx context.Context, u *domain.UserConn, appId string, userId int64, os constants.OSType) error {
 
 	lock, e := s.storage.Lock(ctx, appId, u.Label())
 	if e != nil {
@@ -55,7 +55,7 @@ func (s *UserState) StoreUser(ctx context.Context, u *domain.UserConnection, app
 	return nil
 }
 
-func (s *UserState) RefreshUser(ctx context.Context, uc *domain.UserConnection) error {
+func (s *UserState) RefreshUser(ctx context.Context, uc *domain.UserConn) error {
 	lock, e := s.storage.Lock(ctx, uc.AppId, uc.Label())
 	if e != nil {
 		return e
@@ -69,9 +69,9 @@ func (s *UserState) RefreshUser(ctx context.Context, uc *domain.UserConnection) 
 	return nil
 }
 
-func (s *UserState) loadLocalUser(label string) *domain.UserConnection {
+func (s *UserState) loadLocalUser(label string) *domain.UserConn {
 	if val, ok := s.m.Load(label); ok {
-		return val.(*domain.UserConnection)
+		return val.(*domain.UserConn)
 	}
 	return nil
 }

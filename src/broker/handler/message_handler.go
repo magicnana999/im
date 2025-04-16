@@ -12,11 +12,11 @@ import (
 var messageHandleSingleton = singleton.NewSingleton[*MessageHandler]()
 
 type MessageHandler struct {
-	mss       *broker.MessageSendServer
+	mss       *broker.MessageRetryServer
 	routerCli routerservice.Client
 }
 
-func NewMessageHandler(mss *broker.MessageSendServer) *MessageHandler {
+func NewMessageHandler(mss *broker.MessageRetryServer) *MessageHandler {
 	return messageHandleSingleton.Get(func() *MessageHandler {
 		return &MessageHandler{
 			mss:       mss,
