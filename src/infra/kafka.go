@@ -13,6 +13,19 @@ import (
 	"time"
 )
 
+var (
+	Route    = TopicInfo{"msg-route", "msg-route-group"}
+	RouteDLQ = TopicInfo{"msg-route-dlq", "msg-route-dlq-group"}
+	Store    = TopicInfo{"msg-store", "msg-store-group"}
+	Offline  = TopicInfo{"msg-offline", "msg-offline-group"}
+	Push     = TopicInfo{"msg-push", "msg-push-group"}
+)
+
+type TopicInfo struct {
+	Topic string
+	Group string
+}
+
 // getOrDefaultKafkaConfig 返回 Kafka 配置，优先使用全局配置，缺失时应用默认值。
 // 不会修改输入的 global.Config。
 func getOrDefaultKafkaConfig(g *global.Config) *global.KafkaConfig {

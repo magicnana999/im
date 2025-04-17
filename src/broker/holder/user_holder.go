@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"github.com/go-redis/redis/v8"
 	"github.com/magicnana999/im/broker/domain"
-	"github.com/magicnana999/im/constants"
+	"github.com/magicnana999/im/define"
 	entity "github.com/magicnana999/im/entities"
 	"github.com/magicnana999/im/infra"
 	"github.com/magicnana999/im/pkg/id"
@@ -35,7 +35,7 @@ func (s *UserHolder) StoreUser(ctx context.Context, u *domain.UserConn, appId st
 
 	u.AppId = appId
 	u.UserId = userId
-	u.OS = constants.OSType(os)
+	u.OS = define.OSType(os)
 	u.IsLogin.Store(true)
 
 	s.m.Store(u.Label(), u)

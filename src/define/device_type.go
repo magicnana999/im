@@ -1,4 +1,4 @@
-package constants
+package define
 
 type DeviceType string
 
