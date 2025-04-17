@@ -30,7 +30,7 @@ func TestTimewheelSecond(t *testing.T) {
 
 	totalTask := c.SlotCount * 10
 
-	tw, _ := NewTimeWheel(c, logger.Named("timewheel"), nil)
+	tw, _ := NewTimewheel(c, logger.Named("timewheel"), nil)
 	tw.Start(context.Background())
 	defer tw.Stop()
 
@@ -58,7 +58,7 @@ func TestTimewheelMilli(t *testing.T) {
 
 	totalTask := c.SlotCount * 2
 
-	tw, _ := NewTimeWheel(c, logger.Named("timewheel"), nil)
+	tw, _ := NewTimewheel(c, logger.Named("timewheel"), nil)
 	tw.Start(context.Background())
 	defer tw.Stop()
 

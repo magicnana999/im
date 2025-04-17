@@ -81,7 +81,7 @@ func NewMessageRetryServer(g *global.Config, resave func(*api.Message, *domain.U
 	}
 	log.Info(string(jsonext.MarshalNoErr(twc)), "", define.OpInit, "", nil)
 
-	tw, err := timewheel.NewTimeWheel(twc, logger.Named("timewheel-mrs"), nil)
+	tw, err := timewheel.NewTimewheel(twc, logger.Named("timewheel-mrs"), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create time wheel: %w", err)
 	}

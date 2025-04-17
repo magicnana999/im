@@ -63,7 +63,7 @@ func getOrDefaultConfig(cf *Config) *Config {
 
 	return c
 }
-func NewTimeWheel(config *Config, logger logger.Interface, pool *ants.Pool) (*Timewheel, error) {
+func NewTimewheel(config *Config, logger logger.Interface, pool *ants.Pool) (*Timewheel, error) {
 
 	c := getOrDefaultConfig(config)
 

@@ -65,7 +65,7 @@ type Config struct {
 }
 
 // defaultConfig provides default values for Logger configuration.
-var defaultConfig = Config{
+var defaultConfig = &Config{
 	Dir:        "./logs",
 	TracerName: "",
 	Level:      zapcore.DebugLevel,
@@ -160,25 +160,33 @@ func Init(c *Config) (*Logger, error) {
 
 // getDefaultConfig returns a Config with default values applied to any unset fields.
 // It ensures Dir, Encode, and TimeFormat have valid values.
-func getDefaultConfig(c *Config) *Config {
-	if c == nil {
-		return &defaultConfig
+func getDefaultConfig(config *Config) *Config {
+
+	c := &Config{
+		Dir:        "./logs",
+		TracerName: "",
+		Level:      zapcore.DebugLevel,
+		Encode:     JSONEncode,
+		TimeFormat: time.DateTime,
 	}
 
-	cfg := *c
-	if cfg.Dir == "" {
-		cfg.Dir = defaultConfig.Dir
+	if config != nil {
+		*c = *config
 	}
-	if cfg.Encode == "" {
-		cfg.Encode = defaultConfig.Encode
+
+	if c.Dir == "" {
+		c.Dir = defaultConfig.Dir
 	}
-	if cfg.TimeFormat == "" {
-		cfg.TimeFormat = defaultConfig.TimeFormat
+	if c.Encode == "" {
+		c.Encode = defaultConfig.Encode
 	}
-	if cfg.Level == 0 {
-		cfg.Level = defaultConfig.Level
+	if c.TimeFormat == "" {
+		c.TimeFormat = defaultConfig.TimeFormat
 	}
-	return &cfg
+	if c.Level == 0 {
+		c.Level = defaultConfig.Level
+	}
+	return c
 }
 
 // encoder creates a zap encoder based on the specified encoding type and time format.

@@ -3,6 +3,7 @@ package broker
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/magicnana999/im/pkg/jsonext"
 	"time"
 
@@ -25,9 +26,6 @@ var errHeartbeatTimeout = errors.New("heartbeat timeout")
 // errSubmitUCNil indicates that the user connection provided to Submit is nil.
 var errSubmitUCNil = errors.New("failed to submit,cause uc is nil")
 
-// errInvalidTimeout indicates that the timeout duration is less than the interval.
-var errInvalidTimeout = errors.New("timeout must be greater than or equal to interval")
-
 // HeartbeatServer manages client heartbeat detection and timeout handling.
 // It runs in a separate goroutine and must be stopped explicitly using Stop.
 type HeartbeatServer struct {
@@ -39,8 +37,7 @@ type HeartbeatServer struct {
 
 // getOrDefaultHTSConfig returns the HTS configuration, prioritizing global configuration and applying defaults if necessary.
 // It does not modify the input global.Config.
-// It returns the configuration and an error if the timeout is less than the interval.
-func getOrDefaultHTSConfig(g *global.Config) (*global.HTSConfig, error) {
+func getOrDefaultHTSConfig(g *global.Config) *global.HTSConfig {
 	c := &global.HTSConfig{}
 	if g != nil && g.HTS != nil {
 		*c = *g.HTS
@@ -55,21 +52,19 @@ func getOrDefaultHTSConfig(g *global.Config) (*global.HTSConfig, error) {
 	}
 
 	if c.Timeout < c.Interval {
-		logger.Named("hts").Error("invalid timeout", zap.String(define.OP, define.OpInit), zap.Error(errInvalidTimeout))
-		return nil, errInvalidTimeout
+		c.Timeout = c.Interval
+		s := fmt.Sprintf("invalid timeout,set as %d", c.Timeout)
+		logger.Named("hts").Warn(s, zap.String(define.OP, define.OpInit))
 	}
 
-	return c, nil
+	return c
 }
 
 // NewHeartbeatServer initializes a new HeartbeatServer.
 // It uses global.Config for configuration and fx.Lifecycle for lifecycle management.
 // It returns the configured HeartbeatServer instance and an error if initialization fails (e.g., timewheel creation fails).
 func NewHeartbeatServer(g *global.Config, uh *holder.UserHolder, lc fx.Lifecycle) (*HeartbeatServer, error) {
-	c, err := getOrDefaultHTSConfig(g)
-	if err != nil {
-		return nil, err
-	}
+	c := getOrDefaultHTSConfig(g)
 
 	log := NewLogger("hts", c.DebugMode)
 	log.Print(string(jsonext.MarshalNoErr(c)), define.OpInit, nil)
@@ -81,7 +76,7 @@ func NewHeartbeatServer(g *global.Config, uh *holder.UserHolder, lc fx.Lifecycle
 	}
 	log.Print(string(jsonext.MarshalNoErr(twc)), define.OpInit, nil)
 
-	tw, err := timewheel.NewTimeWheel(twc, logger.Named("timewheel-hts"), nil)
+	tw, err := timewheel.NewTimewheel(twc, logger.Named("timewheel-hts"), nil)
 	if err != nil {
 		return nil, err
 	}
