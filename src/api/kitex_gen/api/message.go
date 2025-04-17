@@ -1,7 +1,7 @@
 package api
 
 import (
-	imerror "github.com/magicnana999/im/pkg/error"
+	imerror "github.com/magicnana999/im/pkg/errext"
 	"github.com/magicnana999/im/pkg/id"
 	"google.golang.org/protobuf/proto"
 	"strings"

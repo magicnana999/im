@@ -6,26 +6,23 @@ import (
 	"github.com/magicnana999/im/broker/cmd_service"
 	"github.com/magicnana999/im/broker/holder"
 	"github.com/magicnana999/im/errors"
-	"github.com/magicnana999/im/pb"
 	"google.golang.org/protobuf/proto"
 )
 
 type CommandHandler struct {
 	userHolder  *holder.UserHolder
-	userService *cmd_service.BusinessService
+	userService *cmd_service.UserService
 }
 
-func NewCommandHandler(uh *holder.UserHolder) *CommandHandler {
+func NewCommandHandler(uh *holder.UserHolder, us *cmd_service.UserService) (*CommandHandler, error) {
+	return &CommandHandler{
+		userHolder:  uh,
+		userService: us,
+	}, nil
 
-	return commandHandlerSingleton.Get(func() *CommandHandler {
-		return &CommandHandler{
-			userHolder:  holder.NewUserHolder(),
-			userService: cmd_service.NewUserService(),
-		}
-	})
 }
 
-func (c *CommandHandler) handlePacket(ctx context.Context, packet *api.Packet) (*api.Packet, error) {
+func (c *CommandHandler) HandlePacket(ctx context.Context, packet *api.Packet) (*api.Packet, error) {
 
 	var reply proto.Message
 	var err error
@@ -33,9 +30,9 @@ func (c *CommandHandler) handlePacket(ctx context.Context, packet *api.Packet) (
 	mb := packet.GetCommand()
 
 	switch mb.CommandType {
-	case pb.CommandTypeUserLogin:
+	case api.CommandTypeUserLogin:
 		reply, err = c.userService.Login(ctx, mb.GetLoginRequest())
-	case pb.CommandTypeUserLogout:
+	case api.CommandTypeUserLogout:
 		reply, err = c.userService.Logout(ctx, mb.GetLogoutRequest())
 	default:
 		err = errors.CmdUnknownType

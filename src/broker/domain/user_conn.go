@@ -2,39 +2,65 @@ package domain
 
 import (
 	"fmt"
+	"github.com/magicnana999/im/broker"
 	"github.com/magicnana999/im/define"
 	"io"
 	"strconv"
 	"sync/atomic"
 )
 
-// UserConn represents a user's connection to the IM broker.
-// It stores connection metadata, status, and I/O interfaces for communication.
 type UserConn struct {
-	Fd            int           `json:"fd"`            // Fd is the file descriptor of the connection.
-	AppId         string        `json:"appId"`         // AppId identifies the application associated with the connection.
-	UserId        int64         `json:"userId"`        // UserId is the unique identifier of the user.
-	ClientAddr    string        `json:"clientAddr"`    // ClientAddr is the client's network address.
-	BrokerAddr    string        `json:"brokerAddr"`    // BrokerAddr is the broker's network address.
-	OS            define.OSType `json:"os"`            // OS indicates the client's operating system type.
-	ConnectTime   int64         `json:"connectTime"`   // ConnectTime is the Unix timestamp when the connection was established.
-	IsLogin       atomic.Bool   `json:"isLogin"`       // IsLogin indicates whether the user is logged in (thread-safe).
-	IsClosed      atomic.Bool   `json:"isClosed"`      // IsClosed indicates whether the connection is closed (thread-safe).
-	LastHeartbeat atomic.Int64  `json:"lastHeartbeat"` // LastHeartbeat is the Unix timestamp of the last heartbeat (thread-safe).
-	Reader        io.Reader     `json:"-"`             // Reader is the input stream for reading data from the connection.
-	Writer        io.Writer     `json:"-"`             // Writer is the output stream for writing data to the connection.
+	Fd            int           `json:"fd"`
+	AppId         string        `json:"appId"`
+	UserId        int64         `json:"userId"`
+	ClientAddr    string        `json:"clientAddr"`
+	BrokerAddr    string        `json:"brokerAddr"`
+	OS            define.OSType `json:"os"`
+	ConnectTime   int64         `json:"connectTime"`
+	IsLogin       atomic.Bool   `json:"isLogin"`
+	IsClosed      atomic.Bool   `json:"isClosed"`
+	LastHeartbeat atomic.Int64  `json:"lastHeartbeat"`
+	Reader        io.Reader     `json:"-"`
+	Writer        io.Writer     `json:"-"`
+	ConnLabel     string        `json:"connLabel"`
+	ConnDesc      string        `json:"connDesc"`
 }
 
-// Desc returns a string description of the UserConn.
-// It combines the client address and the connection label.
-func (u *UserConn) Desc() string {
-	return fmt.Sprintf("%s#%s", u.ClientAddr, u.Label())
+func (u *UserConn) Close() {
+	u.IsClosed.Store(true)
 }
 
-// Label returns a unique label for the UserConn.
-// The label is formatted as "AppId#UserId#DeviceType" if all components are valid.
-// It returns an empty string if AppId, UserId, or DeviceType is invalid.
-func (u *UserConn) Label() string {
+func (u *UserConn) Login(appId string, userId int64, os define.OSType) (bool, error) {
+	if appId == "" {
+		return false, broker.ErrLogin.SetDetail("appId can not be empty")
+	}
+
+	if userId == 0 {
+		return false, broker.ErrLogin.SetDetail("userId can not be empty")
+	}
+
+	if os == "" {
+		return false, broker.ErrLogin.SetDetail("os can not be empty")
+	}
+
+	if u.IsClosed.Load() {
+		return false, broker.ErrLogin.SetDetail("conn is closed")
+	}
+
+	u.IsLogin.Store(true)
+	u.AppId = appId
+	u.UserId = userId
+	u.OS = os
+	u.ConnLabel = u.parseLabel()
+	u.ConnDesc = u.parseDesc()
+	return true, nil
+}
+
+func (u *UserConn) parseDesc() string {
+	return fmt.Sprintf("%s#%s", u.ClientAddr, u.parseLabel())
+}
+
+func (u *UserConn) parseLabel() string {
 	if len(u.AppId) == 0 {
 		return ""
 	}
@@ -49,4 +75,20 @@ func (u *UserConn) Label() string {
 	}
 
 	return fmt.Sprintf("%s#%s#%s", u.AppId, strconv.FormatInt(u.UserId, 10), dt.String())
+}
+
+func (u *UserConn) Label() string {
+	if u.IsLogin.Load() {
+		return u.ConnLabel
+	} else {
+		return u.parseLabel()
+	}
+}
+
+func (u *UserConn) Desc() string {
+	if u.IsLogin.Load() {
+		return u.ConnDesc
+	} else {
+		return u.parseDesc()
+	}
 }

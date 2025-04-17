@@ -58,7 +58,7 @@ func main() {
 			broker.NewMessageRetryServer,
 			broker.NewMessageSendServer,
 		),
-		fx.Invoke(func(userService *cmd_service.BusinessService, producer *kafka.Writer) {
+		fx.Invoke(func(userService *cmd_service.UserService, producer *kafka.Writer) {
 			go func() {
 
 			}()

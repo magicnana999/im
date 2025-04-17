@@ -10,16 +10,17 @@ import (
 	"go.uber.org/fx"
 )
 
-type BusinessService struct {
+type UserService struct {
 	userHolder  *holder.UserHolder
 	businessCli businessservice.Client
 }
 
-func NewBusinessService(uh *holder.UserHolder, bc businessservice.Client, lf fx.Lifecycle) *BusinessService {
-	return &BusinessService{userHolder: uh, businessCli: bc}
+func NewUserService(uh *holder.UserHolder, bc businessservice.Client, lf fx.Lifecycle) (*UserService, error) {
+	bs := &UserService{userHolder: uh, businessCli: bc}
+	return bs, nil
 }
 
-func (s *BusinessService) Login(ctx context.Context, request *api.LoginRequest) (*api.LoginReply, error) {
+func (s *UserService) Login(ctx context.Context, request *api.LoginRequest) (*api.LoginReply, error) {
 	uc, err := broker.CurUserFromCtx(ctx)
 	if err != nil {
 		return nil, errors.CurUserNotFound.SetDetail(err)
@@ -42,6 +43,6 @@ func (s *BusinessService) Login(ctx context.Context, request *api.LoginRequest) 
 	return rep, nil
 }
 
-func (s *BusinessService) Logout(ctx context.Context, request *api.LogoutRequest) (*api.LogoutReply, error) {
+func (s *UserService) Logout(ctx context.Context, request *api.LogoutRequest) (*api.LogoutReply, error) {
 	return nil, nil
 }

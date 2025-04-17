@@ -4,6 +4,9 @@ option go_package = "/api";
 
 import "packet.proto";
 
+message RouteReply{
+}
+
 service RouterService{
-  rpc Route(Message) returns (Message) {}
+  rpc Route(Message) returns (RouteReply) {}
 }

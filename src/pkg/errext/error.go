@@ -1,12 +1,14 @@
-package error
+package errext
 
 import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/magicnana999/im/pkg/logger"
-	"github.com/magicnana999/im/pkg/utils"
-	"go.uber.org/zap"
+)
+
+var (
+	NilError     = New(-1, "nil error")
+	DefaultError = New(-2, "default error")
 )
 
 type Error struct {
@@ -20,20 +22,27 @@ func (e Error) ShortString() string {
 }
 
 func (e Error) LongString() string {
-	return e.Message + " " + e.Detail
+	if e.Detail != "" {
+		return e.Message + "," + e.Detail
+	} else {
+		return e.Message
+	}
 }
 
-func (e Error) JsonString() string {
-	js, err := json.Marshal(e)
-	if err != nil {
-		logger.Error("error json marshal", zap.String(logger.ERROR, err.Error()))
-		return "{}"
+func (e Error) JsonBytes() ([]byte, error) {
+	return json.Marshal(e)
+}
+
+func (e Error) JsonString() (string, error) {
+	if bs, err := e.JsonBytes(); err != nil {
+		return "", err
+	} else {
+		return string(bs), nil
 	}
-	return string(js)
 }
 
 func (e Error) Error() string {
-	return e.JsonString()
+	return e.LongString()
 }
 
 func (e Error) GetMessage() string {
@@ -53,17 +62,13 @@ func (e Error) SetMessage(msg string) Error {
 	return e
 }
 
-func (e Error) SetDetail(a any) Error {
-	d, ee := utils.Any2String(a)
-	if ee != nil {
-		fmt.Printf("parse to string error:%v", ee)
-	}
-	e.Detail = d
+func (e Error) SetDetail(detail string) Error {
+	e.Detail = detail
 	return e
 }
 
 func (e Error) FmtDetail(template string, args ...any) Error {
-	s := fmt.Sprintf(template, args)
+	s := fmt.Sprintf(template, args...)
 	e.Detail = s
 	return e
 }
@@ -82,7 +87,7 @@ func New(code int, message string) Error {
 
 func Format(e error) Error {
 	if e == nil {
-		return New(-1, "no error found")
+		return NilError
 	}
 
 	var ime Error
@@ -90,6 +95,6 @@ func Format(e error) Error {
 		return ime
 	}
 
-	ime = New(-1, e.Error())
+	ime = New(DefaultError.Code, e.Error())
 	return ime
 }

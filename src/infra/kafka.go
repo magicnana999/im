@@ -115,6 +115,6 @@ func (k KafkaLogger) Printf(s string, i ...interface{}) {
 	case zapcore.ErrorLevel:
 		k.Error(msg)
 	default:
-		k.Debug(msg) // 默认 Info
+		k.Debug(msg) // 默认 infoOrError
 	}
 }

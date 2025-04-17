@@ -12,7 +12,7 @@ import (
 	proto "google.golang.org/protobuf/proto"
 )
 
-var errInvalidMessageType = errors.New("invalid message type for cmd_service method handler")
+var errInvalidMessageType = errors.New("invalid message type for service method handler")
 
 var serviceMethods = map[string]kitex.MethodInfo{
 	"Route": kitex.NewMethodInfo(
@@ -180,14 +180,14 @@ func (p *RouteArgs) GetFirstArgument() interface{} {
 }
 
 type RouteResult struct {
-	Success *api.Message
+	Success *api.RouteReply
 }
 
-var RouteResult_Success_DEFAULT *api.Message
+var RouteResult_Success_DEFAULT *api.RouteReply
 
 func (p *RouteResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
 	if !p.IsSetSuccess() {
-		p.Success = new(api.Message)
+		p.Success = new(api.RouteReply)
 	}
 	return p.Success.FastRead(buf, _type, number)
 }
@@ -214,7 +214,7 @@ func (p *RouteResult) Marshal(out []byte) ([]byte, error) {
 }
 
 func (p *RouteResult) Unmarshal(in []byte) error {
-	msg := new(api.Message)
+	msg := new(api.RouteReply)
 	if err := proto.Unmarshal(in, msg); err != nil {
 		return err
 	}
@@ -222,7 +222,7 @@ func (p *RouteResult) Unmarshal(in []byte) error {
 	return nil
 }
 
-func (p *RouteResult) GetSuccess() *api.Message {
+func (p *RouteResult) GetSuccess() *api.RouteReply {
 	if !p.IsSetSuccess() {
 		return RouteResult_Success_DEFAULT
 	}
@@ -230,7 +230,7 @@ func (p *RouteResult) GetSuccess() *api.Message {
 }
 
 func (p *RouteResult) SetSuccess(x interface{}) {
-	p.Success = x.(*api.Message)
+	p.Success = x.(*api.RouteReply)
 }
 
 func (p *RouteResult) IsSetSuccess() bool {
@@ -251,7 +251,7 @@ func newServiceClient(c client.Client) *kClient {
 	}
 }
 
-func (p *kClient) Route(ctx context.Context, Req *api.Message) (r *api.Message, err error) {
+func (p *kClient) Route(ctx context.Context, Req *api.Message) (r *api.RouteReply, err error) {
 	var _args RouteArgs
 	_args.Req = Req
 	var _result RouteResult

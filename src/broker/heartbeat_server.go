@@ -17,14 +17,16 @@ import (
 	"go.uber.org/zap"
 )
 
-// errConnClosedAlready indicates that the client connection is already closed.
-var errConnClosedAlready = errors.New("conn already closed")
+var (
+	// errConnClosedAlready indicates that the client connection is already closed.
+	errConnClosedAlready = errors.New("conn already closed")
 
-// errHeartbeatTimeout indicates that the heartbeat has timed out, requiring the connection to be closed.
-var errHeartbeatTimeout = errors.New("heartbeat timeout")
+	// errHeartbeatTimeout indicates that the heartbeat has timed out, requiring the connection to be closed.
+	errHeartbeatTimeout = errors.New("heartbeat timeout")
 
-// errSubmitUCNil indicates that the user connection provided to Submit is nil.
-var errSubmitUCNil = errors.New("failed to submit,cause uc is nil")
+	// errUCIsNil indicates that the user connection provided to Submit is nil.
+	errUCIsNil = errors.New("uc is nil")
+)
 
 // HeartbeatServer manages client heartbeat detection and timeout handling.
 // It runs in a separate goroutine and must be stopped explicitly using Stop.
@@ -67,14 +69,14 @@ func NewHeartbeatServer(g *global.Config, uh *holder.UserHolder, lc fx.Lifecycle
 	c := getOrDefaultHTSConfig(g)
 
 	log := NewLogger("hts", c.DebugMode)
-	log.Print(string(jsonext.MarshalNoErr(c)), define.OpInit, nil)
+	log.InfoOrError(string(jsonext.MarshalNoErr(c)), "", define.OpInit, "", nil)
 
 	twc := &timewheel.Config{
 		Tick:                time.Second,
 		SlotCount:           60,
 		MaxLengthOfEachSlot: 100_0000,
 	}
-	log.Print(string(jsonext.MarshalNoErr(twc)), define.OpInit, nil)
+	log.InfoOrError(string(jsonext.MarshalNoErr(twc)), "", define.OpInit, "", nil)
 
 	tw, err := timewheel.NewTimewheel(twc, logger.Named("timewheel-hts"), nil)
 	if err != nil {
@@ -104,7 +106,7 @@ func NewHeartbeatServer(g *global.Config, uh *holder.UserHolder, lc fx.Lifecycle
 // It returns an error if the timewheel fails to start.
 func (s *HeartbeatServer) Start(ctx context.Context) error {
 	go s.tw.Start(ctx)
-	s.logger.Print("timewheel started", define.OpStart, nil)
+	s.logger.InfoOrError("timewheel start", "", define.OpStart, "", nil)
 	return nil
 }
 
@@ -112,7 +114,11 @@ func (s *HeartbeatServer) Start(ctx context.Context) error {
 // It stops the timewheel and returns an error if the shutdown fails.
 func (s *HeartbeatServer) Stop(ctx context.Context) error {
 	s.tw.Stop()
-	s.logger.Print("timewheel stopped", define.OpStop, nil)
+	s.logger.InfoOrError("timewheel stop", "", define.OpStart, "", nil)
+
+	if s.logger != nil {
+		s.logger.Close()
+	}
 	return nil
 }
 
@@ -120,15 +126,28 @@ func (s *HeartbeatServer) Stop(ctx context.Context) error {
 // It returns an error if the user connection is nil or the task submission fails.
 func (s *HeartbeatServer) Submit(ctx context.Context, uc *domain.UserConn) error {
 	if uc == nil {
-		return errSubmitUCNil
+		s.logger.Error("failed to submit", zap.Error(errUCIsNil))
+		return errUCIsNil
 	}
 
-	close := func() error {
-		return s.userHolder.Close(ctx, uc)
+	if uc.IsClosed.Load() {
+		s.logger.Error("failed to submit", zap.Error(errConnClosedAlready))
+		return errConnClosedAlready
 	}
 
-	refresh := func() error {
-		return s.userHolder.RefreshUser(ctx, uc)
+	close := func() {
+		s.userHolder.Close(ctx, uc)
+		s.logger.DebugOrError("close", uc.Desc(), define.OpTicking, "", nil)
+	}
+
+	refresh := func() {
+		err := s.userHolder.RefreshUser(ctx, uc)
+		if err != nil {
+			s.logger.DebugOrError("failed to refresh user,to closing", uc.Desc(), define.OpTicking, "", err)
+			s.userHolder.Close(ctx, uc)
+		} else {
+			s.logger.DebugOrError("refresh", uc.Desc(), define.OpTicking, "", nil)
+		}
 	}
 
 	task := &heartbeatTask{
@@ -141,6 +160,7 @@ func (s *HeartbeatServer) Submit(ctx context.Context, uc *domain.UserConn) error
 	}
 
 	_, err := s.tw.Submit(task, task.interval)
+	s.logger.DebugOrError("failed to submit", uc.Desc(), define.OpSubmit, "", err)
 	return err
 }
 
@@ -150,8 +170,8 @@ type heartbeatTask struct {
 	uc          *domain.UserConn // uc is the user connection.
 	interval    time.Duration    // interval is the heartbeat interval.
 	timeout     time.Duration    // timeout is the maximum allowed inactivity duration.
-	closeFunc   func() error     // closeFunc closes the connection on timeout.
-	refreshFunc func() error     // refreshFunc updates the connection's online status.
+	closeFunc   func()           // closeFunc closes the connection on timeout.
+	refreshFunc func()           // refreshFunc updates the connection's online status.
 	logger      *Logger          // logger records task events.
 }
 
@@ -160,23 +180,26 @@ type heartbeatTask struct {
 // and returns the task result (Retry or Break) along with any error encountered.
 func (t *heartbeatTask) Execute(now time.Time) (timewheel.TaskResult, error) {
 	// Connection is already closed.
+
+	if t.uc == nil {
+		t.logger.DebugOrError("uc is nil", "", define.OpTicking, "", errUCIsNil)
+		return timewheel.Break, errUCIsNil
+	}
+
 	if t.uc.IsClosed.Load() {
+		t.logger.DebugOrError("uc is closed", t.uc.Desc(), define.OpTicking, "", errConnClosedAlready)
 		return timewheel.Break, errConnClosedAlready
 	}
 
 	// Connection has timed out.
 	if time.Since(time.Unix(t.uc.LastHeartbeat.Load(), 0)) >= t.timeout {
-		t.logger.Debug("timeout", t.uc.Desc(), "heartbeat", "", nil)
-		if err := t.closeFunc(); err != nil {
-			return timewheel.Break, err
-		}
+		t.logger.DebugOrError("timeout", t.uc.Desc(), define.OpTicking, "", nil)
+		t.closeFunc()
 		return timewheel.Break, errHeartbeatTimeout
 	}
 
 	// Refresh connection status.
-	if err := t.refreshFunc(); err != nil {
-		return timewheel.Break, err
-	}
+	t.refreshFunc()
 
 	// Continue scheduling the task.
 	return timewheel.Retry, nil

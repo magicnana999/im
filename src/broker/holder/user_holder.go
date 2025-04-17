@@ -189,6 +189,6 @@ func (s *UserHolder) StoreByUserId(ctx context.Context, user *entity.User) (stri
 	return cmd.Val(), cmd.Err()
 }
 
-func (s *UserHolder) Close(ctx context.Context, uc *domain.UserConn) error {
-	return nil
+func (s *UserHolder) Close(ctx context.Context, uc *domain.UserConn) {
+	return
 }

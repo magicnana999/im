@@ -2,50 +2,52 @@ package broker
 
 import (
 	"context"
-	"encoding/binary"
 	"github.com/bytedance/gopkg/util/logger"
 	"github.com/magicnana999/im/api/kitex_gen/api"
 	"github.com/magicnana999/im/broker/domain"
 	"github.com/magicnana999/im/broker/handler"
 	"github.com/magicnana999/im/broker/holder"
-	"github.com/magicnana999/im/errors"
+	"github.com/magicnana999/im/define"
 	"github.com/panjf2000/gnet/v2"
 	"github.com/panjf2000/gnet/v2/pkg/logging"
 	bb "github.com/panjf2000/gnet/v2/pkg/pool/bytebuffer"
+	"go.uber.org/fx"
+	"go.uber.org/zap"
 	"google.golang.org/protobuf/encoding/protojson"
 
-	"google.golang.org/protobuf/proto"
 	"time"
 )
 
 type TcpServer struct {
 	*gnet.BuiltinEventEngine
 	eng              gnet.Engine
-	interval         int
+	interval         time.Duration
 	commandHandler   *handler.CommandHandler
 	heartbeatHandler *handler.HeartbeatHandler
 	messageHandler   *handler.MessageHandler
 	brokerHolder     *holder.BrokerHolder
 	codec            *Codec
 	ctx              context.Context
+	logger           *Logger
 }
 
-func NewTcpServer(mss *MessageRetryServer, hts *HeartbeatServer) *TcpServer {
-	return tcpServerSingleton.Get(func() *TcpServer {
-		return &TcpServer{
-			interval:         30,
-			commandHandler:   handler.NewCommandHandler(),
-			messageHandler:   handler.NewMessageHandler(mss),
-			heartbeatHandler: handler.NewHeartbeatHandler(hts),
-			brokerHolder:     holder.NewBrokerHolder(),
-			codec:            newCodec(),
-		}
-	})
+func NewTcpServer(ch *handler.CommandHandler, hh *handler.HeartbeatHandler, mh *handler.MessageHandler, bh *holder.BrokerHolder, lc fx.Lifecycle) (*TcpServer, error) {
+
+	logger := NewLogger("tcp", true)
+	return &TcpServer{
+		commandHandler:   ch,
+		messageHandler:   mh,
+		heartbeatHandler: hh,
+		brokerHolder:     bh,
+		codec:            NewCodec(),
+		interval:         time.Second * 30,
+		logger:           logger,
+	}, nil
 }
 
 func (s *TcpServer) Start(ctx context.Context) error {
 	s.ctx = ctx
-	return gnet.Run(s,
+	err := gnet.Run(s,
 		"tcp://:5075",
 		gnet.WithMulticore(true),
 		gnet.WithLockOSThread(true),
@@ -63,20 +65,26 @@ func (s *TcpServer) Start(ctx context.Context) error {
 		gnet.WithLogLevel(logging.DebugLevel),
 		gnet.WithEdgeTriggeredIO(true),
 		gnet.WithEdgeTriggeredIOChunk(0))
+
+	s.logger.SrvInfo("tcp start", SrvLifecycle, err)
+	return err
 }
 
 func (s *TcpServer) OnBoot(eng gnet.Engine) (action gnet.Action) {
 	s.eng = eng
+	s.logger.SrvInfo("tcp started", SrvLifecycle, nil)
 
-	brokerInfo := domain.BrokerInfo{Addr: "", StartAt: time.Now().UnixMilli()}
-	if _, e := s.brokerHolder.StoreBroker(s.ctx, brokerInfo); e != nil {
-		logger.Fatalf("failed to store broker info: %v", e)
-	}
+	//brokerInfo := domain.BrokerInfo{Addr: "", StartAt: time.Now().UnixMilli()}
+	//if _, e := s.brokerHolder.StoreBroker(s.ctx, brokerInfo); e != nil {
+	//	logger.Fatalf("failed to store broker info: %v", e)
+	//}
 
 	return gnet.None
 }
 
 func (s *TcpServer) OnShutdown(eng gnet.Engine) {
+	s.logger.SrvInfo("tcp shutdown", SrvLifecycle, nil)
+
 }
 
 func (s *TcpServer) OnOpen(c gnet.Conn) (out []byte, action gnet.Action) {
@@ -94,40 +102,67 @@ func (s *TcpServer) OnOpen(c gnet.Conn) (out []byte, action gnet.Action) {
 	subCtx := context.WithValue(s.ctx, currentUserKey, uc)
 	c.SetContext(subCtx)
 
-	if err := s.heartbeatHandler.StartHeartbeat(subCtx, c, uc); err != nil {
-		logger.Errorf("failed to open connection: %v", err)
-		s.eng.Stop(subCtx)
+	err := s.heartbeatHandler.StartHeartbeat(subCtx, uc)
+	if err != nil {
+		s.logger.ConnDebug("start heartbeat", uc.Desc(), ConnLifecycle, err)
+		s.Close(c, uc, err.Error())
 	}
+
 	return nil, gnet.None
 }
 
 func (s *TcpServer) OnClose(c gnet.Conn, err error) (action gnet.Action) {
-	return
+	ctx := GetContext(c)
+	uc := GetCurUserConn(ctx)
+	s.logger.ConnDebug("close", uc.Desc(), ConnLifecycle, err)
+	return gnet.None
 }
 
 func (s *TcpServer) OnTraffic(c gnet.Conn) (action gnet.Action) {
 
-	ctx := c.Context().(context.Context)
+	ctx := GetContext(c)
+	uc, err := GetCurUserConn(ctx)
+	if err != nil {
+		s.logger.ConnDebug("current user not exist", "", ConnLifecycle, err)
+		s.Close(c, uc, err.Error())
+	}
+	if uc == nil {
+		s.logger.ConnDebug("current user is nil", "", ConnLifecycle, UserConnIsNil)
+		s.Close(c, uc, err.Error())
+	}
 
-	ctx = logger.NewSpan(ctx, "traffic")
-	defer logger.EndSpan(ctx)
-
-	packets, e := s.codec.decode(c)
-	if e != nil {
-		t, a := traffic(ctx, c, "decode error:%v", e)
-		logger.Errorf(t, a...)
-
-		s.heartbeatHandler.stopTicker(c)
+	packets, err := s.codec.Decode(c)
+	if err != nil {
+		s.logger.ConnDebug("decode error", uc.Desc(), ConnLifecycle, e)
+		s.heartbeatHandler.StopHeartbeat(ctx, uc)
+		s.Close(c, uc, e.Error())
 		return gnet.None
 	}
 
 	if packets != nil {
 		for _, packet := range packets {
 
-			if !packet.IsHeartbeat() && logger.IsDebugEnable() {
-				js, _ := protojson.Marshal(packet)
-				t, a := traffic(ctx, c, "decode:%s", string(js))
-				logger.Debugf(t, a...)
+			var response *api.Packet
+
+			switch packet.Type {
+			case api.TypeHeartbeat:
+				res, err := s.heartbeatHandler.HandlePacket(ctx, uc, packet)
+				if err != nil {
+					s.heartbeatHandler.StopHeartbeat(ctx, uc)
+					c.Close()
+				}
+				response = res
+				break
+			case api.TypeCommand:
+				res, err := s.commandHandler.HandlePacket(ctx, packet)
+			}
+
+			if packet.IsHeartbeat() {
+				response, err := s.heartbeatHandler.HandlePacket(ctx, packet)
+				if err != nil {
+					s.heartbeatHandler.StopHeartbeat(ctx, uc)
+					c.Close()
+				}
 			}
 
 			response, err11 := s.handler.handlePacket(ctx, packet)
@@ -145,13 +180,13 @@ func (s *TcpServer) OnTraffic(c gnet.Conn) (action gnet.Action) {
 
 			if !response.IsHeartbeat() && logger.IsDebugEnable() {
 				js, _ := protojson.Marshal(response)
-				t, a := traffic(ctx, c, "encode:%s", string(js))
+				t, a := traffic(ctx, c, "Encode:%s", string(js))
 				logger.Debugf(t, a...)
 			}
 
-			bs, err12 := s.codec.encode(c, response)
+			bs, err12 := s.codec.Encode(c, response)
 			if err12 != nil {
-				t, a := traffic(ctx, c, "encode error:%v", err12)
+				t, a := traffic(ctx, c, "Encode error:%v", err12)
 				logger.Errorf(t, a...)
 				s.heartbeatHandler.stopTicker(c)
 				return gnet.None
@@ -176,93 +211,38 @@ func (s *TcpServer) OnTraffic(c gnet.Conn) (action gnet.Action) {
 func (s *TcpServer) OnTick() (delay time.Duration, action gnet.Action) {
 
 	broker := domain.BrokerInfo{
-		Addr:    s.addr,
+		Addr:    "hello",
 		StartAt: time.Now().UnixMilli(),
 	}
-	_, err := s.brokerState.RefreshBroker(s.ctx, broker)
+	_, err := s.brokerHolder.RefreshBroker(s.ctx, broker)
 	if err != nil {
-		logger.Fatalf("failed to ticking error: %v", err)
+		s.logger.DebugOrError("tcp server could not tick", "", define.OpTicking, "", err)
 	}
 
 	return time.Duration(s.interval) * time.Second, gnet.None
 }
 
-var defaultCodec = &Codec{}
+func GetContext(c gnet.Conn) context.Context {
 
-type Codec struct {
-}
-
-func newCodec() *Codec {
-	return defaultCodec
-}
-
-func (l *Codec) encode(p *api.Packet) (*bb.ByteBuffer, error) {
-
-	buffer := bb.Get()
-
-	if p.IsHeartbeat() {
-
-		hb := p.GetHeartbeat().Value
-
-		binary.Write(buffer, binary.BigEndian, int32(4))
-		binary.Write(buffer, binary.BigEndian, int32(hb))
-
-		return buffer, nil
-	} else {
-
-		bs, e := proto.Marshal(p)
-
-		if e != nil {
-			return nil, errors.EncodeError.SetDetail(e)
-		}
-
-		binary.Write(buffer, binary.BigEndian, int32(len(bs)))
-		binary.Write(buffer, binary.BigEndian, bs)
-		return buffer, nil
-	}
-}
-
-func (l *Codec) decode(c gnet.Conn) ([]*api.Packet, error) {
-
-	result := make([]*api.Packet, 0)
-
-	for c.InboundBuffered() >= 4 {
-
-		var length int32
-		binary.Read(c, binary.BigEndian, &length)
-
-		if length == 4 && c.InboundBuffered() >= int(length) {
-
-			var heartbeat int32
-			binary.Read(c, binary.BigEndian, &heartbeat)
-
-			packet := api.NewHeartbeat(int32(heartbeat)).Wrap()
-			result = append(result, packet)
-
-		}
-
-		if length > 4 && c.InboundBuffered() >= int(length) {
-
-			bs := make([]byte, int(length))
-			n, e := c.Read(bs)
-			if e != nil {
-				return nil, errors.DecodeError.SetDetail(e)
-			}
-
-			if n != int(length) {
-				return nil, errors.DecodeError.SetDetail("failed to read packet")
-			}
-
-			var p api.Packet
-			if e4 := proto.Unmarshal(bs, &p); e4 != nil {
-				return nil, errors.DecodeError.SetDetail(e4)
-			}
-
-			result = append(result, &p)
-
-		}
-
+	if c == nil {
+		return nil
 	}
 
-	return result, nil
+	if ctx, o := c.Context().(context.Context); o {
+		return ctx
+	}
+	return nil
+}
+
+func DelContext(c gnet.Conn) {
+	c.SetContext(nil)
+}
+
+func (s *TcpServer) Close(c gnet.Conn, uc *domain.UserConn, reason string) {
+	uc.Close()
+	c.CloseWithCallback(func(c gnet.Conn, err error) error {
+		s.logger.ConnDebug("close completed", uc.Desc(), ConnLifecycle, err, zap.String("reason", reason))
+		DelContext(c)
+		return nil
+	})
 }

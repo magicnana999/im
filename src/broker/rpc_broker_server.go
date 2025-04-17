@@ -88,14 +88,14 @@ func NewRpcBrokerServer(
 func (s *RpcBrokerServer) Start(ctx context.Context) error {
 	go func() {
 		err := s.server.Run()
-		s.logger.Print("rpc server start...", define.OpStart, err)
+		s.logger.InfoOrError("rpc server start...", "", define.OpStart, "", err)
 	}()
 	return nil
 }
 
 func (s *RpcBrokerServer) Stop(ctx context.Context) error {
 	err := s.server.Stop()
-	s.logger.Print("rpc server stop...", define.OpStop, err)
+	s.logger.InfoOrError("rpc server stop...", "", define.OpStop, "", err)
 	return err
 }
 

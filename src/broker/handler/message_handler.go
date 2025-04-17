@@ -5,37 +5,34 @@ import (
 	"github.com/magicnana999/im/api/kitex_gen/api"
 	"github.com/magicnana999/im/api/kitex_gen/api/routerservice"
 	"github.com/magicnana999/im/broker"
-	"github.com/magicnana999/im/infra"
-	"github.com/magicnana999/im/pkg/singleton"
+	"go.uber.org/fx"
 )
 
-var messageHandleSingleton = singleton.NewSingleton[*MessageHandler]()
-
 type MessageHandler struct {
-	mss       *broker.MessageRetryServer
-	routerCli routerservice.Client
+	mrs          *broker.MessageRetryServer
+	routerClient routerservice.Client
 }
 
-func NewMessageHandler(mss *broker.MessageRetryServer) *MessageHandler {
-	return messageHandleSingleton.Get(func() *MessageHandler {
-		return &MessageHandler{
-			mss:       mss,
-			routerCli: infra.NewRouterClient(),
-		}
-	})
+func NewMessageHandler(mrs *broker.MessageRetryServer, rc routerservice.Client, lc fx.Lifecycle) (*MessageHandler, error) {
+	h := &MessageHandler{
+		mrs:          mrs,
+		routerClient: rc,
+	}
+
+	return h, nil
 }
 
 func (m *MessageHandler) handlePacket(ctx context.Context, p *api.Packet) (*api.Packet, error) {
 
 	mb := p.GetMessage()
 	if mb.IsRequest() {
-		reply, err := m.routerCli.Route(ctx, mb)
-		return nil, nil
+		_, err := m.routerClient.Route(ctx, mb)
+		return mb.Response(nil, err).Wrap(), nil
 	}
 
-	//if mb.IsResponse() {
-	//	m.deliver.ack(mb.MessageId)
-	//}
+	if mb.IsResponse() {
+		m.mrs.Ack(mb.MessageId)
+	}
 
 	return nil, nil
 }
