@@ -3,13 +3,12 @@ package timewheel
 import (
 	"context"
 	"fmt"
-	"github.com/magicnana999/im/define"
+	"github.com/magicnana999/im/pkg/jsonext"
 	"github.com/magicnana999/im/pkg/logger"
 	"github.com/magicnana999/im/pkg/queue"
 	"github.com/panjf2000/ants/v2"
 	"go.uber.org/zap"
 	"runtime"
-	"sync"
 	"sync/atomic"
 	"time"
 )
@@ -27,17 +26,18 @@ type Task interface {
 }
 
 type Config struct {
-	Tick                time.Duration `yaml:"tick"`                //时间间隔
-	SlotCount           int           `yaml:"slotCount"`           //槽数量
-	MaxLengthOfEachSlot int           `yaml:"maxLengthOfEachSlot"` //每个槽的最大长度，0：无限大
-	maxIntervalOfSubmit time.Duration //提交任务时最大间隔
+	Tick                time.Duration `yaml:"tick",json:"tick"`                               //时间间隔
+	SlotCount           int           `yaml:"slotCount",json:"slotCount"`                     //槽数量
+	MaxLengthOfEachSlot int           `yaml:"maxLengthOfEachSlot",json:"maxLengthOfEachSlot"` //每个槽的最大长度，0：无限大
+	MaxIntervalOfSubmit time.Duration `yaml:"maxIntervalOfSubmit",json:"maxIntervalOfSubmit"` //提交任务时最大间隔
+	RunWithPool         bool          `yaml:"runWithPool",json:"runWithPool"`
 }
 
 // Timewheel 时间轮
 type Timewheel struct {
 	slots        []*queue.LockFreeQueue[Task] //槽
 	cancel       context.CancelFunc           //停止方法
-	once         sync.Once                    //用来保证start一次
+	IsRunning    atomic.Bool                  // atomic
 	currentIndex int64                        //当前的slot索引
 	currentMilli int64                        //毫秒
 	pool         *ants.Pool                   //worker池
@@ -51,21 +51,38 @@ func getOrDefaultConfig(cf *Config) *Config {
 		*c = *cf
 	}
 
-	if c.Tick == 0 {
+	if c.Tick <= 0 {
 		c.Tick = time.Second
 	}
 
-	if c.SlotCount == 0 {
+	if c.SlotCount <= 0 {
 		c.SlotCount = 60
 	}
 
-	c.maxIntervalOfSubmit = c.Tick * time.Duration(c.SlotCount)
+	if c.MaxLengthOfEachSlot <= 0 {
+		c.MaxLengthOfEachSlot = 0
+	}
+
+	if c.MaxIntervalOfSubmit <= 0 {
+		c.MaxIntervalOfSubmit = c.Tick * time.Duration(c.SlotCount)
+	}
 
 	return c
 }
 func NewTimewheel(config *Config, logger logger.Interface, pool *ants.Pool) (*Timewheel, error) {
 
 	c := getOrDefaultConfig(config)
+
+	if c.MaxIntervalOfSubmit >= c.Tick*time.Duration(c.SlotCount) {
+		c.MaxIntervalOfSubmit = c.Tick * time.Duration(c.SlotCount)
+		if logger != nil {
+			logger.Warn("invalid MaxIntervalOfSubmit,reset as default value")
+		}
+	}
+
+	if logger != nil && logger.IsDebugEnabled() {
+		logger.Debug(string(jsonext.MarshalNoErr(c)))
+	}
 
 	tw := &Timewheel{
 		slots:  make([]*queue.LockFreeQueue[Task], c.SlotCount),
@@ -78,9 +95,12 @@ func NewTimewheel(config *Config, logger logger.Interface, pool *ants.Pool) (*Ti
 		tw.slots[i] = queue.NewLockFreeQueue[Task](int64(c.MaxLengthOfEachSlot))
 	}
 
-	if tw.pool == nil {
+	if tw.pool == nil && c.RunWithPool {
 		p, err := ants.NewPool(runtime.NumCPU(), ants.WithPreAlloc(true))
 		if err != nil {
+			if logger != nil {
+				logger.Error("new ants pool err", zap.Error(err))
+			}
 			return nil, err
 		}
 		tw.pool = p
@@ -89,13 +109,18 @@ func NewTimewheel(config *Config, logger logger.Interface, pool *ants.Pool) (*Ti
 	return tw, nil
 }
 
+// Start begins the timewheel's ticking process, advancing slots at the configured tick interval.
+// It runs until the provided context is canceled.
 func (tw *Timewheel) Start(ctx context.Context) {
-	tw.once.Do(func() {
 
+	if tw.IsRunning.CompareAndSwap(false, true) {
 		ticker := time.NewTicker(tw.cfg.Tick)
 		c, cancel := context.WithCancel(ctx)
 
 		tw.cancel = cancel
+
+		baseTime := time.Now()
+		tickCount := int64(0)
 
 		go func() {
 			defer ticker.Stop()
@@ -103,37 +128,46 @@ func (tw *Timewheel) Start(ctx context.Context) {
 				select {
 				case <-c.Done():
 					return
-				case t := <-ticker.C:
-					tw.advance(t)
+				case <-ticker.C:
+					tickCount++
+					now := baseTime.Add(time.Duration(tickCount) * tw.cfg.Tick)
+					if err := tw.advance(now); err != nil && tw.logger != nil {
+						tw.logger.Error("advance failed", zap.Error(err))
+					}
 				}
 			}
 		}()
 
 		if tw.logger != nil {
-			tw.logger.Info("started", zap.String(define.OP, define.OpStart))
+			tw.logger.Info("start ticker")
 		}
-	})
+	}
 }
+
+// Stop  stop the ticking goroutine and release all of other resource, and release ants pool after 2 second ,if ants pool exist
 func (tw *Timewheel) Stop() {
-	if tw.cancel != nil {
-		tw.cancel()
-	}
 
-	if tw.pool != nil {
-		tw.pool.Release()
-	}
+	if tw.IsRunning.CompareAndSwap(true, false) {
+		if tw.cancel != nil {
+			tw.cancel()
+		}
 
-	if tw.logger != nil {
-		tw.logger.Close()
-	}
+		if tw.pool != nil {
+			tw.pool.ReleaseTimeout(time.Second * 2)
+		}
 
-	if tw.logger != nil {
-		tw.logger.Info("closed", zap.String(define.OP, define.OpClose))
-	}
+		if tw.logger != nil {
+			tw.logger.Info("closed")
+		}
 
+		if tw.logger != nil {
+			tw.logger.Close()
+		}
+	}
 }
 
-func (tw *Timewheel) advance(now time.Time) {
+// advance push the timewheel pointer to next slot
+func (tw *Timewheel) advance(now time.Time) error {
 	// 计算槽索引：毫秒时间戳除以 tick（毫秒）
 	tickMs := int64(tw.cfg.Tick / time.Millisecond)
 	slot := (now.UnixMilli() / tickMs) % int64(tw.cfg.SlotCount)
@@ -144,10 +178,16 @@ func (tw *Timewheel) advance(now time.Time) {
 
 	// 记录日志
 	if tw.logger != nil && tw.logger.IsDebugEnabled() {
-		msg := fmt.Sprintf("ticking slot[%d], now:%s, len:%d", slot, now.Format(time.StampMilli), tw.slots[slot].Len())
-		tw.logger.Debug(msg,
-			zap.String(define.OP, define.OpAdvance),
-			zap.Duration("tick", tw.cfg.Tick))
+		tw.logger.Debug("ticking slot",
+			zap.Int64("slot", slot),
+			zap.Time("now", now),
+			zap.Int64("len", tw.slots[slot].Len()))
+	}
+
+	f := func(task Task) {
+		if tr, e := task.Execute(now); e == nil && tr == Retry {
+			tw.slots[slot].Enqueue(task)
+		}
 	}
 
 	// 处理任务
@@ -160,12 +200,21 @@ func (tw *Timewheel) advance(now time.Time) {
 			continue
 		}
 
-		tw.pool.Submit(func() {
-			if tr, e := task.Execute(now); e == nil && tr == Retry {
-				tw.slots[slot].Enqueue(task)
+		if tw.pool != nil {
+			if err := tw.pool.Submit(func() { f(task) }); err != nil {
+				if tw.logger != nil {
+					tw.logger.Error("pool submit failed,call directly", zap.Error(err))
+				}
+
+				f(task)
+				return err
 			}
-		})
+		} else {
+			f(task)
+		}
 	}
+
+	return nil
 }
 
 // Submit adds a task to the Timewheel. The slot is calculated based on the current time,
@@ -173,16 +222,16 @@ func (tw *Timewheel) advance(now time.Time) {
 func (tw *Timewheel) Submit(task Task, delay time.Duration) (int, error) {
 
 	if delay < 0 {
-		delay = 0
+		err := fmt.Errorf("negative delay %v is not allowed", delay)
+		tw.logger.Error("failed to submit", zap.Error(err))
+		return -1, err
 	}
 
 	// 检查最大延迟
-	if delay > tw.cfg.maxIntervalOfSubmit {
-		err := fmt.Errorf("delay %v exceeds max interval %v", delay, tw.cfg.maxIntervalOfSubmit)
+	if delay > tw.cfg.MaxIntervalOfSubmit {
+		err := fmt.Errorf("delay %v exceeds max interval %v", delay, tw.cfg.MaxIntervalOfSubmit)
 		if tw.logger != nil {
-			tw.logger.Error(err.Error(),
-				zap.String(define.OP, define.OpSubmit),
-			)
+			tw.logger.Error("failed to submit", zap.Error(err))
 		}
 		return -1, err
 	}
@@ -194,14 +243,12 @@ func (tw *Timewheel) Submit(task Task, delay time.Duration) (int, error) {
 
 	err := tw.slots[slot].Enqueue(task)
 	if tw.logger != nil && err != nil {
-		tw.logger.Error(err.Error(),
-			zap.String(define.OP, define.OpSubmit),
-		)
+		tw.logger.Error("failed to submit", zap.Error(err))
 	} else {
 		if tw.logger != nil && tw.logger.IsDebugEnabled() {
-			tw.logger.Debug(fmt.Sprintf("submit into slots[%d],len:%d", slot, tw.slots[slot].Len()),
-				zap.String(define.OP, define.OpSubmit),
-			)
+			tw.logger.Debug("submit into slot",
+				zap.Int("slot", slot),
+				zap.Int64("len", tw.slots[slot].Len()))
 		}
 	}
 	return slot, err
