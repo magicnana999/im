@@ -3,8 +3,8 @@ package handler
 import (
 	"context"
 	"github.com/magicnana999/im/api/kitex_gen/api"
+	"github.com/magicnana999/im/broker/cmd_service"
 	"github.com/magicnana999/im/broker/holder"
-	"github.com/magicnana999/im/broker/service"
 	"github.com/magicnana999/im/errors"
 	"github.com/magicnana999/im/pb"
 	"google.golang.org/protobuf/proto"
@@ -12,7 +12,7 @@ import (
 
 type CommandHandler struct {
 	userHolder  *holder.UserHolder
-	userService *service.BusinessService
+	userService *cmd_service.BusinessService
 }
 
 func NewCommandHandler(uh *holder.UserHolder) *CommandHandler {
@@ -20,7 +20,7 @@ func NewCommandHandler(uh *holder.UserHolder) *CommandHandler {
 	return commandHandlerSingleton.Get(func() *CommandHandler {
 		return &CommandHandler{
 			userHolder:  holder.NewUserHolder(),
-			userService: service.NewUserService(),
+			userService: cmd_service.NewUserService(),
 		}
 	})
 }

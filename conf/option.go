@@ -19,7 +19,7 @@ type Option struct {
 	Redis   Redis   `yaml:"cache"`
 	Kafka   Kafka   `yaml:"kafka"`
 	Broker  Broker  `yaml:"broker"`
-	Service Service `yaml:"service"`
+	Service Service `yaml:"cmd_service"`
 }
 
 type MySQL struct {

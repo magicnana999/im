@@ -11,7 +11,7 @@ func main() {
 	//root, cancel := context.WithCancel(context.Background())
 
 	var confFile string
-	flag.StringVar(&confFile, "conf", "conf/im-service.yaml", "config file path")
+	flag.StringVar(&confFile, "conf", "conf/im-cmd_service.yaml", "config file path")
 	flag.Parse()
 
 	conf.LoadConfig(confFile)

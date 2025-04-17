@@ -40,8 +40,14 @@ type Config struct {
 	HTS          *HTSConfig   `yaml:"hts"`
 	MRS          *MRSConfig   `yaml:"mrs"`
 	MSS          *MSSConfig   `yaml:"mss"`
+	RBS          *RBSConfig   `yaml:"rbs"`
 }
 
+type RBSConfig struct {
+	Network   string `yaml:"network"`
+	Addr      string `yaml:"addr"`
+	DebugMode bool   `yaml:"debugMode"`
+}
 type MSSConfig struct {
 	MaxRemaining int  `yaml:"maxRemaining"`
 	DebugMode    bool `yaml:"debugMode"`

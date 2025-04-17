@@ -14,8 +14,8 @@ var (
 	MsgDeliverTaskError = error.New(1107, "message deliver task failed")
 	CurUserNotFound     = error.New(1108, "current user not found")
 
-	CmdError        = error.New(1201, "service failed")
-	CmdUnknownType  = error.New(1202, "unknown service type")
+	CmdError        = error.New(1201, "cmd_service failed")
+	CmdUnknownType  = error.New(1202, "unknown cmd_service type")
 	CmdResponseNull = error.New(1203, "response is null")
 	CmdReplyNull    = error.New(1204, "reply is null")
 )

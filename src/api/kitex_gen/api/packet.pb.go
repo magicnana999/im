@@ -111,7 +111,7 @@ type Packet_Heartbeat struct {
 }
 
 type Packet_Command struct {
-	Command *Command `protobuf:"bytes,3,opt,name=service,proto3,oneof"`
+	Command *Command `protobuf:"bytes,3,opt,name=cmd_service,proto3,oneof"`
 }
 
 type Packet_Message struct {
@@ -1423,7 +1423,7 @@ var file_packet_proto_goTypes = []interface{}{
 }
 var file_packet_proto_depIdxs = []int32{
 	1,  // 0: api.Packet.heartbeat:type_name -> api.Heartbeat
-	2,  // 1: api.Packet.service:type_name -> api.Command
+	2,  // 1: api.Packet.cmd_service:type_name -> api.Command
 	3,  // 2: api.Packet.message:type_name -> api.Message
 	10, // 3: api.Command.loginRequest:type_name -> api.LoginRequest
 	12, // 4: api.Command.logoutRequest:type_name -> api.LogoutRequest

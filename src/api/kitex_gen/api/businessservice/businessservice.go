@@ -12,7 +12,7 @@ import (
 	proto "google.golang.org/protobuf/proto"
 )
 
-var errInvalidMessageType = errors.New("invalid message type for service method handler")
+var errInvalidMessageType = errors.New("invalid message type for cmd_service method handler")
 
 var serviceMethods = map[string]kitex.MethodInfo{
 	"Login": kitex.NewMethodInfo(

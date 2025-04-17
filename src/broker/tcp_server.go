@@ -2,20 +2,21 @@ package broker
 
 import (
 	"context"
+	"encoding/binary"
 	"github.com/bytedance/gopkg/util/logger"
+	"github.com/magicnana999/im/api/kitex_gen/api"
 	"github.com/magicnana999/im/broker/domain"
 	"github.com/magicnana999/im/broker/handler"
 	"github.com/magicnana999/im/broker/holder"
-	"github.com/magicnana999/im/pkg/singleton"
+	"github.com/magicnana999/im/errors"
 	"github.com/panjf2000/gnet/v2"
 	"github.com/panjf2000/gnet/v2/pkg/logging"
 	bb "github.com/panjf2000/gnet/v2/pkg/pool/bytebuffer"
 	"google.golang.org/protobuf/encoding/protojson"
 
+	"google.golang.org/protobuf/proto"
 	"time"
 )
-
-var tcpServerSingleton = singleton.NewSingleton[*TcpServer]()
 
 type TcpServer struct {
 	*gnet.BuiltinEventEngine
@@ -25,7 +26,7 @@ type TcpServer struct {
 	heartbeatHandler *handler.HeartbeatHandler
 	messageHandler   *handler.MessageHandler
 	brokerHolder     *holder.BrokerHolder
-	codec            codec
+	codec            *Codec
 	ctx              context.Context
 }
 
@@ -86,7 +87,8 @@ func (s *TcpServer) OnOpen(c gnet.Conn) (out []byte, action gnet.Action) {
 		ClientAddr:  c.RemoteAddr().String(),
 		BrokerAddr:  c.LocalAddr().String(),
 		ConnectTime: time.Now().UnixMilli(),
-		C:           c,
+		Reader:      c,
+		Writer:      c,
 	}
 
 	subCtx := context.WithValue(s.ctx, currentUserKey, uc)
@@ -100,7 +102,6 @@ func (s *TcpServer) OnOpen(c gnet.Conn) (out []byte, action gnet.Action) {
 }
 
 func (s *TcpServer) OnClose(c gnet.Conn, err error) (action gnet.Action) {
-	s.heartbeatHandler.stopTicker(c)
 	return
 }
 
@@ -184,4 +185,84 @@ func (s *TcpServer) OnTick() (delay time.Duration, action gnet.Action) {
 	}
 
 	return time.Duration(s.interval) * time.Second, gnet.None
+}
+
+var defaultCodec = &Codec{}
+
+type Codec struct {
+}
+
+func newCodec() *Codec {
+	return defaultCodec
+}
+
+func (l *Codec) encode(p *api.Packet) (*bb.ByteBuffer, error) {
+
+	buffer := bb.Get()
+
+	if p.IsHeartbeat() {
+
+		hb := p.GetHeartbeat().Value
+
+		binary.Write(buffer, binary.BigEndian, int32(4))
+		binary.Write(buffer, binary.BigEndian, int32(hb))
+
+		return buffer, nil
+	} else {
+
+		bs, e := proto.Marshal(p)
+
+		if e != nil {
+			return nil, errors.EncodeError.SetDetail(e)
+		}
+
+		binary.Write(buffer, binary.BigEndian, int32(len(bs)))
+		binary.Write(buffer, binary.BigEndian, bs)
+		return buffer, nil
+	}
+}
+
+func (l *Codec) decode(c gnet.Conn) ([]*api.Packet, error) {
+
+	result := make([]*api.Packet, 0)
+
+	for c.InboundBuffered() >= 4 {
+
+		var length int32
+		binary.Read(c, binary.BigEndian, &length)
+
+		if length == 4 && c.InboundBuffered() >= int(length) {
+
+			var heartbeat int32
+			binary.Read(c, binary.BigEndian, &heartbeat)
+
+			packet := api.NewHeartbeat(int32(heartbeat)).Wrap()
+			result = append(result, packet)
+
+		}
+
+		if length > 4 && c.InboundBuffered() >= int(length) {
+
+			bs := make([]byte, int(length))
+			n, e := c.Read(bs)
+			if e != nil {
+				return nil, errors.DecodeError.SetDetail(e)
+			}
+
+			if n != int(length) {
+				return nil, errors.DecodeError.SetDetail("failed to read packet")
+			}
+
+			var p api.Packet
+			if e4 := proto.Unmarshal(bs, &p); e4 != nil {
+				return nil, errors.DecodeError.SetDetail(e4)
+			}
+
+			result = append(result, &p)
+
+		}
+
+	}
+
+	return result, nil
 }

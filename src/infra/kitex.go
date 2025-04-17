@@ -115,10 +115,10 @@ func NewRouterClient(resolver discovery.Resolver, lc fx.Lifecycle) (routerservic
 //		ri := rpcinfo.GetRPCInfo(ctx)
 //		// get real request
 //		klog.Infof("real request: %+v\n", req.(args).GetFirstArgument())
-//		// get local service information
-//		klog.Infof("local service name: %v\n", ri.From().ServiceName())
-//		// get remote service information
-//		klog.Infof("remote service name: %v, remote method: %v\n", ri.To().ServiceName(), ri.To().Method())
+//		// get local cmd_service information
+//		klog.Infof("local cmd_service name: %v\n", ri.From().ServiceName())
+//		// get remote cmd_service information
+//		klog.Infof("remote cmd_service name: %v, remote method: %v\n", ri.To().ServiceName(), ri.To().Method())
 //		if err := next(ctx, req, resp); err != nil {
 //			return err
 //		}

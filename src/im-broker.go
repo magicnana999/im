@@ -4,8 +4,8 @@ import (
 	"context"
 	"flag"
 	"github.com/magicnana999/im/broker"
+	"github.com/magicnana999/im/broker/cmd_service"
 	"github.com/magicnana999/im/broker/holder"
-	"github.com/magicnana999/im/broker/service"
 	"github.com/magicnana999/im/global"
 	"github.com/magicnana999/im/infra"
 	"github.com/magicnana999/im/pkg/logger"
@@ -58,7 +58,7 @@ func main() {
 			broker.NewMessageRetryServer,
 			broker.NewMessageSendServer,
 		),
-		fx.Invoke(func(userService *service.BusinessService, producer *kafka.Writer) {
+		fx.Invoke(func(userService *cmd_service.BusinessService, producer *kafka.Writer) {
 			go func() {
 
 			}()

@@ -33,8 +33,8 @@ var errInvalidTimeout = errors.New("timeout must be greater than or equal to int
 type HeartbeatServer struct {
 	userHolder *holder.UserHolder   // userHolder manages all client connections.
 	tw         *timewheel.Timewheel // tw schedules heartbeat tasks using a timewheel.
-	cfg        *global.HTSConfig    // cfg holds the heartbeat service configuration.
-	logger     *Logger              // logger records service events.
+	cfg        *global.HTSConfig    // cfg holds the heartbeat cmd_service configuration.
+	logger     *Logger              // logger records cmd_service events.
 }
 
 // getOrDefaultHTSConfig returns the HTS configuration, prioritizing global configuration and applying defaults if necessary.
@@ -105,7 +105,7 @@ func NewHeartbeatServer(g *global.Config, uh *holder.UserHolder, lc fx.Lifecycle
 	return hs, nil
 }
 
-// Start launches the heartbeat service in a separate goroutine.
+// Start launches the heartbeat cmd_service in a separate goroutine.
 // It returns an error if the timewheel fails to start.
 func (s *HeartbeatServer) Start(ctx context.Context) error {
 	go s.tw.Start(ctx)
@@ -113,7 +113,7 @@ func (s *HeartbeatServer) Start(ctx context.Context) error {
 	return nil
 }
 
-// Stop shuts down the heartbeat service.
+// Stop shuts down the heartbeat cmd_service.
 // It stops the timewheel and returns an error if the shutdown fails.
 func (s *HeartbeatServer) Stop(ctx context.Context) error {
 	s.tw.Stop()

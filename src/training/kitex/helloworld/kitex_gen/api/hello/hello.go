@@ -10,7 +10,7 @@ import (
 	api "main/kitex_gen/api"
 )
 
-var errInvalidMessageType = errors.New("invalid message type for service method handler")
+var errInvalidMessageType = errors.New("invalid message type for cmd_service method handler")
 
 var serviceMethods = map[string]kitex.MethodInfo{
 	"echo": kitex.NewMethodInfo(
