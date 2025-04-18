@@ -1,11 +1,6 @@
 version: '3.8'
 
-
-
-
 services:
-
-
   etcd:
     container_name: etcd
     image: quay.io/coreos/etcd:v3.5.0
@@ -24,61 +19,68 @@ services:
         --initial-cluster node1=http://127.0.0.1:2380
         --auto-compaction-mode=periodic 
         --auto-compaction-retention=30m
-  
+    volumes:
+      - ~/volumes/im/etcd/data:/etcd-data
+      - ~/volumes/im/etcd/logs:/var/log/etcd
 
   mysql:
-    image: mysql:8.0.29 # 使用 MySQL 8.x 的稳定版本
+    image: mysql:8.0.29
     container_name: mysql
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: im
     volumes:
-      - /Users/jinsong/volumes/im/mysql:/var/lib/mysql
+      - ~/volumes/im/mysql/data:/var/lib/mysql
+      - ~/volumes/im/mysql/logs:/var/log/mysql
+      - ~/volumes/im/mysql/conf:/etc/mysql/conf.d
     ports:
       - "3306:3306"
     networks:
       - im-network
 
   redis:
-    image: redis:latest # 使用 Redis 7.x 的稳定版本
-    container_name: cache
+    image: redis:latest
+    container_name: redis
     volumes:
-      - /Users/jinsong/volumes/im/cache:/data
+      - ~/volumes/im/redis/data:/data
+      - ~/volumes/im/redis/logs:/var/log/redis
+      - ~/volumes/im/redis/conf:/usr/local/etc/redis
     ports:
       - "6379:6379"
     networks:
       - im-network
 
   kafka:
-    image: apache/kafka # 使用 Kafka 3.9.0 raft 版本
+    image: apache/kafka:latest
     container_name: kafka
     environment:
-      KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka:9093,OUTSIDE://localhost:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL: PLAINTEXT
-      KAFKA_LISTENER_NAMES: INSIDE,OUTSIDE
-      KAFKA_LISTENERS: INSIDE://0.0.0.0:9093,OUTSIDE://0.0.0.0:9092
-      KAFKA_LISTENER_SSL_PORT: 9094
-      KAFKA_LISTENER_INTERNAL_PORT: 9093
-      KAFKA_LISTENER_PORT: 9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:9092,EXTERNAL://localhost:9094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@broker:9093
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
     volumes:
-      - /Users/jinsong/volumes/im/kafka:/var/lib/kafka
+      - ~/volumes/im/kafka/data:/opt/kafka/data
+      - ~/volumes/im/kafka/logs:/opt/kafka/logs
+      - ~/volumes/im/kafka/conf:/opt/kafka/config
     ports:
       - "9092:9092"
       - "9093:9093"
-    networks:
-      - im-network
-
-  elasticsearch:
-    image: elasticsearch:8.17.3
-    container_name: elasticsearch
-    environment:
-      - discovery.type=single-node
-    volumes:
-      - /Users/jinsong/volumes/im/elasticsearch:/usr/share/elasticsearch/data
-    ports:
-      - "9200:9200"
-      - "9300:9300"
+      - "9094:9094"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "./opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 > /dev/null 2>&1",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 5
     networks:
       - im-network
 
