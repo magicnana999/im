@@ -3,7 +3,6 @@ package infra
 import (
 	"context"
 	"fmt"
-	"github.com/magicnana999/im/define"
 	"github.com/magicnana999/im/global"
 	log "github.com/magicnana999/im/pkg/logger"
 	"github.com/segmentio/kafka-go"
@@ -74,19 +73,15 @@ func NewKafkaProducer(g *global.Config, lc fx.Lifecycle) (*kafka.Writer, error) 
 
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
-			logger.Info("kafka writer established",
-				zap.String(define.OP, define.OpInit))
+			logger.Info("kafka writer established")
 			return nil
 		},
 		OnStop: func(ctx context.Context) error {
 			if e := kw.Close(); e != nil {
-				logger.Error("kafka writer could not close",
-					zap.String(define.OP, define.OpClose),
-					zap.Error(e))
+				logger.Error("kafka writer could not close", zap.Error(e))
 				return e
 			} else {
-				logger.Info("kafka closed",
-					zap.String(define.OP, define.OpClose))
+				logger.Info("kafka closed")
 				return nil
 			}
 		},

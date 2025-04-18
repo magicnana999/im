@@ -1,10 +1,7 @@
 package global
 
 import (
-	"fmt"
 	"github.com/go-redis/redis/v8"
-	"github.com/magicnana999/im/define"
-	"github.com/magicnana999/im/pkg/ip"
 	"github.com/magicnana999/im/pkg/logger"
 	"go.uber.org/zap"
 	"gopkg.in/yaml.v3"
@@ -13,34 +10,15 @@ import (
 	"time"
 )
 
-type MicroService struct {
-	EtcdAddr   []string `yaml:"etcdAddr"`
-	BrokerName string   `yaml:"brokerName"`
-	BrokerAddr string   `yaml:"brokerAddr"`
-	RouterName string   `yaml:"routerName"`
-	RouterAddr string   `yaml:"routerAddr"`
-	ServerName string   `yaml:"serverName"`
-	ServerAddr string   `yaml:"serverAddr"`
-}
-
-type Broker struct {
-	Name              string `yaml:"name"`
-	Addr              string `yaml:"addr"`
-	TickerInterval    string `yaml:"tickerInterval"`
-	HeartbeatInterval int64  `yaml:"heartbeatInterval"`
-}
-
 type Config struct {
-	Broker       Broker       `yaml:"broker"`
-	MicroService MicroService `yaml:"microService"`
-	Gorm         *GormConfig  `yaml:"gorm"`
-	Redis        *RedisConfig `yaml:"redis"`
-	Kafka        *KafkaConfig `yaml:"kafka"`
-	Etcd         *EtcdConfig  `yaml:"etcd"`
-	HTS          *HTSConfig   `yaml:"hts"`
-	MRS          *MRSConfig   `yaml:"mrs"`
-	MSS          *MSSConfig   `yaml:"mss"`
-	RBS          *RBSConfig   `yaml:"rbs"`
+	Gorm  *GormConfig  `yaml:"gorm"`
+	Redis *RedisConfig `yaml:"redis"`
+	Kafka *KafkaConfig `yaml:"kafka"`
+	Etcd  *EtcdConfig  `yaml:"etcd"`
+	HTS   *HTSConfig   `yaml:"hts"`
+	MRS   *MRSConfig   `yaml:"mrs"`
+	MSS   *MSSConfig   `yaml:"mss"`
+	RBS   *RBSConfig   `yaml:"rbs"`
 }
 
 type RBSConfig struct {
@@ -111,31 +89,14 @@ func Load(path string) (*Config, error) {
 
 	data, err := os.ReadFile(path)
 	if err != nil {
-		log.Error("load config failed",
-			zap.String(define.OP, define.OpInit),
-			zap.Error(err))
+		log.Error("load config failed", zap.Error(err))
 		return nil, err
 	}
 
 	err = yaml.Unmarshal(data, &c)
 	if err != nil {
-		log.Error("unmarshal config failed",
-			zap.String(define.OP, define.OpInit),
-			zap.Error(err))
+		log.Error("unmarshal config failed", zap.Error(err))
 		return nil, err
-	}
-
-	if c.Broker.Addr == "" {
-		i, err := ip.GetLocalIP()
-		if err != nil {
-			log.Error("get localIP failed",
-				zap.String(define.OP, define.OpInit),
-				zap.Error(err))
-			return nil, err
-
-		}
-
-		c.Broker.Addr = fmt.Sprintf("%s:7539", i)
 	}
 
 	return c, nil

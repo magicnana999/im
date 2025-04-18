@@ -4,13 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/magicnana999/im/broker/msg_service"
 	"sync/atomic"
 	"time"
 
 	"github.com/magicnana999/im/api/kitex_gen/api"
 	"github.com/magicnana999/im/broker/domain"
-	"github.com/magicnana999/im/define"
 	"github.com/magicnana999/im/global"
 	"github.com/magicnana999/im/pkg/jsonext"
 	"go.uber.org/fx"
@@ -35,8 +33,8 @@ type MessageSendServer struct {
 	cancel    context.CancelFunc
 	ch        chan *messageSending //消息投递队列
 	logger    *Logger
-	mrs       *MessageRetryServer        //消息重发服务
-	mw        *msg_service.MessageWriter //消息写入服务
+	mrs       *MessageRetryServer //消息重发服务
+	mw        *MessageWriter      //消息写入服务
 }
 
 func getOrDefaultMSSConfig(g *global.Config) *global.MSSConfig {
@@ -56,13 +54,13 @@ func NewMessageSendServer(g *global.Config, mrs *MessageRetryServer, lc fx.Lifec
 	c := getOrDefaultMSSConfig(g)
 
 	log := NewLogger("mss", c.DebugMode)
-	log.InfoOrError(string(jsonext.MarshalNoErr(c)), "", define.OpInit, "", nil)
+	log.SrvInfo(string(jsonext.MarshalNoErr(c)), SrvLifecycle, nil)
 
 	mss := &MessageSendServer{
 		ch:     make(chan *messageSending, c.MaxRemaining),
 		logger: log,
 		mrs:    mrs,
-		mw:     msg_service.NewMessageWriter(NewCodec(), log),
+		mw:     NewMessageWriter(NewCodec(), log),
 	}
 
 	lc.Append(fx.Hook{
@@ -81,7 +79,8 @@ func (mss *MessageSendServer) Start(ctx context.Context) error {
 		ctx, cancel := context.WithCancel(ctx)
 		mss.cancel = cancel
 		go func() {
-			mss.logger.InfoOrError("message send loop started", "", define.OpStart, "", nil)
+			mss.logger.SrvInfo("message send loop started", SrvLifecycle, nil)
+
 			for {
 				select {
 				case <-ctx.Done():
@@ -100,10 +99,9 @@ func (mss *MessageSendServer) Stop(ctx context.Context) error {
 	if mss.isRunning.CompareAndSwap(true, false) {
 		mss.cancel()
 		close(mss.ch)
-		mss.logger.InfoOrError("message send loop stopped", "", define.OpStop, "", nil)
+		mss.logger.SrvInfo("message send loop stopped", SrvLifecycle, nil)
 
-		txt := fmt.Sprintf("remaining messages: %d", len(mss.ch))
-		mss.logger.InfoOrError(txt, "", define.OpStop, "", nil)
+		mss.logger.SrvInfo("resave the remaining message", SrvLifecycle, nil)
 		mss.resaveMessages()
 	}
 	return nil
@@ -149,12 +147,12 @@ func (mss *MessageSendServer) write(m *api.Message, uc *domain.UserConn) {
 
 func (mss *MessageSendServer) submit(ms *api.Message, uc *domain.UserConn) {
 	if err := mss.mrs.Submit(ms, uc, time.Now().Unix()); err != nil {
-		mss.logger.DebugOrError("failed to submit mrs,resave it", uc.Desc(), define.OpSubmit, ms.MessageId, err)
+		mss.logger.MsgDebug("failed to submit mrs,resave it", uc.Desc(), ms.MessageId, MsgTracking, nil)
 		mss.resave(ms, uc)
 	}
 }
 
 func (mss *MessageSendServer) resave(ms *api.Message, uc *domain.UserConn) {
-	mss.logger.DebugOrError("resave message", uc.Desc(), define.OpResave, ms.MessageId, nil)
+	mss.logger.MsgDebug("resave message", uc.Desc(), ms.MessageId, MsgTracking, nil)
 	fmt.Print(jsonext.PbMarshalNoErr(ms))
 }

@@ -3,7 +3,6 @@ package infra
 import (
 	"context"
 	"github.com/go-redis/redis/v8"
-	"github.com/magicnana999/im/define"
 	"github.com/magicnana999/im/global"
 	"github.com/magicnana999/im/pkg/logger"
 	"go.uber.org/fx"
@@ -39,19 +38,15 @@ func NewRedisClient(g *global.Config, lc fx.Lifecycle) *redis.Client {
 
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
-			log.Info("redis established",
-				zap.String(define.OP, define.OpInit))
+			log.Info("redis established")
 			return nil
 		},
 		OnStop: func(ctx context.Context) error {
 			if e := rds.Close(); e != nil {
-				log.Error("reds could not close",
-					zap.String(define.OP, define.OpClose),
-					zap.Error(e))
+				log.Error("reds could not close", zap.Error(e))
 				return e
 			} else {
-				log.Info("redis closed",
-					zap.String(define.OP, define.OpClose))
+				log.Info("redis closed")
 				return nil
 			}
 		},

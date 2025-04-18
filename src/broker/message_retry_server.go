@@ -4,19 +4,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/magicnana999/im/broker/msg_service"
 	"sync"
 	"sync/atomic"
 	"time"
 
 	"github.com/magicnana999/im/api/kitex_gen/api"
 	"github.com/magicnana999/im/broker/domain"
-	"github.com/magicnana999/im/define"
 	"github.com/magicnana999/im/global"
 	"github.com/magicnana999/im/pkg/jsonext"
 	"github.com/magicnana999/im/pkg/logger"
 	"github.com/magicnana999/im/pkg/timewheel"
-	"go.uber.org/zap"
 )
 
 var (
@@ -39,7 +36,7 @@ func getOrDefaultMRSConfig(g *global.Config) *global.MRSConfig {
 	if c.Timeout < c.Interval {
 		c.Timeout = c.Interval
 		s := fmt.Sprintf("invalid timeout,set as %d", c.Timeout)
-		logger.Named("mrs").Warn(s, zap.String(define.OP, define.OpInit))
+		logger.Named("mrs").Warn(s)
 	}
 
 	return c
@@ -50,26 +47,26 @@ type MessageRetryServer struct {
 	tw     *timewheel.Timewheel // tw schedules retry tasks.
 	cfg    *global.MRSConfig    // cfg holds retry configuration.
 	logger *Logger              // logger records server events.
-	mw     *msg_service.MessageWriter
-	mr     *msg_service.MessageResaver
+	mw     *MessageWriter
+	mr     *MessageResaver
 }
 
 func NewMessageRetryServer(g *global.Config) (*MessageRetryServer, error) {
 	c := getOrDefaultMRSConfig(g)
 
 	log := NewLogger("mrs", c.DebugMode)
-	log.InfoOrError(string(jsonext.MarshalNoErr(c)), "", define.OpInit, "", nil)
+	log.SrvInfo(string(jsonext.MarshalNoErr(c)), SrvLifecycle, nil)
 
 	twc := &timewheel.Config{
 		Tick:                time.Millisecond * 100,
 		SlotCount:           30,
 		MaxLengthOfEachSlot: 100_0000,
 	}
-	log.InfoOrError(string(jsonext.MarshalNoErr(twc)), "", define.OpInit, "", nil)
+	log.SrvInfo(string(jsonext.MarshalNoErr(twc)), SrvLifecycle, nil)
 
 	tw, err := timewheel.NewTimewheel(twc, logger.Named("timewheel-mrs"), nil)
 	if err != nil {
-		log.InfoOrError("failed to new timewheel", "", define.OpInit, "", err)
+		log.SrvInfo("failed to init timewheel", SrvLifecycle, nil)
 		return nil, err
 	}
 
@@ -78,23 +75,21 @@ func NewMessageRetryServer(g *global.Config) (*MessageRetryServer, error) {
 		tw:     tw,
 		cfg:    c,
 		logger: log,
-		mw:     msg_service.NewMessageWriter(NewCodec(), log),
-		mr:     msg_service.NewMessageResaver(log),
+		mw:     NewMessageWriter(NewCodec(), log),
+		mr:     NewMessageResaver(),
 	}, nil
 }
 
 func (s *MessageRetryServer) Start(ctx context.Context) error {
 	go s.tw.Start(ctx)
-	s.logger.InfoOrError("timewheel started", "", define.OpStart, "", nil)
+	s.logger.SrvInfo("timewheel started", SrvLifecycle, nil)
 	return nil
 }
 
 func (s *MessageRetryServer) Stop(ctx context.Context) error {
 	s.tw.Stop()
-	s.logger.InfoOrError("timewheel stopped", "", define.OpStop, "", nil)
-
-	txt := fmt.Sprintf("remaining messages: could not be know")
-	s.logger.InfoOrError(txt, "", define.OpStop, "", nil)
+	s.logger.SrvInfo("timewheel stopped", SrvLifecycle, nil)
+	s.logger.SrvInfo("resave the remaining message", SrvLifecycle, nil)
 	s.resaveMessages()
 	return nil
 }
@@ -175,26 +170,26 @@ type messageRetryTask struct {
 	resaveFunc      func(*api.Message, *domain.UserConn)       //消息保存方法
 }
 
-func (t *messageRetryTask) Execute(now time.Time) (timewheel.TaskResult, error) {
+func (t *messageRetryTask) Execute(now time.Time) timewheel.TaskResult {
 	if t.isAckOK.Load() {
-		return timewheel.Break, nil
+		return timewheel.Break
 	}
 
 	if !t.IsRetryOK.Load() {
-		return timewheel.Break, nil
+		return timewheel.Break
 	}
 
 	if time.Since(time.Unix(t.firstSendSecond.Load(), 0)) >= t.timeout {
 		t.resaveFunc(t.m, t.uc)
-		return timewheel.Break, retryTimeout
+		return timewheel.Break
 	}
 
 	if err := t.writeFunc(t.m, t.uc); err != nil {
 		t.resaveFunc(t.m, t.uc)
-		return timewheel.Break, err
+		return timewheel.Break
 	}
 
-	return timewheel.Retry, nil
+	return timewheel.Retry
 }
 
 func (s *MessageRetryServer) write(m *api.Message, uc *domain.UserConn) error {

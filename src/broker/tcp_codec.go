@@ -35,7 +35,7 @@ func (l *Codec) Encode(p *api.Packet) (*bb.ByteBuffer, error) {
 		bs, e := proto.Marshal(p)
 
 		if e != nil {
-			return nil, errors.EncodeError.SetDetail(e)
+			return nil, errors.EncodeError.SetDetail(e.Error())
 		}
 
 		binary.Write(buffer, binary.BigEndian, int32(len(bs)))
@@ -51,16 +51,19 @@ func (l *Codec) Decode(c gnet.Conn) ([]*api.Packet, error) {
 	for c.InboundBuffered() >= 4 {
 
 		var length int32
-		binary.Read(c, binary.BigEndian, &length)
+		if err := binary.Read(c, binary.BigEndian, &length); err != nil {
+			return nil, DecodeError.SetDetail(err.Error())
+		}
 
 		if length == 4 && c.InboundBuffered() >= int(length) {
 
 			var heartbeat int32
-			binary.Read(c, binary.BigEndian, &heartbeat)
+			if err := binary.Read(c, binary.BigEndian, &heartbeat); err != nil {
+				return nil, DecodeError.SetDetail(err.Error())
+			}
 
 			packet := api.NewHeartbeat(int32(heartbeat)).Wrap()
 			result = append(result, packet)
-
 		}
 
 		if length > 4 && c.InboundBuffered() >= int(length) {
@@ -68,16 +71,16 @@ func (l *Codec) Decode(c gnet.Conn) ([]*api.Packet, error) {
 			bs := make([]byte, int(length))
 			n, e := c.Read(bs)
 			if e != nil {
-				return nil, errors.DecodeError.SetDetail(e)
+				return nil, errors.DecodeError.SetDetail(e.Error())
 			}
 
 			if n != int(length) {
-				return nil, errors.DecodeError.SetDetail("failed to read packet")
+				return nil, errors.DecodeError.SetDetail("read length is less than field")
 			}
 
 			var p api.Packet
 			if e4 := proto.Unmarshal(bs, &p); e4 != nil {
-				return nil, errors.DecodeError.SetDetail(e4)
+				return nil, errors.DecodeError.SetDetail(e4.Error())
 			}
 
 			result = append(result, &p)

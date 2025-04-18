@@ -8,7 +8,6 @@ import (
 	"github.com/magicnana999/im/api/kitex_gen/api"
 	"github.com/magicnana999/im/api/kitex_gen/api/brokerservice"
 	"github.com/magicnana999/im/broker/holder"
-	"github.com/magicnana999/im/define"
 	"github.com/magicnana999/im/global"
 	"go.uber.org/fx"
 	"net"
@@ -88,14 +87,16 @@ func NewRpcBrokerServer(
 func (s *RpcBrokerServer) Start(ctx context.Context) error {
 	go func() {
 		err := s.server.Run()
-		s.logger.InfoOrError("rpc server start...", "", define.OpStart, "", err)
+		s.logger.SrvInfo("rpc server start", SrvLifecycle, err)
+
 	}()
 	return nil
 }
 
 func (s *RpcBrokerServer) Stop(ctx context.Context) error {
 	err := s.server.Stop()
-	s.logger.InfoOrError("rpc server stop...", "", define.OpStop, "", err)
+	s.logger.SrvInfo("rpc server stop", SrvLifecycle, err)
+
 	return err
 }
 

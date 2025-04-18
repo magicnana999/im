@@ -56,7 +56,7 @@ func (mb *Command) Failure(e error) *Command {
 
 	ee := imerror.Format(e)
 	ack.Code = int32(ee.Code)
-	ack.Message = ee.Message + "," + ee.Detail
+	ack.Message = ee.Error()
 
 	return ack
 }

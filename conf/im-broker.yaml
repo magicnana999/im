@@ -1,27 +1,42 @@
-name: im-broker
-logger:
-    level: -1
-broker:
-    addr: "127.0.0.1:7539"
-    ServerInterval: 30
-    heartbeatInterval: 30
-    loggerLevel: debug
-service:
-    addr: 127.0.0.1:7540
-mysql:
-    user: root
-    password: root1234
-    host: localhost
-    port: 3306
-    schema: im
-    charset: utf8mb4
-    parseTime: True
-    location: Asia%2FShanghai
+gorm:
+  dsn: "root:root@tcp(127.0.0.1:3306)/im?charset=utf8mb4&parseTime=True&loc=Local"
+  maxOpenConns: 100
+  maxIdleConns: 10
+  connMaxLifetime: 1h
+  connMaxIdleTime: 30m
+  slowThreshold: 200ms
+  connTimeout: 5s
+
 redis:
-    host: localhost
-    port: 6379
-    password:
-    db: 0
+  addr: "127.0.0.1:6379"
+  password: ""
+  db: 0
+  timeout: 5s
+
 kafka:
-    host: localhost
-    port: 9092
+  brokers:
+    - "127.0.0.1:9092"
+
+etcd:
+  endpoints:
+    - "127.0.0.1:2379"
+  dial-timeout: 5s
+
+hts:
+  interval: 30s
+  timeout: 5s
+  debugMode: true
+
+mrs:
+  interval: 10s
+  timeout: 5s
+  debugMode: true
+
+mss:
+  maxRemaining: 100
+  debugMode: true
+
+rbs:
+  network: "tcp"
+  addr: "127.0.0.1:8080"
+  debugMode: true

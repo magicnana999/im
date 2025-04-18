@@ -22,7 +22,7 @@ const (
 
 // Task 任务接口，所有被加入的任务必须实现此接口
 type Task interface {
-	Execute(now time.Time) (TaskResult, error)
+	Execute(now time.Time) TaskResult //不能有error，内部处理所有可能的error
 }
 
 type Config struct {
@@ -109,11 +109,14 @@ func NewTimewheel(config *Config, logger logger.Interface, pool *ants.Pool) (*Ti
 	return tw, nil
 }
 
-// Start begins the timewheel's ticking process, advancing slots at the configured tick interval.
-// It runs until the provided context is canceled.
 func (tw *Timewheel) Start(ctx context.Context) {
 
 	if tw.IsRunning.CompareAndSwap(false, true) {
+
+		if tw.logger != nil && tw.logger.IsDebugEnabled() {
+			tw.logger.Debug("ticker start")
+		}
+
 		ticker := time.NewTicker(tw.cfg.Tick)
 		c, cancel := context.WithCancel(ctx)
 
@@ -127,6 +130,9 @@ func (tw *Timewheel) Start(ctx context.Context) {
 			for {
 				select {
 				case <-c.Done():
+					if tw.logger != nil && tw.logger.IsDebugEnabled() {
+						tw.logger.Debug("ticker done")
+					}
 					return
 				case <-ticker.C:
 					tickCount++
@@ -137,17 +143,17 @@ func (tw *Timewheel) Start(ctx context.Context) {
 				}
 			}
 		}()
-
-		if tw.logger != nil {
-			tw.logger.Info("start ticker")
-		}
 	}
 }
 
-// Stop  stop the ticking goroutine and release all of other resource, and release ants pool after 2 second ,if ants pool exist
 func (tw *Timewheel) Stop() {
 
 	if tw.IsRunning.CompareAndSwap(true, false) {
+
+		if tw.logger != nil && tw.logger.IsDebugEnabled() {
+			tw.logger.Debug("ticker stop")
+		}
+
 		if tw.cancel != nil {
 			tw.cancel()
 		}
@@ -157,16 +163,11 @@ func (tw *Timewheel) Stop() {
 		}
 
 		if tw.logger != nil {
-			tw.logger.Info("closed")
-		}
-
-		if tw.logger != nil {
 			tw.logger.Close()
 		}
 	}
 }
 
-// advance push the timewheel pointer to next slot
 func (tw *Timewheel) advance(now time.Time) error {
 	// 计算槽索引：毫秒时间戳除以 tick（毫秒）
 	tickMs := int64(tw.cfg.Tick / time.Millisecond)
@@ -178,15 +179,17 @@ func (tw *Timewheel) advance(now time.Time) error {
 
 	// 记录日志
 	if tw.logger != nil && tw.logger.IsDebugEnabled() {
-		tw.logger.Debug("ticking slot",
+		tw.logger.Debug("ticking",
 			zap.Int64("slot", slot),
 			zap.Time("now", now),
-			zap.Int64("len", tw.slots[slot].Len()))
+			zap.Int64("slotsLen", tw.slots[slot].Len()))
 	}
 
 	f := func(task Task) {
-		if tr, e := task.Execute(now); e == nil && tr == Retry {
-			tw.slots[slot].Enqueue(task)
+		if tr := task.Execute(now); tr == Retry {
+			if err := tw.slots[slot].Enqueue(task); err != nil && tw.logger != nil {
+				tw.logger.Error("executed,but enqueue failed", zap.Error(err))
+			}
 		}
 	}
 
@@ -201,11 +204,8 @@ func (tw *Timewheel) advance(now time.Time) error {
 		}
 
 		if tw.pool != nil {
-			if err := tw.pool.Submit(func() { f(task) }); err != nil {
-				if tw.logger != nil {
-					tw.logger.Error("pool submit failed,call directly", zap.Error(err))
-				}
-
+			if err := tw.pool.Submit(func() { f(task) }); err != nil && tw.logger != nil {
+				tw.logger.Error("pool submit failed,call it directly", zap.Error(err))
 				f(task)
 				return err
 			}
@@ -217,8 +217,6 @@ func (tw *Timewheel) advance(now time.Time) error {
 	return nil
 }
 
-// Submit adds a task to the Timewheel. The slot is calculated based on the current time,
-// which may not be precise. Business logic should handle timing in Execute.
 func (tw *Timewheel) Submit(task Task, delay time.Duration) (int, error) {
 
 	if delay < 0 {

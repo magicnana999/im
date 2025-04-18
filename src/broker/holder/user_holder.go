@@ -192,3 +192,11 @@ func (s *UserHolder) StoreByUserId(ctx context.Context, user *entity.User) (stri
 func (s *UserHolder) Close(ctx context.Context, uc *domain.UserConn) {
 	return
 }
+
+func (s *UserHolder) StoreTransient(uc *domain.UserConn) {
+	s.m.Store(uc.Label(), uc)
+}
+
+func (s *UserHolder) RemoveUserConn(uc *domain.UserConn) {
+	s.m.Delete(uc.Label())
+}

@@ -5,6 +5,7 @@ import (
 	"flag"
 	"github.com/magicnana999/im/broker"
 	"github.com/magicnana999/im/broker/cmd_service"
+	"github.com/magicnana999/im/broker/handler"
 	"github.com/magicnana999/im/broker/holder"
 	"github.com/magicnana999/im/global"
 	"github.com/magicnana999/im/infra"
@@ -57,6 +58,11 @@ func main() {
 			broker.NewHeartbeatServer,
 			broker.NewMessageRetryServer,
 			broker.NewMessageSendServer,
+			cmd_service.NewUserService,
+			handler.NewCommandHandler,
+			handler.NewMessageHandler,
+			broker.NewRpcBrokerServer,
+			broker.NewTcpServer,
 		),
 		fx.Invoke(func(userService *cmd_service.UserService, producer *kafka.Writer) {
 			go func() {

@@ -1,7 +1,6 @@
 package broker
 
 import (
-	"github.com/magicnana999/im/define"
 	"github.com/magicnana999/im/pkg/logger"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -62,11 +61,11 @@ func (s *Logger) _log(level zapcore.Level, msg string, connDesc string, messageI
 	}
 
 	if connDesc != "" {
-		fields = append(fields, zap.String(define.Conn, connDesc))
+		fields = append(fields, zap.String("conn", connDesc))
 	}
 
 	if messageID != "" {
-		fields = append(fields, zap.String(define.MessageId, messageID))
+		fields = append(fields, zap.String("messageID", messageID))
 	}
 
 	if fs != nil && len(fs) > 0 {

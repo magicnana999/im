@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/magicnana999/im/api/kitex_gen/api"
 	"github.com/magicnana999/im/api/kitex_gen/api/businessservice"
-	"github.com/magicnana999/im/broker"
 	"github.com/magicnana999/im/broker/holder"
 	"github.com/magicnana999/im/errors"
 	"go.uber.org/fx"
@@ -21,24 +20,19 @@ func NewUserService(uh *holder.UserHolder, bc businessservice.Client, lf fx.Life
 }
 
 func (s *UserService) Login(ctx context.Context, request *api.LoginRequest) (*api.LoginReply, error) {
-	uc, err := broker.CurUserFromCtx(ctx)
-	if err != nil {
-		return nil, errors.CurUserNotFound.SetDetail(err)
-	}
-
 	rep, err := s.businessCli.Login(ctx, request)
 
 	if err != nil {
-		return nil, errors.CmdError.SetDetail(err)
+		return nil, errors.CmdError.SetDetail(err.Error())
 	}
 
 	if rep == nil {
 		return nil, errors.CmdResponseNull
 	}
 
-	if err = s.userHolder.StoreUser(ctx, uc, rep.AppId, rep.UserId, request.Os); err != nil {
-		return nil, errors.CmdError.SetDetail(err)
-	}
+	//if err = s.userHolder.StoreUser(ctx, uc, rep.AppId, rep.UserId, request.Os); err != nil {
+	//	return nil, errors.CmdError.SetDetail(err.Error())
+	//}
 
 	return rep, nil
 }

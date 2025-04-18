@@ -2,7 +2,6 @@ package domain
 
 import (
 	"fmt"
-	"github.com/magicnana999/im/broker"
 	"github.com/magicnana999/im/define"
 	"io"
 	"strconv"
@@ -31,22 +30,6 @@ func (u *UserConn) Close() {
 }
 
 func (u *UserConn) Login(appId string, userId int64, os define.OSType) (bool, error) {
-	if appId == "" {
-		return false, broker.ErrLogin.SetDetail("appId can not be empty")
-	}
-
-	if userId == 0 {
-		return false, broker.ErrLogin.SetDetail("userId can not be empty")
-	}
-
-	if os == "" {
-		return false, broker.ErrLogin.SetDetail("os can not be empty")
-	}
-
-	if u.IsClosed.Load() {
-		return false, broker.ErrLogin.SetDetail("conn is closed")
-	}
-
 	u.IsLogin.Store(true)
 	u.AppId = appId
 	u.UserId = userId
@@ -91,4 +74,8 @@ func (u *UserConn) Desc() string {
 	} else {
 		return u.parseDesc()
 	}
+}
+
+func (u *UserConn) RefreshHeartbeat(milli int64) {
+	u.LastHeartbeat.Store(milli)
 }
