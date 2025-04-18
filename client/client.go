@@ -5,14 +5,12 @@ import (
 	"context"
 	"encoding/binary"
 	"fmt"
-	"github.com/magicnana999/im/constants"
-	"github.com/magicnana999/im/pb"
-	"github.com/magicnana999/im/util/id"
+	"github.com/magicnana999/im/api/kitex_gen/api"
+	"github.com/magicnana999/im/pkg/id"
 	"github.com/panjf2000/ants/v2"
 	bb "github.com/panjf2000/gnet/v2/pkg/pool/bytebuffer"
 	goPool "github.com/panjf2000/gnet/v2/pkg/pool/goroutine"
 	"google.golang.org/protobuf/encoding/protojson"
-	"google.golang.org/protobuf/proto"
 	"io"
 	"net"
 	"os"
@@ -411,8 +409,8 @@ func encode(p *pb.Packet) (*bb.ByteBuffer, error) {
 }
 
 func login(sender *sender, userSig string) {
-	loginRequest := pb.LoginRequest{
-		AppId:    constants.AppId,
+	loginRequest := api.LoginRequest{
+		AppId:    "",
 		UserSig:  userSig,
 		Version:  "1.0.0",
 		Os:       constants.Ios,
