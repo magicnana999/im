@@ -11,6 +11,7 @@ import (
 	bb "github.com/panjf2000/gnet/v2/pkg/pool/bytebuffer"
 	goPool "github.com/panjf2000/gnet/v2/pkg/pool/goroutine"
 	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/proto"
 	"io"
 	"net"
 	"os"
@@ -34,8 +35,6 @@ type Client struct {
 }
 
 func (c *Client) Start() {
-
-	initLogger()
 
 	conn, err := net.Dial("tcp", c.ServerAddress)
 	if err != nil {
@@ -89,9 +88,9 @@ func (c *Client) getMessageFromScan(ctx context.Context, cancel context.CancelFu
 
 func (c *Client) saySomething(t string) {
 
-	text := &pb.TextContent{Text: t}
+	text := &api.Text{Text: t}
 
-	packet := pb.NewMessage(c.UserId, c.To, 0, 100, constants.AppId, "1-1", text).Wrap()
+	packet := api.NewMessage(c.UserId, c.To, 0, 100, "19860220", "1-1", text).Wrap()
 	c.Sender.send(packet)
 }
 
@@ -109,7 +108,7 @@ func (c *Client) startHeartbeat(ctx context.Context, sender *sender, stop contex
 				return
 			}
 
-			packet := pb.NewHeartbeat(12)
+			packet := api.NewHeartbeat(12).Wrap()
 			sender.send(packet)
 
 		case <-ctx.Done():
@@ -139,7 +138,7 @@ func (c *Client) decode(ctx context.Context, conn net.Conn, sender *sender) erro
 		var heartbeat int32
 		binary.Read(conn, binary.BigEndian, &heartbeat)
 
-		p := pb.NewHeartbeat(heartbeat)
+		p := api.NewHeartbeat(heartbeat).Wrap()
 		c.handlePacket(ctx, p, sender)
 		return nil
 	}
@@ -152,7 +151,7 @@ func (c *Client) decode(ctx context.Context, conn net.Conn, sender *sender) erro
 			panic(e)
 		}
 
-		var p pb.Packet
+		var p api.Packet
 		if e4 := proto.Unmarshal(bs, &p); e4 != nil {
 			panic(e4)
 		}
@@ -167,36 +166,36 @@ func (c *Client) decode(ctx context.Context, conn net.Conn, sender *sender) erro
 	return nil
 }
 
-func (c *Client) handlePacket(ctx context.Context, packet *pb.Packet, sender *sender) {
+func (c *Client) handlePacket(ctx context.Context, packet *api.Packet, sender *sender) {
 	switch packet.Type {
-	case pb.TypeHeartbeat:
+	case api.TypeHeartbeat:
 		c.LastHeartbeatReceive = time.Now().UnixMilli()
 		return
-	case pb.TypeMessage:
-		mb := packet.GetMessageBody()
+	case api.TypeMessage:
+		mb := packet.GetMessage()
 		if mb.IsResponse() {
 			sender.close(mb.MessageId)
 		} else {
 			c.receiveMessage(ctx, mb, sender)
 		}
-	case pb.TypeCommand:
+	case api.TypeCommand:
 		c.receiveCommand(ctx, packet, sender)
 	default:
 		fmt.Printf("不知道啥Type: %d\n", packet.Type)
 	}
 }
 
-func (c *Client) receiveCommand(ctx context.Context, packet *pb.Packet, s *sender) {
+func (c *Client) receiveCommand(ctx context.Context, packet *api.Packet, s *sender) {
 
-	switch packet.GetCommandBody().CType {
-	case pb.CTypeUserLogin:
-		reply := packet.GetCommandBody().GetLoginReply()
-		if packet.GetCommandBody().Code == 0 {
+	switch packet.GetCommand().CommandType {
+	case api.CommandTypeUserLogin:
+		reply := packet.GetCommand().GetLoginReply()
+		if packet.GetCommand().Code == 0 {
 			c.CurrentAppId = reply.AppId
 			c.CurrentUserId = reply.UserId
 			fmt.Println("登录成功")
 		} else {
-			fmt.Println("登录失败,", packet.GetCommandBody().Message)
+			fmt.Println("登录失败,", packet.GetCommand().Message)
 
 		}
 	default:
@@ -204,7 +203,7 @@ func (c *Client) receiveCommand(ctx context.Context, packet *pb.Packet, s *sende
 	}
 }
 
-func (c *Client) receiveMessage(ctx context.Context, mb *pb.MessageBody, s *sender) {
+func (c *Client) receiveMessage(ctx context.Context, mb *api.Message, s *sender) {
 	write(c.C, mb.Success(nil).Wrap())
 }
 
@@ -224,16 +223,16 @@ type resendTask struct {
 	cancel   context.CancelFunc
 	id       string
 	interval int
-	packet   *pb.Packet
+	packet   *api.Packet
 	ticker   *time.Ticker
 	conn     net.Conn
 }
 
-func newResendTask(ctx context.Context, cancel context.CancelFunc, interval int, cmd *pb.Packet, conn net.Conn) *resendTask {
+func newResendTask(ctx context.Context, cancel context.CancelFunc, interval int, cmd *api.Packet, conn net.Conn) *resendTask {
 	return &resendTask{
 		ctx:      ctx,
 		cancel:   cancel,
-		id:       cmd.GetMessageBody().MessageId,
+		id:       cmd.GetMessage().MessageId,
 		interval: interval,
 		packet:   cmd,
 		ticker:   time.NewTicker(time.Duration(interval) * time.Second),
@@ -244,7 +243,7 @@ func newResendTask(ctx context.Context, cancel context.CancelFunc, interval int,
 type sender struct {
 	ctx      context.Context
 	conn     net.Conn
-	packets  chan *pb.Packet
+	packets  chan *api.Packet
 	executor *goPool.Pool
 	m        map[string]*resendTask
 	lock     sync.RWMutex
@@ -259,7 +258,7 @@ func initSender(conn net.Conn, ctx context.Context) *sender {
 	return &sender{
 		ctx:      ctx,
 		conn:     conn,
-		packets:  make(chan *pb.Packet),
+		packets:  make(chan *api.Packet),
 		executor: pool,
 		m:        make(map[string]*resendTask),
 	}
@@ -274,7 +273,7 @@ func (s *sender) closeAll() {
 	}
 }
 
-func (s *sender) send(packet *pb.Packet) {
+func (s *sender) send(packet *api.Packet) {
 
 	s.packets <- packet
 }
@@ -301,28 +300,28 @@ func (s *sender) start() {
 			}
 
 			switch packet.Type {
-			case pb.TypeHeartbeat:
+			case api.TypeHeartbeat:
 				s.sendHeartbeat(packet)
-			case pb.TypeCommand:
+			case api.TypeCommand:
 				s.sendCommand(packet)
-			case pb.TypeMessage:
+			case api.TypeMessage:
 				s.sendMessage(packet)
 			}
 		}
 	}
 }
 
-func (s *sender) sendHeartbeat(packet *pb.Packet) {
+func (s *sender) sendHeartbeat(packet *api.Packet) {
 	write(s.conn, packet)
 }
 
-func (s *sender) sendCommand(packet *pb.Packet) {
+func (s *sender) sendCommand(packet *api.Packet) {
 	write(s.conn, packet)
 }
 
-func (s *sender) sendMessage(packet *pb.Packet) {
+func (s *sender) sendMessage(packet *api.Packet) {
 	s.lock.RLock()
-	mb := packet.GetMessageBody()
+	mb := packet.GetMessage()
 	_, exist := s.m[mb.MessageId]
 	s.lock.RUnlock()
 	if !exist {
@@ -330,7 +329,7 @@ func (s *sender) sendMessage(packet *pb.Packet) {
 		task := newResendTask(subCtx, cancel, 1, packet, s.conn)
 
 		s.lock.Lock()
-		if _, doubleCheck := s.m[packet.GetMessageBody().GetMessageId()]; doubleCheck { // Double-check 防止并发问题
+		if _, doubleCheck := s.m[packet.GetMessage().GetMessageId()]; doubleCheck { // Double-check 防止并发问题
 			s.lock.Unlock()
 			return
 		}
@@ -348,8 +347,8 @@ func (s *sender) sendMessage(packet *pb.Packet) {
 					next := fibonacci(task.interval)
 					if next >= 8 {
 
-						fmt.Println("重试超过限制，关闭连接:", packet.GetMessageBody().MessageId)
-						s.close(packet.GetMessageBody().MessageId)
+						fmt.Println("重试超过限制，关闭连接:", packet.GetMessage().MessageId)
+						s.close(packet.GetMessage().MessageId)
 						s.conn.Close()
 						return
 
@@ -362,7 +361,7 @@ func (s *sender) sendMessage(packet *pb.Packet) {
 	}
 }
 
-func write(conn net.Conn, packet *pb.Packet) (int, error) {
+func write(conn net.Conn, packet *api.Packet) (int, error) {
 
 	buffer, err := encode(packet)
 	defer bb.Put(buffer)
@@ -384,9 +383,9 @@ func write(conn net.Conn, packet *pb.Packet) (int, error) {
 	return total, nil
 }
 
-func encode(p *pb.Packet) (*bb.ByteBuffer, error) {
+func encode(p *api.Packet) (*bb.ByteBuffer, error) {
 
-	if p.Type != pb.TypeHeartbeat {
+	if p.Type != api.TypeHeartbeat {
 		bbs, _ := protojson.Marshal(p)
 		fmt.Printf("发送：%s\n\n", string(bbs))
 	}
@@ -395,7 +394,7 @@ func encode(p *pb.Packet) (*bb.ByteBuffer, error) {
 
 	if p.IsHeartbeat() {
 		binary.Write(buffer, binary.BigEndian, uint32(4))
-		binary.Write(buffer, binary.BigEndian, p.GetHeartbeatBody().Value)
+		binary.Write(buffer, binary.BigEndian, p.GetHeartbeat().Value)
 	} else {
 
 		bs, e := proto.Marshal(p)
@@ -413,11 +412,11 @@ func login(sender *sender, userSig string) {
 		AppId:    "",
 		UserSig:  userSig,
 		Version:  "1.0.0",
-		Os:       constants.Ios,
+		Os:       "iOS",
 		DeviceId: strings.ToLower(id.GenerateXId()),
 	}
 
-	request := pb.NewCommand(&loginRequest)
+	request := api.NewCommand(&loginRequest)
 
 	sender.send(request)
 }

@@ -28,7 +28,7 @@ func (s *Singleton[T]) GetWithCloser(initFunc func() (T, func(), error)) (T, fun
 		var err error
 		s.instance, closer, err = initFunc()
 		if err != nil {
-			logger.Fatal("Singleton init failed", zap.Error(err))
+			logger.Error("Singleton init failed", zap.Error(err))
 		}
 	})
 	return s.instance, closer
