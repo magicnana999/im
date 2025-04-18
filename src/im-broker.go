@@ -10,7 +10,6 @@ import (
 	"github.com/magicnana999/im/global"
 	"github.com/magicnana999/im/infra"
 	"github.com/magicnana999/im/pkg/logger"
-	"github.com/segmentio/kafka-go"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 	"os"
@@ -45,13 +44,13 @@ func main() {
 		fx.NopLogger,
 		fx.Provide(
 			f,
+			infra.NewRedisClient,
 			infra.NewGorm,
 			infra.NewKafkaProducer,
 			infra.NewEtcdRegistry,
 			infra.NewEtcdResolver,
 			infra.NewBusinessClient,
 			infra.NewRouterClient,
-			infra.NewRedisClient,
 			infra.NewSpinLock,
 			holder.NewBrokerHolder,
 			holder.NewUserHolder,
@@ -64,9 +63,8 @@ func main() {
 			broker.NewRpcBrokerServer,
 			broker.NewTcpServer,
 		),
-		fx.Invoke(func(userService *cmd_service.UserService, producer *kafka.Writer) {
+		fx.Invoke(func(tcp *broker.TcpServer, rpc *broker.RpcBrokerServer, delivery *broker.MessageSendServer) {
 			go func() {
-
 			}()
 		}),
 	)
