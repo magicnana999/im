@@ -30,7 +30,6 @@ type Config struct {
 	SlotCount           int           `yaml:"slotCount",json:"slotCount"`                     //槽数量
 	MaxLengthOfEachSlot int           `yaml:"maxLengthOfEachSlot",json:"maxLengthOfEachSlot"` //每个槽的最大长度，0：无限大
 	MaxIntervalOfSubmit time.Duration `yaml:"maxIntervalOfSubmit",json:"maxIntervalOfSubmit"` //提交任务时最大间隔
-	RunWithPool         bool          `yaml:"runWithPool",json:"runWithPool"`
 }
 
 // Timewheel 时间轮
@@ -95,7 +94,7 @@ func NewTimewheel(config *Config, logger logger.Interface, pool *ants.Pool) (*Ti
 		tw.slots[i] = queue.NewLockFreeQueue[Task](int64(c.MaxLengthOfEachSlot))
 	}
 
-	if tw.pool == nil && c.RunWithPool {
+	if tw.pool == nil {
 		p, err := ants.NewPool(runtime.NumCPU(), ants.WithPreAlloc(true))
 		if err != nil {
 			if logger != nil {
@@ -131,7 +130,7 @@ func (tw *Timewheel) Start(ctx context.Context) {
 				select {
 				case <-c.Done():
 					if tw.logger != nil && tw.logger.IsDebugEnabled() {
-						tw.logger.Debug("ticker done")
+						tw.logger.Debug("ticker done", zap.Error(c.Err()))
 					}
 					return
 				case <-ticker.C:

@@ -24,12 +24,12 @@ etcd:
 
 hts:
   interval: 30s
-  timeout: 5s
+  timeout: 60s
   debugMode: true
 
 mrs:
-  interval: 10s
-  timeout: 5s
+  interval: 1s
+  timeout: 2s
   debugMode: true
 
 mss:

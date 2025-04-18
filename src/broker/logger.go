@@ -22,7 +22,7 @@ type Logger struct {
 
 func NewLogger(name string, debugMode bool) *Logger {
 	return &Logger{
-		Logger:    logger.Named(name),
+		Logger:    logger.NamedAndAddSkip(name, 2),
 		debugMode: debugMode,
 	}
 }

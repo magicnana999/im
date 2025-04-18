@@ -36,8 +36,6 @@ func NewRedisClient(g *global.Config, lc fx.Lifecycle) *redis.Client {
 
 	rds := redis.NewClient(c)
 
-	log.Info("new redis client ok")
-
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
 			log.Info("redis established")

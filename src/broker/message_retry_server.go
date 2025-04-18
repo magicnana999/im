@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"go.uber.org/fx"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -34,9 +35,12 @@ func getOrDefaultMRSConfig(g *global.Config) *global.MRSConfig {
 	}
 
 	if c.Timeout < c.Interval {
-		c.Timeout = c.Interval
-		s := fmt.Sprintf("invalid timeout,set as %d", c.Timeout)
+		s := fmt.Sprintf("timeout[%s] is less than interval[%s] ,set as %s",
+			c.Timeout.String(),
+			c.Interval.String(),
+			c.Interval.String())
 		logger.Named("mrs").Warn(s)
+		c.Timeout = c.Interval
 	}
 
 	return c
@@ -51,7 +55,7 @@ type MessageRetryServer struct {
 	mr     *MessageResaver
 }
 
-func NewMessageRetryServer(g *global.Config) (*MessageRetryServer, error) {
+func NewMessageRetryServer(g *global.Config, lc fx.Lifecycle) (*MessageRetryServer, error) {
 	c := getOrDefaultMRSConfig(g)
 
 	log := NewLogger("mrs", c.DebugMode)
@@ -64,46 +68,54 @@ func NewMessageRetryServer(g *global.Config) (*MessageRetryServer, error) {
 	}
 	log.SrvInfo(string(jsonext.MarshalNoErr(twc)), SrvLifecycle, nil)
 
-	tw, err := timewheel.NewTimewheel(twc, logger.Named("timewheel-mrs"), nil)
+	//tw, err := timewheel.NewTimewheel(twc, logger.Named("timewheel-mrs"), nil)
+	tw, err := timewheel.NewTimewheel(twc, nil, nil)
 	if err != nil {
 		log.SrvInfo("failed to init timewheel", SrvLifecycle, nil)
 		return nil, err
 	}
 
-	return &MessageRetryServer{
+	s := &MessageRetryServer{
 		tasks:  sync.Map{},
 		tw:     tw,
 		cfg:    c,
 		logger: log,
 		mw:     NewMessageWriter(NewCodec(), log),
 		mr:     NewMessageResaver(),
-	}, nil
+	}
+
+	lc.Append(fx.Hook{
+		OnStart: func(ctx context.Context) error {
+			return s.Start(ctx)
+		},
+		OnStop: func(ctx context.Context) error {
+			return s.Stop(ctx)
+		},
+	})
+
+	return s, nil
 }
 
 func (s *MessageRetryServer) Start(ctx context.Context) error {
-	go s.tw.Start(ctx)
-	s.logger.SrvInfo("timewheel started", SrvLifecycle, nil)
+	go s.tw.Start(context.Background())
+	s.logger.SrvInfo("timewheel-mrs started", SrvLifecycle, nil)
 	return nil
 }
 
 func (s *MessageRetryServer) Stop(ctx context.Context) error {
 	s.tw.Stop()
-	s.logger.SrvInfo("timewheel stopped", SrvLifecycle, nil)
+	s.logger.SrvInfo("timewheel-mrs stopped", SrvLifecycle, nil)
 	s.logger.SrvInfo("resave the remaining message", SrvLifecycle, nil)
-	s.resaveMessages()
+	go s.resaveMessages()
 	return nil
 }
 
 func (s *MessageRetryServer) resaveMessages() {
 
 	s.tasks.Range(func(key, value interface{}) bool {
-		messageId := key.(string)
-		a, ok := s.tasks.Load(messageId)
-		if ok && a != nil {
-			task, ok := a.(*messageRetryTask)
-			if ok && task != nil {
-				s.mr.Resave(task.m, task.uc)
-			}
+		task, ok := value.(*messageRetryTask)
+		if ok && task != nil {
+			s.mr.Resave(task.m, task.uc)
 		}
 		return true
 	})

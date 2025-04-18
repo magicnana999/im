@@ -227,6 +227,13 @@ func Named(name string) *Logger {
 	return &Logger{Logger: instance.Logger.Named(name)}
 }
 
+func NamedAndAddSkip(name string, skip int) *Logger {
+	if instance == nil {
+		return nil
+	}
+	return &Logger{Logger: instance.Logger.WithOptions(zap.AddCallerSkip(skip)).Named(name)}
+}
+
 func Close() {
 	if instance != nil {
 		instance.Close()

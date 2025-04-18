@@ -76,7 +76,7 @@ func NewMessageSendServer(g *global.Config, mrs *MessageRetryServer, lc fx.Lifec
 
 func (mss *MessageSendServer) Start(ctx context.Context) error {
 	if mss.isRunning.CompareAndSwap(false, true) {
-		ctx, cancel := context.WithCancel(ctx)
+		ctx, cancel := context.WithCancel(context.Background())
 		mss.cancel = cancel
 		go func() {
 			mss.logger.SrvInfo("message send loop started", SrvLifecycle, nil)
@@ -102,7 +102,7 @@ func (mss *MessageSendServer) Stop(ctx context.Context) error {
 		mss.logger.SrvInfo("message send loop stopped", SrvLifecycle, nil)
 
 		mss.logger.SrvInfo("resave the remaining message", SrvLifecycle, nil)
-		mss.resaveMessages()
+		go mss.resaveMessages()
 	}
 	return nil
 }

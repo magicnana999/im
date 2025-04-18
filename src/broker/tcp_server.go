@@ -40,7 +40,7 @@ func NewTcpServer(
 	lc fx.Lifecycle) (*TcpServer, error) {
 
 	logger := NewLogger("tcp", true)
-	return &TcpServer{
+	ts := &TcpServer{
 		hts:            hts,
 		mrs:            mrs,
 		commandHandler: ch,
@@ -50,32 +50,45 @@ func NewTcpServer(
 		codec:          NewCodec(),
 		interval:       time.Second * 30,
 		logger:         logger,
-	}, nil
+	}
+
+	lc.Append(fx.Hook{
+		OnStart: func(ctx context.Context) error {
+			return ts.Start(context.Background())
+		},
+		OnStop: func(ctx context.Context) error {
+			return ts.eng.Stop(ctx)
+		},
+	})
+
+	return ts, nil
 }
 
 func (s *TcpServer) Start(ctx context.Context) error {
 	s.ctx = ctx
-	err := gnet.Run(s,
-		"tcp://:5075",
-		gnet.WithMulticore(true),
-		gnet.WithLockOSThread(true),
-		gnet.WithReadBufferCap(4096),
-		gnet.WithWriteBufferCap(4096),
-		gnet.WithLoadBalancing(gnet.RoundRobin),
-		gnet.WithNumEventLoop(1),
-		gnet.WithReuseAddr(true),
-		gnet.WithReusePort(true),
-		gnet.WithTCPKeepAlive(time.Minute),
-		gnet.WithTCPNoDelay(gnet.TCPNoDelay),
-		gnet.WithSocketRecvBuffer(4096),
-		gnet.WithSocketSendBuffer(4096),
-		gnet.WithTicker(true),
-		gnet.WithLogLevel(logging.DebugLevel),
-		gnet.WithEdgeTriggeredIO(true),
-		gnet.WithEdgeTriggeredIOChunk(0))
+	go func() {
+		err := gnet.Run(s,
+			"tcp://:5075",
+			gnet.WithMulticore(true),
+			gnet.WithLockOSThread(true),
+			gnet.WithReadBufferCap(4096),
+			gnet.WithWriteBufferCap(4096),
+			gnet.WithLoadBalancing(gnet.RoundRobin),
+			gnet.WithNumEventLoop(1),
+			gnet.WithReuseAddr(true),
+			gnet.WithReusePort(true),
+			gnet.WithTCPKeepAlive(time.Minute),
+			gnet.WithTCPNoDelay(gnet.TCPNoDelay),
+			gnet.WithSocketRecvBuffer(4096),
+			gnet.WithSocketSendBuffer(4096),
+			gnet.WithTicker(true),
+			gnet.WithLogLevel(logging.DebugLevel),
+			gnet.WithEdgeTriggeredIO(true),
+			gnet.WithEdgeTriggeredIOChunk(0))
 
-	s.logger.SrvInfo("tcp starting", SrvLifecycle, err)
-	return err
+		s.logger.SrvInfo("tcp starting", SrvLifecycle, err)
+	}()
+	return nil
 }
 
 func (s *TcpServer) OnBoot(eng gnet.Engine) (action gnet.Action) {

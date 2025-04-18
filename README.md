@@ -17,3 +17,9 @@ $ kitex router.proto
 ## 启动
 #### IDE 中启动
 * Run -> Edit Configuration -> 选择你的目标程序 -> Program arguments -> -conf ../conf/im-broker.yaml
+
+
+## 启动依赖
+```shell
+docker compose up -d
+```

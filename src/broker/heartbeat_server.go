@@ -50,9 +50,12 @@ func getOrDefaultHTSConfig(g *global.Config) *global.HTSConfig {
 	}
 
 	if c.Timeout < c.Interval {
-		c.Timeout = c.Interval
-		s := fmt.Sprintf("invalid timeout,set as %d", c.Timeout)
+		s := fmt.Sprintf("timeout[%s] is less than interval[%s] ,set as %s",
+			c.Timeout.String(),
+			c.Interval.String(),
+			c.Interval.String())
 		logger.Named("hts").Warn(s)
+		c.Timeout = c.Interval
 	}
 
 	return c
@@ -71,7 +74,7 @@ func NewHeartbeatServer(g *global.Config, uh *holder.UserHolder, lc fx.Lifecycle
 	}
 	log.SrvInfo(string(jsonext.MarshalNoErr(twc)), SrvLifecycle, nil)
 
-	tw, err := timewheel.NewTimewheel(twc, logger.Named("timewheel-hts"), nil)
+	tw, err := timewheel.NewTimewheel(twc, nil, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -96,14 +99,14 @@ func NewHeartbeatServer(g *global.Config, uh *holder.UserHolder, lc fx.Lifecycle
 }
 
 func (s *HeartbeatServer) Start(ctx context.Context) error {
-	go s.tw.Start(ctx)
-	s.logger.SrvInfo("timewheel start", SrvLifecycle, nil)
+	go s.tw.Start(context.Background())
+	s.logger.SrvInfo("timewheel-hts start", SrvLifecycle, nil)
 	return nil
 }
 
 func (s *HeartbeatServer) Stop(ctx context.Context) error {
 	s.tw.Stop()
-	s.logger.SrvInfo("timewheel stop", SrvLifecycle, nil)
+	s.logger.SrvInfo("timewheel-hts stop", SrvLifecycle, nil)
 
 	if s.logger != nil {
 		s.logger.Close()
