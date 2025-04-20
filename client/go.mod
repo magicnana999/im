@@ -3,6 +3,7 @@ module github.com/magicnana999/im/client
 go 1.23.1
 
 require (
+	github.com/asynkron/goconsole v0.0.0-20160504192649-bfa12eebf716
 	github.com/magicnana999/im v0.9.1
 	github.com/panjf2000/gnet/v2 v2.7.2
 )

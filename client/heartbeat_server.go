@@ -2,9 +2,9 @@ package main
 
 import (
 	"context"
-	"time"
-
+	"github.com/magicnana999/im/pkg/logger"
 	"github.com/magicnana999/im/pkg/timewheel"
+	"time"
 )
 
 type HeartbeatFunc func(now time.Time) timewheel.TaskResult
@@ -14,11 +14,11 @@ func (f HeartbeatFunc) Execute(now time.Time) timewheel.TaskResult {
 }
 
 type HeartbeatServer struct {
-	tw       *timewheel.Timewheel // tw schedules heartbeat tasks using a timewheel.
+	tw       *timewheel.Timewheel
 	interval time.Duration
 }
 
-func NewHeartbeatServer(interval time.Duration) (*HeartbeatServer, error) {
+func NewHeartbeatServer(interval time.Duration) *HeartbeatServer {
 	twc := &timewheel.Config{
 		Tick:                time.Second,
 		SlotCount:           60,
@@ -27,7 +27,8 @@ func NewHeartbeatServer(interval time.Duration) (*HeartbeatServer, error) {
 
 	tw, err := timewheel.NewTimewheel(twc, nil, nil)
 	if err != nil {
-		return nil, err
+		logger.Named("hts").Fatal("hts start fail")
+		return nil
 	}
 
 	hs := &HeartbeatServer{
@@ -35,15 +36,15 @@ func NewHeartbeatServer(interval time.Duration) (*HeartbeatServer, error) {
 		interval: interval,
 	}
 
-	return hs, nil
+	return hs
 }
 
-func (s *HeartbeatServer) Start(ctx context.Context) error {
+func (s *HeartbeatServer) Start() error {
 	go s.tw.Start(context.Background())
 	return nil
 }
 
-func (s *HeartbeatServer) Stop(ctx context.Context) error {
+func (s *HeartbeatServer) Stop() error {
 	s.tw.Stop()
 	return nil
 }
