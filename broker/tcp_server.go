@@ -120,11 +120,11 @@ func (s *TcpServer) OnOpen(c gnet.Conn) (out []byte, action gnet.Action) {
 		Writer:      c,
 	}
 
-	subCtx := context.WithValue(s.ctx, currentUserKey, uc)
-	c.SetContext(subCtx)
+	uc.RefreshHeartbeat(time.Now().UnixMilli())
 
-	if err := s.openConn(subCtx, c, uc); err != nil {
-		s.logger.ConnDebug("connect", uc.Desc(), ConnLifecycle, err)
+	err := s.openConn(c, uc)
+	s.logger.ConnDebug("connect", uc.Desc(), ConnLifecycle, err)
+	if err != nil {
 		s.closeConn(c, uc, err.Error())
 	}
 
@@ -132,7 +132,7 @@ func (s *TcpServer) OnOpen(c gnet.Conn) (out []byte, action gnet.Action) {
 }
 
 func (s *TcpServer) OnClose(c gnet.Conn, err error) (action gnet.Action) {
-	ctx := GetContext(c)
+	ctx := s.getContext(c)
 	uc, _ := GetCurUserConn(ctx)
 	s.logger.ConnDebug("close", uc.Desc(), ConnLifecycle, err)
 	return gnet.None
@@ -140,7 +140,7 @@ func (s *TcpServer) OnClose(c gnet.Conn, err error) (action gnet.Action) {
 
 func (s *TcpServer) OnTraffic(c gnet.Conn) (action gnet.Action) {
 
-	ctx := GetContext(c)
+	ctx := s.getContext(c)
 	uc, err := GetCurUserConn(ctx)
 	if err != nil {
 		s.logger.ConnDebug("read", "", ConnLifecycle, err)
@@ -158,41 +158,43 @@ func (s *TcpServer) OnTraffic(c gnet.Conn) (action gnet.Action) {
 	if packets != nil {
 		for _, packet := range packets {
 
-			ret, err := s.handle(ctx, packet)
-			if err != nil {
-				s.logger.ConnDebug("process packet", uc.Desc(), ConnLifecycle, err)
-				s.closeConn(c, uc, err.Error())
-			}
-
 			if packet.IsHeartbeat() {
-				ret = api.NewHeartbeatPacket(int32(1))
+				s.response(c, uc, api.NewHeartbeatPacket(int32(1)))
 				uc.RefreshHeartbeat(time.Now().UnixMilli())
+				continue
 			}
 
-			if packet.IsMessage() && packet.GetMessage().IsResponse() {
-				s.mrs.Ack(packet.GetMessage().MessageId)
+			if packet.IsCommand() {
+				s.logger.ConnDebug("process command packet start", uc.Desc(), ConnLifecycle, nil)
+				ret, err := s.commandHandler.HandlePacket(ctx, packet)
+				s.logger.ConnDebug("process command packet end", uc.Desc(), ConnLifecycle, err)
+				resp := packet.GetCommand().Response(ret, err).Wrap()
+				s.response(c, uc, resp)
+				continue
 			}
 
-			if ret != nil {
-				s.response(c, uc, ret)
+			if packet.IsMessage() {
+				message := packet.GetMessage()
+				if message.IsRequest() {
+					s.logger.ConnDebug("process message packet start", uc.Desc(), ConnLifecycle, nil)
+					ret, err := s.messageHandler.HandlePacket(ctx, packet)
+					s.logger.ConnDebug("process message packet end", uc.Desc(), ConnLifecycle, err)
+					resp := packet.GetMessage().Response(ret, err).Wrap()
+					s.response(c, uc, resp)
+					continue
+				} else {
+					s.logger.ConnDebug("process message ack start", uc.Desc(), ConnLifecycle, nil)
+					err := s.mrs.Ack(message.MessageId)
+					s.logger.ConnDebug("process message ack end", uc.Desc(), ConnLifecycle, err)
+					continue
+				}
 			}
-
 		}
 	}
 
 	return gnet.None
 }
 
-func (s *TcpServer) handle(ctx context.Context, packet *api.Packet) (*api.Packet, error) {
-
-	switch packet.Type {
-	case api.TypeCommand:
-		return s.commandHandler.HandlePacket(ctx, packet)
-	case api.TypeMessage:
-		return s.messageHandler.HandlePacket(ctx, packet)
-	}
-	return nil, nil
-}
 func (s *TcpServer) OnTick() (delay time.Duration, action gnet.Action) {
 
 	//broker := domain.BrokerInfo{
@@ -207,8 +209,20 @@ func (s *TcpServer) OnTick() (delay time.Duration, action gnet.Action) {
 	return time.Duration(s.interval) * time.Second, gnet.None
 }
 
-func GetContext(c gnet.Conn) context.Context {
+// initContext 新连接到来时，初始化ctx
+func (s *TcpServer) initContext(c gnet.Conn, uc *domain.UserConn) context.Context {
+	subCtx := context.WithValue(s.ctx, currentUserKey, uc)
+	c.SetContext(subCtx)
+	return subCtx
+}
 
+// 删除ctx
+func (s *TcpServer) delContext(c gnet.Conn) {
+	c.SetContext(nil)
+}
+
+// 获取ctx
+func (s *TcpServer) getContext(c gnet.Conn) context.Context {
 	if c == nil {
 		return nil
 	}
@@ -219,12 +233,13 @@ func GetContext(c gnet.Conn) context.Context {
 	return nil
 }
 
-func (s *TcpServer) DelContext(c gnet.Conn) {
-	c.SetContext(nil)
-}
+// 打开链接：初始化ctx、保存uc到本地、启动心跳
+func (s *TcpServer) openConn(c gnet.Conn, uc *domain.UserConn) error {
+	if !s.userHolder.StoreTransient(uc) {
+		return nil
+	}
 
-func (s *TcpServer) openConn(ctx context.Context, c gnet.Conn, uc *domain.UserConn) error {
-	s.userHolder.StoreTransient(uc)
+	s.initContext(c, uc)
 
 	fun := func(now time.Time) timewheel.TaskResult {
 
@@ -240,6 +255,7 @@ func (s *TcpServer) openConn(ctx context.Context, c gnet.Conn, uc *domain.UserCo
 			return timewheel.Break
 		}
 
+		s.logger.ConnDebug("heartbeat retry", uc.Desc(), ConnLifecycle, nil)
 		return timewheel.Retry
 	}
 
@@ -250,19 +266,28 @@ func (s *TcpServer) openConn(ctx context.Context, c gnet.Conn, uc *domain.UserCo
 	return nil
 }
 
+// 打开链接：删除ctx、删除uc到本地、停止心跳
 func (s *TcpServer) closeConn(c gnet.Conn, uc *domain.UserConn, reason string) {
-	s.userHolder.RemoveUserConn(uc)
+	if !s.userHolder.RemoveUserConn(uc) {
+		return
+	}
+
+	//停止心跳不会从hts中删除任务，把uc的IsClose = true，在hts中自己根据IsClose退出
 	uc.Close()
 	ucd := ""
 	if uc != nil {
 		ucd = uc.Desc()
 	}
 
-	c.CloseWithCallback(func(c gnet.Conn, err error) error {
+	err := c.CloseWithCallback(func(c gnet.Conn, err error) error {
 		s.logger.ConnDebug("close completed", ucd, ConnLifecycle, err, zap.String("reason", reason))
-		s.DelContext(c)
+		s.delContext(c)
 		return nil
 	})
+
+	if err != nil {
+		s.logger.ConnDebug("close error", ucd, ConnLifecycle, err)
+	}
 }
 
 func (s *TcpServer) response(c gnet.Conn, uc *domain.UserConn, packet *api.Packet) {
@@ -270,14 +295,18 @@ func (s *TcpServer) response(c gnet.Conn, uc *domain.UserConn, packet *api.Packe
 	defer bb.Put(bs)
 
 	if err != nil {
-		s.logger.ConnDebug("encode", uc.Desc(), ConnLifecycle, err)
+		s.logger.ConnDebug("encode error", uc.Desc(), ConnLifecycle, err)
 		s.closeConn(c, uc, err.Error())
 		return
 	}
 
-	c.AsyncWrite(bs.Bytes(), func(c gnet.Conn, err error) error {
-		s.logger.ConnDebug("write ack", uc.Desc(), ConnLifecycle, err)
+	if err := c.AsyncWrite(bs.Bytes(), func(c gnet.Conn, err error) error {
+		s.logger.ConnDebug("write completed", uc.Desc(), ConnLifecycle, err)
 		return err
-	})
+	}); err != nil {
+		s.logger.ConnDebug("async write error", uc.Desc(), ConnLifecycle, err)
+		s.closeConn(c, uc, err.Error())
+		return
+	}
 
 }

@@ -2,27 +2,27 @@ package main
 
 import (
 	"context"
+	"fmt"
+	console "github.com/asynkron/goconsole"
 	"github.com/magicnana999/im/api/kitex_gen/api"
 	"github.com/magicnana999/im/broker"
 	"github.com/magicnana999/im/pkg/timewheel"
 	"github.com/panjf2000/gnet/v2"
 	"github.com/panjf2000/gnet/v2/pkg/logging"
+	"sync"
 	"time"
 )
 
 var key string = "USER"
-
-type TcpClientListener interface {
-	Connect(*User)
-	DisConnect(*User)
-}
+var curUser *User
+var curUsers sync.Map
 
 type TcpServer struct {
 	agent      *gnet.Client
 	codec      *broker.Codec
 	handler    *PacketHandler
 	htsHandler *HeartbeatServer
-	listener   TcpClientListener
+	console    *console.Console
 }
 
 func (h *TcpServer) OnShutdown(eng gnet.Engine) {}
@@ -56,6 +56,8 @@ func (h *TcpServer) OnOpen(c gnet.Conn) (out []byte, action gnet.Action) {
 		Reader: c,
 	}
 
+	curUser = user
+
 	ctx := context.WithValue(context.Background(), key, user)
 	c.SetContext(ctx)
 
@@ -66,9 +68,8 @@ func (h *TcpServer) OnOpen(c gnet.Conn) (out []byte, action gnet.Action) {
 		ht := api.NewHeartbeatPacket(100)
 		h.handler.Write(ht, c)
 		return timewheel.Retry
-	}, time.Second*30)
+	}, time.Second*20)
 
-	h.listener.Connect(user)
 	return
 }
 
@@ -102,27 +103,32 @@ func (h *TcpServer) OnTraffic(c gnet.Conn) gnet.Action {
 
 func (h *TcpServer) OnClose(c gnet.Conn, err error) gnet.Action {
 	logging.Infof("Connection closed: %v", err)
-	user := GetUser(c)
-	h.listener.DisConnect(user)
 	return gnet.None
 }
 
 func (h *TcpServer) Start() {
-	h.agent.Start()
+	go h.agent.Start()
+	go h.htsHandler.Start()
+	h.console.Run()
 }
 
 func (h *TcpServer) Stop() {
 	h.agent.Stop()
+	h.htsHandler.Stop()
 }
 
-func (h *TcpServer) Connect() (gnet.Conn, error) {
+func (h *TcpServer) connect() (gnet.Conn, error) {
 	return h.agent.Dial("tcp", "127.0.0.1:5075")
 }
 
-func NewTcpServer(handler *PacketHandler, hts *HeartbeatServer, l TcpClientListener) *TcpServer {
+func (h *TcpServer) write(ht *api.Packet, user *User) {
+	h.handler.Write(ht, user.Writer)
+}
+
+func NewTcpServer(handler *PacketHandler, hts *HeartbeatServer) *TcpServer {
 
 	codec := broker.NewCodec()
-	eh := &TcpServer{codec: codec, handler: handler, htsHandler: hts, listener: l}
+	eh := &TcpServer{codec: codec, handler: handler, htsHandler: hts}
 	client, err := gnet.NewClient(eh,
 		gnet.WithLogger(logging.GetDefaultLogger()),
 		gnet.WithReadBufferCap(1024),
@@ -131,6 +137,27 @@ func NewTcpServer(handler *PacketHandler, hts *HeartbeatServer, l TcpClientListe
 		logging.Fatalf("Failed to create client: %v", err)
 	}
 
+	c := console.NewConsole(func(s string) {
+		fmt.Println(s)
+	})
+
+	c.Command("conn", func(text string) {
+		eh.connect()
+	})
+
+	c.Command("login", func(text string) {
+		req := &api.LoginRequest{
+			AppId:    "1201",
+			UserSig:  "",
+			Os:       "iOS",
+			DeviceId: "",
+		}
+
+		packet := api.NewCommand(req)
+		eh.write(packet, curUser)
+	})
+
+	eh.console = c
 	eh.agent = client
 	return eh
 }

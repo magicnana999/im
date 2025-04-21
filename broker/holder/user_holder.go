@@ -193,10 +193,14 @@ func (s *UserHolder) Close(ctx context.Context, uc *domain.UserConn) {
 	return
 }
 
-func (s *UserHolder) StoreTransient(uc *domain.UserConn) {
-	s.m.Store(uc.Label(), uc)
+// StoreTransient 保存一个未登录的connection到本地
+func (s *UserHolder) StoreTransient(uc *domain.UserConn) bool {
+	_, ok := s.m.LoadOrStore(uc.Label(), uc)
+	return !ok
 }
 
-func (s *UserHolder) RemoveUserConn(uc *domain.UserConn) {
-	s.m.Delete(uc.Label())
+// RemoveUserConn 从本地删除一个connection，无论是否登录
+func (s *UserHolder) RemoveUserConn(uc *domain.UserConn) bool {
+	_, ok := s.m.LoadAndDelete(uc.Label())
+	return ok
 }

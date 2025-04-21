@@ -1,11 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"github.com/magicnana999/im/api/kitex_gen/api"
 	"github.com/magicnana999/im/broker"
+	"github.com/magicnana999/im/pkg/jsonext"
+	"github.com/panjf2000/gnet/v2/pkg/logging"
 	bb "github.com/panjf2000/gnet/v2/pkg/pool/bytebuffer"
-	"google.golang.org/protobuf/proto"
 	"io"
 	"sync"
 )
@@ -50,10 +50,12 @@ func (s *PacketHandler) Send(request *api.Packet, user *User) {
 }
 
 func (s *PacketHandler) Handle(p *api.Packet, user *User) *api.Packet {
+
+	json := jsonext.PbMarshalNoErr(p)
+	logging.Infof("收到: %s", string(json))
+
 	if p.IsMessage() {
 		if p.GetMessage().IsRequest() {
-			json, _ := proto.Marshal(p.GetMessage())
-			fmt.Println("收到消息：", string(json))
 			return p.GetMessage().Wrap()
 		}
 
@@ -62,19 +64,26 @@ func (s *PacketHandler) Handle(p *api.Packet, user *User) *api.Packet {
 			return nil
 		}
 
-		if p.IsCommand() && p.GetCommand().CommandType == api.CommandTypeUserLogin {
-			cmd := p.GetCommand()
-			if cmd.GetLoginReply() != nil {
-				user.UserID = cmd.GetLoginReply().GetUserId()
-				user.AppID = cmd.GetLoginReply().GetAppId()
-				user.IsLogin.Store(true)
-			}
+	}
+
+	if p.IsCommand() && p.GetCommand().CommandType == api.CommandTypeUserLogin {
+		cmd := p.GetCommand()
+		if cmd.GetLoginReply() != nil {
+			user.UserID = cmd.GetLoginReply().GetUserId()
+			user.AppID = cmd.GetLoginReply().GetAppId()
+			user.IsLogin.Store(true)
+			curUsers.Store(user.UserID, user)
 		}
 	}
 	return nil
 }
 
 func (s *PacketHandler) Write(ret *api.Packet, writer io.Writer) error {
+
+	json := jsonext.PbMarshalNoErr(ret)
+
+	logging.Infof("写入: %s", string(json))
+
 	buffer, err := s.codec.Encode(ret)
 	defer bb.Put(buffer)
 	if err != nil {

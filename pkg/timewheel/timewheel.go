@@ -36,7 +36,7 @@ type Config struct {
 type Timewheel struct {
 	slots        []*queue.LockFreeQueue[Task] //槽
 	cancel       context.CancelFunc           //停止方法
-	IsRunning    atomic.Bool                  // atomic
+	IsRunning    atomic.Bool                  // consurrent
 	currentIndex int64                        //当前的slot索引
 	currentMilli int64                        //毫秒
 	pool         *ants.Pool                   //worker池
@@ -112,8 +112,8 @@ func (tw *Timewheel) Start(ctx context.Context) {
 
 	if tw.IsRunning.CompareAndSwap(false, true) {
 
-		if tw.logger != nil && tw.logger.IsDebugEnabled() {
-			tw.logger.Debug("ticker start")
+		if tw.logger != nil {
+			tw.logger.Info("ticker start")
 		}
 
 		ticker := time.NewTicker(tw.cfg.Tick)
@@ -149,8 +149,8 @@ func (tw *Timewheel) Stop() {
 
 	if tw.IsRunning.CompareAndSwap(true, false) {
 
-		if tw.logger != nil && tw.logger.IsDebugEnabled() {
-			tw.logger.Debug("ticker stop")
+		if tw.logger != nil {
+			tw.logger.Info("ticker stop")
 		}
 
 		if tw.cancel != nil {

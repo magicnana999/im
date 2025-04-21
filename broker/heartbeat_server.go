@@ -2,9 +2,10 @@ package broker
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"github.com/magicnana999/im/pkg/jsonext"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 	"time"
 
 	"github.com/magicnana999/im/broker/holder"
@@ -12,14 +13,6 @@ import (
 	"github.com/magicnana999/im/pkg/logger"
 	"github.com/magicnana999/im/pkg/timewheel"
 	"go.uber.org/fx"
-)
-
-var (
-	errConnClosedAlready = errors.New("conn already closed")
-
-	errHeartbeatTimeout = errors.New("heartbeat timeout")
-
-	errUCIsNil = errors.New("uc is nil")
 )
 
 type HeartbeatFunc func(now time.Time) timewheel.TaskResult
@@ -69,12 +62,13 @@ func NewHeartbeatServer(g *global.Config, uh *holder.UserHolder, lc fx.Lifecycle
 
 	twc := &timewheel.Config{
 		Tick:                time.Second,
-		SlotCount:           60,
+		SlotCount:           30,
 		MaxLengthOfEachSlot: 100_0000,
 	}
 	log.SrvInfo(string(jsonext.MarshalNoErr(twc)), SrvLifecycle, nil)
 
-	tw, err := timewheel.NewTimewheel(twc, nil, nil)
+	twLogger := logger.NameWithOptions("timewheel-hts", zap.IncreaseLevel(zapcore.DebugLevel))
+	tw, err := timewheel.NewTimewheel(twc, twLogger, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -99,8 +93,10 @@ func NewHeartbeatServer(g *global.Config, uh *holder.UserHolder, lc fx.Lifecycle
 }
 
 func (s *HeartbeatServer) Start(ctx context.Context) error {
-	go s.tw.Start(context.Background())
-	s.logger.SrvInfo("timewheel-hts start", SrvLifecycle, nil)
+	go func() {
+		s.tw.Start(context.Background())
+		s.logger.SrvInfo("timewheel-hts start", SrvLifecycle, nil)
+	}()
 	return nil
 }
 
@@ -114,6 +110,7 @@ func (s *HeartbeatServer) Stop(ctx context.Context) error {
 	return nil
 }
 
+// StartTicking 启动一个心跳
 func (s *HeartbeatServer) StartTicking(fun HeartbeatFunc, interval time.Duration) (int, error) {
 	return s.tw.Submit(fun, interval)
 }

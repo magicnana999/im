@@ -22,7 +22,7 @@ type Logger struct {
 
 func NewLogger(name string, debugMode bool) *Logger {
 	return &Logger{
-		Logger:    logger.NamedAndAddSkip(name, 2),
+		Logger:    logger.NameWithOptions(name, zap.AddCallerSkip(2)),
 		debugMode: debugMode,
 	}
 }
@@ -50,11 +50,13 @@ func (s *Logger) _log(level zapcore.Level, msg string, connDesc string, messageI
 
 	fields := make([]zap.Field, 0)
 
-	//if err == nil {
-	//	fields = append(fields, zap.Bool(define.Status, true))
-	//} else {
-	//	fields = append(fields, zap.Bool(define.Status, false))
-	//}
+	if ezf == ConnLifecycle {
+		if err == nil {
+			fields = append(fields, zap.Bool("status", true))
+		} else {
+			fields = append(fields, zap.Bool("status", false))
+		}
+	}
 
 	if ezf != "" {
 		fields = append(fields, zap.String("event", string(ezf)))

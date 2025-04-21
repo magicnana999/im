@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"go.uber.org/fx"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -15,10 +17,6 @@ import (
 	"github.com/magicnana999/im/pkg/jsonext"
 	"github.com/magicnana999/im/pkg/logger"
 	"github.com/magicnana999/im/pkg/timewheel"
-)
-
-var (
-	retryTimeout = errors.New("retry timeout")
 )
 
 func getOrDefaultMRSConfig(g *global.Config) *global.MRSConfig {
@@ -68,8 +66,8 @@ func NewMessageRetryServer(g *global.Config, lc fx.Lifecycle) (*MessageRetryServ
 	}
 	log.SrvInfo(string(jsonext.MarshalNoErr(twc)), SrvLifecycle, nil)
 
-	//tw, err := timewheel.NewTimewheel(twc, logger.Named("timewheel-mrs"), nil)
-	tw, err := timewheel.NewTimewheel(twc, nil, nil)
+	twLogger := logger.NameWithOptions("timewheel-mrs", zap.IncreaseLevel(zapcore.InfoLevel))
+	tw, err := timewheel.NewTimewheel(twc, twLogger, nil)
 	if err != nil {
 		log.SrvInfo("failed to init timewheel", SrvLifecycle, nil)
 		return nil, err
@@ -97,8 +95,10 @@ func NewMessageRetryServer(g *global.Config, lc fx.Lifecycle) (*MessageRetryServ
 }
 
 func (s *MessageRetryServer) Start(ctx context.Context) error {
-	go s.tw.Start(context.Background())
-	s.logger.SrvInfo("timewheel-mrs started", SrvLifecycle, nil)
+	go func() {
+		s.tw.Start(context.Background())
+		s.logger.SrvInfo("timewheel-mrs started", SrvLifecycle, nil)
+	}()
 	return nil
 }
 
@@ -157,24 +157,10 @@ func (s *MessageRetryServer) Ack(messageID string) error {
 	return nil
 }
 
-func (s *MessageRetryServer) retryNoMore(messageID string) error {
-	if messageID == "" {
-		return errors.New("invalid message ID")
-	}
-	value, ok := s.tasks.LoadAndDelete(messageID)
-	if ok && value != nil {
-		if task, ok := value.(*messageRetryTask); ok && task != nil {
-			task.IsRetryOK.Store(false)
-		}
-	}
-	return nil
-}
-
 type messageRetryTask struct {
 	uc              *domain.UserConn
 	m               *api.Message
 	isAckOK         atomic.Bool                                //是否已收到ACK
-	IsRetryOK       atomic.Bool                                //是否需要再次重试
 	firstSendSecond atomic.Int64                               //首次发送时间
 	interval        time.Duration                              //重发间隔
 	timeout         time.Duration                              //重发超时时间，超多此时间将不在重发
@@ -184,10 +170,6 @@ type messageRetryTask struct {
 
 func (t *messageRetryTask) Execute(now time.Time) timewheel.TaskResult {
 	if t.isAckOK.Load() {
-		return timewheel.Break
-	}
-
-	if !t.IsRetryOK.Load() {
 		return timewheel.Break
 	}
 

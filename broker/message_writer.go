@@ -8,9 +8,7 @@ import (
 )
 
 var (
-	errUcIsNil      = errors.New("uc is nil")
-	errUcIsClosed   = errors.New("uc is closed")
-	errMessageIsNil = errors.New("message is nil")
+	errUcIsClosed = errors.New("uc is closed")
 )
 
 // MessageWriter 消息写入服务
