@@ -67,7 +67,7 @@ func NewHeartbeatServer(g *global.Config, uh *holder.UserHolder, lc fx.Lifecycle
 	}
 	log.SrvInfo(string(jsonext.MarshalNoErr(twc)), SrvLifecycle, nil)
 
-	twLogger := logger.NameWithOptions("timewheel-hts", zap.IncreaseLevel(zapcore.DebugLevel))
+	twLogger := logger.NameWithOptions("timewheel-hts", zap.IncreaseLevel(zapcore.InfoLevel))
 	tw, err := timewheel.NewTimewheel(twc, twLogger, nil)
 	if err != nil {
 		return nil, err

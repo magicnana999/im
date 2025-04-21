@@ -3,9 +3,10 @@ package main
 import (
 	"github.com/magicnana999/im/api/kitex_gen/api"
 	"github.com/magicnana999/im/broker"
-	"github.com/magicnana999/im/pkg/jsonext"
 	"github.com/panjf2000/gnet/v2/pkg/logging"
 	bb "github.com/panjf2000/gnet/v2/pkg/pool/bytebuffer"
+	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/proto"
 	"io"
 	"sync"
 )
@@ -51,8 +52,7 @@ func (s *PacketHandler) Send(request *api.Packet, user *User) {
 
 func (s *PacketHandler) Handle(p *api.Packet, user *User) *api.Packet {
 
-	json := jsonext.PbMarshalNoErr(p)
-	logging.Infof("收到: %s", string(json))
+	logging.Infof("收到: %s", toJson(p))
 
 	if p.IsMessage() {
 		if p.GetMessage().IsRequest() {
@@ -80,9 +80,7 @@ func (s *PacketHandler) Handle(p *api.Packet, user *User) *api.Packet {
 
 func (s *PacketHandler) Write(ret *api.Packet, writer io.Writer) error {
 
-	json := jsonext.PbMarshalNoErr(ret)
-
-	logging.Infof("写入: %s", string(json))
+	logging.Infof("写入: %s", toJson(ret))
 
 	buffer, err := s.codec.Encode(ret)
 	defer bb.Put(buffer)
@@ -101,4 +99,13 @@ func (s *PacketHandler) Write(ret *api.Packet, writer io.Writer) error {
 	}
 
 	return nil
+}
+
+func toJson(m proto.Message) string {
+	b, err := protojson.Marshal(m)
+	if err != nil {
+		return ""
+	}
+
+	return string(b)
 }

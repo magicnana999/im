@@ -12,6 +12,7 @@ var (
 	SrvLifecycle  EventZapField = "server lifecycle"
 	ConnLifecycle EventZapField = "conn lifecycle"
 	MsgTracking   EventZapField = "message tracking"
+	CmdTracking   EventZapField = "command tracking"
 )
 
 // Logger 用于Broker内部的日志
@@ -37,6 +38,10 @@ func (s *Logger) ConnDebug(msg, connDesc string, ezf EventZapField, err error, f
 
 func (s *Logger) MsgDebug(msg, connDesc, messageID string, ezf EventZapField, err error, field ...zap.Field) {
 	s._log(zap.DebugLevel, msg, connDesc, messageID, ezf, err, field...)
+}
+
+func (s *Logger) CmdDebug(msg, connDesc, commandId string, ezf EventZapField, err error, field ...zap.Field) {
+	s._log(zap.DebugLevel, msg, connDesc, commandId, ezf, err, field...)
 }
 
 func (s *Logger) _log(level zapcore.Level, msg string, connDesc string, messageID string, ezf EventZapField, err error, fs ...zap.Field) {

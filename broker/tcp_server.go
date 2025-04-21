@@ -6,6 +6,7 @@ import (
 	"github.com/magicnana999/im/broker/domain"
 	"github.com/magicnana999/im/broker/handler"
 	"github.com/magicnana999/im/broker/holder"
+	"github.com/magicnana999/im/pkg/jsonext"
 	"github.com/magicnana999/im/pkg/timewheel"
 	"github.com/panjf2000/gnet/v2"
 	"github.com/panjf2000/gnet/v2/pkg/logging"
@@ -165,10 +166,16 @@ func (s *TcpServer) OnTraffic(c gnet.Conn) (action gnet.Action) {
 			}
 
 			if packet.IsCommand() {
+
+				json1 := string(jsonext.PbMarshalNoErr(packet))
+				s.logger.MsgDebug(json1, uc.Desc(), packet.GetCommand().CommandId, CmdTracking, nil)
 				s.logger.ConnDebug("process command packet start", uc.Desc(), ConnLifecycle, nil)
 				ret, err := s.commandHandler.HandlePacket(ctx, packet)
 				s.logger.ConnDebug("process command packet end", uc.Desc(), ConnLifecycle, err)
 				resp := packet.GetCommand().Response(ret, err).Wrap()
+				json2 := string(jsonext.PbMarshalNoErr(resp))
+				s.logger.MsgDebug(json2, uc.Desc(), resp.GetCommand().CommandId, CmdTracking, nil)
+
 				s.response(c, uc, resp)
 				continue
 			}
