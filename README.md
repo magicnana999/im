@@ -14,12 +14,28 @@ $ kitex router.proto
 
 ```
 
-## 启动
-#### IDE 中启动
-* Run -> Edit Configuration -> 选择你的目标程序 -> Program arguments -> -conf ../conf/im-broker.yaml
+## Starting on IDE
+### build
+```shell
+go mod tidy
+```
 
+```shell
+cd client
+go mod tidy
+```
 
-## 启动依赖
+### Start MysQL Redis Etcd and Kafka
 ```shell
 docker compose up -d
+```
+### Start im-broker
+```shell
+go run im-broker.go
+```
+
+## Start client
+```shell
+cd client
+go run im-client.go
 ```

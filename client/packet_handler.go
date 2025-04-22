@@ -38,7 +38,7 @@ func (s *PacketHandler) ACK(messageId string) {
 
 func (s *PacketHandler) Send(request *api.Packet, user *User) {
 	if user != nil && !user.IsClosed.Load() {
-		s.Write(request, user.Writer)
+		s.Write(request, user.Writer, user)
 	}
 
 	if request.IsMessage() {
@@ -51,9 +51,6 @@ func (s *PacketHandler) Send(request *api.Packet, user *User) {
 }
 
 func (s *PacketHandler) Handle(p *api.Packet, user *User) *api.Packet {
-
-	logging.Infof("收到: %s", toJson(p))
-
 	if p.IsMessage() {
 		if p.GetMessage().IsRequest() {
 			return p.GetMessage().Wrap()
@@ -72,15 +69,13 @@ func (s *PacketHandler) Handle(p *api.Packet, user *User) *api.Packet {
 			user.UserID = cmd.GetLoginReply().GetUserId()
 			user.AppID = cmd.GetLoginReply().GetAppId()
 			user.IsLogin.Store(true)
-			curUsers.Store(user.UserID, user)
 		}
 	}
 	return nil
 }
 
-func (s *PacketHandler) Write(ret *api.Packet, writer io.Writer) error {
-
-	logging.Infof("写入: %s", toJson(ret))
+func (s *PacketHandler) Write(ret *api.Packet, writer io.Writer, user *User) error {
+	logging.Infof("%d write: %s", user.UserID, toJson(ret))
 
 	buffer, err := s.codec.Encode(ret)
 	defer bb.Put(buffer)

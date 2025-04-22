@@ -2,7 +2,9 @@ package broker
 
 import (
 	"context"
+	"fmt"
 	"github.com/magicnana999/im/api/kitex_gen/api"
+	brokerctx "github.com/magicnana999/im/broker/ctx"
 	"github.com/magicnana999/im/broker/domain"
 	"github.com/magicnana999/im/broker/handler"
 	"github.com/magicnana999/im/broker/holder"
@@ -110,18 +112,8 @@ func (s *TcpServer) OnShutdown(eng gnet.Engine) {
 }
 
 func (s *TcpServer) OnOpen(c gnet.Conn) (out []byte, action gnet.Action) {
-	uc := &domain.UserConn{
-		Fd:          c.Fd(),
-		AppId:       "",
-		UserId:      0,
-		ClientAddr:  c.RemoteAddr().String(),
-		BrokerAddr:  c.LocalAddr().String(),
-		ConnectTime: time.Now().UnixMilli(),
-		Reader:      c,
-		Writer:      c,
-	}
-
-	uc.RefreshHeartbeat(time.Now().UnixMilli())
+	fmt.Println("open", c.Fd())
+	uc := domain.NewUserConn(c)
 
 	err := s.openConn(c, uc)
 	s.logger.ConnDebug("connect", uc.Desc(), ConnLifecycle, err)
@@ -134,15 +126,17 @@ func (s *TcpServer) OnOpen(c gnet.Conn) (out []byte, action gnet.Action) {
 
 func (s *TcpServer) OnClose(c gnet.Conn, err error) (action gnet.Action) {
 	ctx := s.getContext(c)
-	uc, _ := GetCurUserConn(ctx)
+	uc, _ := brokerctx.GetCurUserConn(ctx)
 	s.logger.ConnDebug("close", uc.Desc(), ConnLifecycle, err)
 	return gnet.None
 }
 
 func (s *TcpServer) OnTraffic(c gnet.Conn) (action gnet.Action) {
 
+	fmt.Println("traffic", c.Fd())
+
 	ctx := s.getContext(c)
-	uc, err := GetCurUserConn(ctx)
+	uc, err := brokerctx.GetCurUserConn(ctx)
 	if err != nil {
 		s.logger.ConnDebug("read", "", ConnLifecycle, err)
 		s.closeConn(c, uc, err.Error())
@@ -150,6 +144,7 @@ func (s *TcpServer) OnTraffic(c gnet.Conn) (action gnet.Action) {
 	}
 
 	packets, err := s.codec.Decode(c)
+
 	if err != nil {
 		s.logger.ConnDebug("decode", uc.Desc(), ConnLifecycle, err)
 		s.closeConn(c, uc, err.Error())
@@ -161,38 +156,43 @@ func (s *TcpServer) OnTraffic(c gnet.Conn) (action gnet.Action) {
 
 			if packet.IsHeartbeat() {
 				s.response(c, uc, api.NewHeartbeatPacket(int32(1)))
-				uc.RefreshHeartbeat(time.Now().UnixMilli())
+				uc.Refresh(time.Now().UnixMilli())
 				continue
 			}
 
+			s.logger.PktDebug("read", uc.Desc(), string(jsonext.PbMarshalNoErr(packet)), packet.GetPacketId(), PacketTracking, nil)
+
 			if packet.IsCommand() {
-
-				json1 := string(jsonext.PbMarshalNoErr(packet))
-				s.logger.MsgDebug(json1, uc.Desc(), packet.GetCommand().CommandId, CmdTracking, nil)
-				s.logger.ConnDebug("process command packet start", uc.Desc(), ConnLifecycle, nil)
 				ret, err := s.commandHandler.HandlePacket(ctx, packet)
-				s.logger.ConnDebug("process command packet end", uc.Desc(), ConnLifecycle, err)
-				resp := packet.GetCommand().Response(ret, err).Wrap()
-				json2 := string(jsonext.PbMarshalNoErr(resp))
-				s.logger.MsgDebug(json2, uc.Desc(), resp.GetCommand().CommandId, CmdTracking, nil)
-
-				s.response(c, uc, resp)
+				s.logger.PktDebug("command process", uc.Desc(), packet.GetPacketId(), string(jsonext.PbMarshalNoErr(packet)), PacketTracking, err)
+				if err != nil {
+					s.closeConn(c, uc, err.Error())
+					continue
+				}
+				s.response(c, uc, ret)
 				continue
 			}
 
 			if packet.IsMessage() {
 				message := packet.GetMessage()
 				if message.IsRequest() {
-					s.logger.ConnDebug("process message packet start", uc.Desc(), ConnLifecycle, nil)
 					ret, err := s.messageHandler.HandlePacket(ctx, packet)
-					s.logger.ConnDebug("process message packet end", uc.Desc(), ConnLifecycle, err)
-					resp := packet.GetMessage().Response(ret, err).Wrap()
-					s.response(c, uc, resp)
+					s.logger.PktDebug("message process", uc.Desc(), packet.GetPacketId(), string(jsonext.PbMarshalNoErr(packet)), PacketTracking, err)
+
+					if err != nil {
+						s.closeConn(c, uc, err.Error())
+						continue
+					}
+
+					s.response(c, uc, ret)
 					continue
 				} else {
-					s.logger.ConnDebug("process message ack start", uc.Desc(), ConnLifecycle, nil)
 					err := s.mrs.Ack(message.MessageId)
-					s.logger.ConnDebug("process message ack end", uc.Desc(), ConnLifecycle, err)
+					s.logger.PktDebug("ack process", uc.Desc(), packet.GetPacketId(), string(jsonext.PbMarshalNoErr(packet)), PacketTracking, err)
+					if err != nil {
+						s.closeConn(c, uc, err.Error())
+						continue
+					}
 					continue
 				}
 			}
@@ -218,7 +218,7 @@ func (s *TcpServer) OnTick() (delay time.Duration, action gnet.Action) {
 
 // initContext 新连接到来时，初始化ctx
 func (s *TcpServer) initContext(c gnet.Conn, uc *domain.UserConn) context.Context {
-	subCtx := context.WithValue(s.ctx, currentUserKey, uc)
+	subCtx := context.WithValue(s.ctx, brokerctx.CurrentUserKey, uc)
 	c.SetContext(subCtx)
 	return subCtx
 }
@@ -242,9 +242,6 @@ func (s *TcpServer) getContext(c gnet.Conn) context.Context {
 
 // 打开链接：初始化ctx、保存uc到本地、启动心跳
 func (s *TcpServer) openConn(c gnet.Conn, uc *domain.UserConn) error {
-	if !s.userHolder.StoreTransient(uc) {
-		return nil
-	}
 
 	s.initContext(c, uc)
 
@@ -270,14 +267,18 @@ func (s *TcpServer) openConn(c gnet.Conn, uc *domain.UserConn) error {
 		return err
 	}
 
+	s.logger.ConnDebug("open connection", uc.Desc(), ConnLifecycle, nil)
 	return nil
 }
 
 // 打开链接：删除ctx、删除uc到本地、停止心跳
 func (s *TcpServer) closeConn(c gnet.Conn, uc *domain.UserConn, reason string) {
-	if !s.userHolder.RemoveUserConn(uc) {
+
+	if !uc.Close() {
 		return
 	}
+
+	s.userHolder.RemoveUserConn(uc)
 
 	//停止心跳不会从hts中删除任务，把uc的IsClose = true，在hts中自己根据IsClose退出
 	uc.Close()
@@ -289,6 +290,7 @@ func (s *TcpServer) closeConn(c gnet.Conn, uc *domain.UserConn, reason string) {
 	err := c.CloseWithCallback(func(c gnet.Conn, err error) error {
 		s.logger.ConnDebug("close completed", ucd, ConnLifecycle, err, zap.String("reason", reason))
 		s.delContext(c)
+		s.logger.ConnDebug("close connection", ucd, ConnLifecycle, nil)
 		return nil
 	})
 
@@ -298,20 +300,21 @@ func (s *TcpServer) closeConn(c gnet.Conn, uc *domain.UserConn, reason string) {
 }
 
 func (s *TcpServer) response(c gnet.Conn, uc *domain.UserConn, packet *api.Packet) {
+	s.logger.PktDebug("write", uc.Desc(), packet.GetPacketId(), string(jsonext.PbMarshalNoErr(packet)), PacketTracking, nil)
 	bs, err := s.codec.Encode(packet)
 	defer bb.Put(bs)
 
 	if err != nil {
-		s.logger.ConnDebug("encode error", uc.Desc(), ConnLifecycle, err)
+		s.logger.PktDebug("encode error", uc.Desc(), packet.GetPacketId(), "", PacketTracking, err)
 		s.closeConn(c, uc, err.Error())
 		return
 	}
 
 	if err := c.AsyncWrite(bs.Bytes(), func(c gnet.Conn, err error) error {
-		s.logger.ConnDebug("write completed", uc.Desc(), ConnLifecycle, err)
+		s.logger.PktDebug("write completed", uc.Desc(), packet.GetPacketId(), "", PacketTracking, err)
 		return err
 	}); err != nil {
-		s.logger.ConnDebug("async write error", uc.Desc(), ConnLifecycle, err)
+		s.logger.PktDebug("write error", uc.Desc(), packet.GetPacketId(), "", PacketTracking, err)
 		s.closeConn(c, uc, err.Error())
 		return
 	}

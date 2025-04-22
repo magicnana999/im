@@ -2,6 +2,17 @@ package api
 
 import "google.golang.org/protobuf/proto"
 
+func (p *Packet) GetPacketId() string {
+	switch p.Type {
+	case TypeCommand:
+		return p.GetCommand().GetCommandId()
+	case TypeMessage:
+		return p.GetMessage().GetMessageId()
+	default:
+		return ""
+	}
+}
+
 func (p *Packet) IsHeartbeat() bool {
 	return p.Type == TypeHeartbeat
 }

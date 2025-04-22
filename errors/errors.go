@@ -14,7 +14,7 @@ var (
 	MsgDeliverTaskError = errext.New(1107, "message deliver task failed")
 	CurUserNotFound     = errext.New(1108, "current user not found")
 
-	CmdError        = errext.New(1201, "cmd_service failed")
+	LoginErr        = errext.New(1201, "cmd_service failed")
 	CmdUnknownType  = errext.New(1202, "unknown cmd_service type")
 	CmdResponseNull = errext.New(1203, "response is null")
 	CmdReplyNull    = errext.New(1204, "reply is null")

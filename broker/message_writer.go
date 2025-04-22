@@ -27,14 +27,14 @@ func NewMessageWriter(codec *Codec, logger *Logger) *MessageWriter {
 func (s *MessageWriter) Write(m *api.Message, uc *domain.UserConn) error {
 
 	if uc.IsClosed.Load() {
-		s.logger.MsgDebug("failed to write message", uc.Desc(), m.MessageId, MsgTracking, errUcIsClosed)
+		s.logger.PktDebug("failed to write message,client closed", uc.Desc(), m.MessageId, "", PacketTracking, errUcIsClosed)
 		return errUcIsClosed
 	}
 
 	buffer, err := s.codec.Encode(m.Wrap())
 	defer bb.Put(buffer)
 	if err != nil {
-		s.logger.MsgDebug("failed to write message", uc.Desc(), m.MessageId, MsgTracking, err)
+		s.logger.PktDebug("failed to decode message", uc.Desc(), m.MessageId, "", PacketTracking, err)
 		return err
 	}
 
@@ -43,7 +43,7 @@ func (s *MessageWriter) Write(m *api.Message, uc *domain.UserConn) error {
 	for sent < total {
 		n, err := uc.Writer.Write(buffer.Bytes()[sent:])
 		if err != nil {
-			s.logger.MsgDebug("failed to write message", uc.Desc(), m.MessageId, MsgTracking, err)
+			s.logger.PktDebug("failed to write message", uc.Desc(), m.MessageId, "", PacketTracking, err)
 			return err
 		}
 		sent += n

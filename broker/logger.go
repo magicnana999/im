@@ -9,10 +9,9 @@ import (
 type EventZapField string
 
 var (
-	SrvLifecycle  EventZapField = "server lifecycle"
-	ConnLifecycle EventZapField = "conn lifecycle"
-	MsgTracking   EventZapField = "message tracking"
-	CmdTracking   EventZapField = "command tracking"
+	SrvLifecycle   EventZapField = "server lifecycle"
+	ConnLifecycle  EventZapField = "conn lifecycle"
+	PacketTracking EventZapField = "packet tracking"
 )
 
 // Logger 用于Broker内部的日志
@@ -29,22 +28,18 @@ func NewLogger(name string, debugMode bool) *Logger {
 }
 
 func (s *Logger) SrvInfo(msg string, ezf EventZapField, err error, field ...zap.Field) {
-	s._log(zap.InfoLevel, msg, "", "", ezf, err, field...)
+	s._log(zap.InfoLevel, msg, "", "", "", ezf, err, field...)
 }
 
 func (s *Logger) ConnDebug(msg, connDesc string, ezf EventZapField, err error, field ...zap.Field) {
-	s._log(zap.DebugLevel, msg, connDesc, "", ezf, err, field...)
+	s._log(zap.DebugLevel, msg, connDesc, "", "", ezf, err, field...)
 }
 
-func (s *Logger) MsgDebug(msg, connDesc, messageID string, ezf EventZapField, err error, field ...zap.Field) {
-	s._log(zap.DebugLevel, msg, connDesc, messageID, ezf, err, field...)
+func (s *Logger) PktDebug(msg, connDesc, messageID, packet string, ezf EventZapField, err error, field ...zap.Field) {
+	s._log(zap.DebugLevel, msg, connDesc, messageID, packet, ezf, err, field...)
 }
 
-func (s *Logger) CmdDebug(msg, connDesc, commandId string, ezf EventZapField, err error, field ...zap.Field) {
-	s._log(zap.DebugLevel, msg, connDesc, commandId, ezf, err, field...)
-}
-
-func (s *Logger) _log(level zapcore.Level, msg string, connDesc string, messageID string, ezf EventZapField, err error, fs ...zap.Field) {
+func (s *Logger) _log(level zapcore.Level, msg string, connDesc string, packetID string, packet string, ezf EventZapField, err error, fs ...zap.Field) {
 	if s.Logger == nil {
 		return
 	}
@@ -55,7 +50,7 @@ func (s *Logger) _log(level zapcore.Level, msg string, connDesc string, messageI
 
 	fields := make([]zap.Field, 0)
 
-	if ezf == ConnLifecycle {
+	if ezf == ConnLifecycle || ezf == PacketTracking {
 		if err == nil {
 			fields = append(fields, zap.Bool("status", true))
 		} else {
@@ -71,8 +66,12 @@ func (s *Logger) _log(level zapcore.Level, msg string, connDesc string, messageI
 		fields = append(fields, zap.String("conn", connDesc))
 	}
 
-	if messageID != "" {
-		fields = append(fields, zap.String("messageID", messageID))
+	if packetID != "" {
+		fields = append(fields, zap.String("packetID", packetID))
+	}
+
+	if packet != "" {
+		fields = append(fields, zap.String("packet", packet))
 	}
 
 	if fs != nil && len(fs) > 0 {

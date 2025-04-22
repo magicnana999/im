@@ -6,12 +6,12 @@ import (
 )
 
 type User struct {
-	FD       int
-	Writer   io.Writer
-	Reader   io.Reader
-	AppID    string
-	UserID   int64
-	IsClosed atomic.Bool
-	IsLogin  atomic.Bool
-	LastHTS  atomic.Int64
+	FD       int          `json:"fd"`
+	Writer   io.Writer    `json:"-"`
+	Reader   io.Reader    `json:"-"`
+	AppID    string       `json:"appId"`
+	UserID   int64        `json:"userId"`
+	IsClosed atomic.Bool  `json:"-"`
+	IsLogin  atomic.Bool  `json:"-"`
+	LastHTS  atomic.Int64 `json:"-"`
 }

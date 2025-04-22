@@ -147,12 +147,12 @@ func (mss *MessageSendServer) write(m *api.Message, uc *domain.UserConn) {
 
 func (mss *MessageSendServer) submit(ms *api.Message, uc *domain.UserConn) {
 	if err := mss.mrs.Submit(ms, uc, time.Now().Unix()); err != nil {
-		mss.logger.MsgDebug("failed to submit mrs,resave it", uc.Desc(), ms.MessageId, MsgTracking, nil)
+		mss.logger.PktDebug("failed to submit mrs,resave it", uc.Desc(), ms.MessageId, "", PacketTracking, nil)
 		mss.resave(ms, uc)
 	}
 }
 
 func (mss *MessageSendServer) resave(ms *api.Message, uc *domain.UserConn) {
-	mss.logger.MsgDebug("resave message", uc.Desc(), ms.MessageId, MsgTracking, nil)
+	mss.logger.PktDebug("resave message", uc.Desc(), ms.MessageId, "", PacketTracking, nil)
 	fmt.Print(jsonext.PbMarshalNoErr(ms))
 }
