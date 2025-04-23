@@ -1,16 +1,23 @@
 package infra
 
 import (
+	"context"
+	"errors"
+	"fmt"
 	"github.com/cloudwego/kitex/client"
 	"github.com/cloudwego/kitex/pkg/discovery"
 	"github.com/cloudwego/kitex/pkg/registry"
+	jsoniter "github.com/json-iterator/go"
 	etcd "github.com/kitex-contrib/registry-etcd"
+	"github.com/magicnana999/im/api/kitex_gen/api/brokerservice"
 	"github.com/magicnana999/im/api/kitex_gen/api/businessservice"
 	"github.com/magicnana999/im/api/kitex_gen/api/routerservice"
 	"github.com/magicnana999/im/global"
 	"github.com/magicnana999/im/pkg/logger"
+	etcdclient "go.etcd.io/etcd/client/v3"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
+	"sync"
 	"time"
 )
 
@@ -100,6 +107,91 @@ func NewRouterClient(resolver discovery.Resolver, lc fx.Lifecycle) (routerservic
 	}
 
 	return cli, nil
+}
+
+type BrokerClientResolver struct {
+	Endpoints map[string]brokerservice.Client
+	lock      sync.RWMutex
+	client    *etcdclient.Client
+	logger    *logger.Logger
+}
+
+func NewBrokerClientResolver(g *global.Config, lc fx.Lifecycle) (*BrokerClientResolver, error) {
+	c := getOrDefaultEtcdConfig(g)
+
+	cli, err := etcdclient.New(etcdclient.Config{
+		Endpoints:   c.Endpoints,
+		DialTimeout: c.DialTimeout,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	lc.Append(fx.Hook{
+		OnStop: func(ctx context.Context) error {
+			return cli.Close()
+		},
+	})
+
+	return &BrokerClientResolver{
+		Endpoints: make(map[string]brokerservice.Client),
+		client:    cli,
+		logger:    logger.Named("kitex"),
+	}, nil
+}
+
+func (r *BrokerClientResolver) Client(ctx context.Context, addr string) (brokerservice.Client, error) {
+	r.lock.RLock()
+	defer r.lock.RUnlock()
+
+	if v, ok := r.Endpoints[addr]; ok && v != nil {
+		return v, nil
+	}
+
+	r.lock.Lock()
+	defer r.lock.Unlock()
+
+	if v, ok := r.Endpoints[addr]; ok && v != nil {
+		return v, nil
+	}
+
+	if err := r.fetch(ctx); err != nil {
+		return nil, err
+	}
+
+	if v, ok := r.Endpoints[addr]; ok && v != nil {
+		return v, nil
+	}
+
+	r.logger.Error("no registered broker service client")
+	return nil, errors.New("no registered broker service client")
+}
+
+func (r *BrokerClientResolver) fetch(ctx context.Context) error {
+	resp, err := r.client.Get(ctx, "kitex/registry-etcd/im.broker", etcdclient.WithPrefix())
+	if err != nil {
+		return err
+	}
+
+	for _, v := range resp.Kvs {
+		addr := jsoniter.Get(v.Value, "addr").ToString()
+		errMsg := fmt.Sprintf("invalid and ignore json:%s", string(v.Value))
+		r.logger.Error(errMsg)
+		if addr == "" {
+			continue
+		}
+		cli, err := brokerservice.NewClient("im.broker", client.WithHostPorts(addr))
+		if err != nil {
+			return err
+		}
+		r.Endpoints[addr] = cli
+	}
+	return nil
+}
+
+func (r *BrokerClientResolver) Close() {
+	r.client.Close()
 }
 
 // 以后再说

@@ -112,9 +112,7 @@ func (s *TcpServer) OnShutdown(eng gnet.Engine) {
 }
 
 func (s *TcpServer) OnOpen(c gnet.Conn) (out []byte, action gnet.Action) {
-	fmt.Println("open", c.Fd())
 	uc := domain.NewUserConn(c)
-
 	err := s.openConn(c, uc)
 	s.logger.ConnDebug("connect", uc.Desc(), ConnLifecycle, err)
 	if err != nil {
@@ -169,6 +167,11 @@ func (s *TcpServer) OnTraffic(c gnet.Conn) (action gnet.Action) {
 					s.closeConn(c, uc, err.Error())
 					continue
 				}
+
+				if packet.GetCommand().CommandType == api.CommandTypeUserLogin {
+					s.OnLogin(ctx, uc, packet.GetCommand().GetLoginRequest(), ret.GetCommand().GetLoginReply())
+				}
+
 				s.response(c, uc, ret)
 				continue
 			}
@@ -214,6 +217,24 @@ func (s *TcpServer) OnTick() (delay time.Duration, action gnet.Action) {
 	//}
 
 	return time.Duration(s.interval) * time.Second, gnet.None
+}
+
+func (s *TcpServer) OnLogin(
+	ctx context.Context,
+	uc *domain.UserConn,
+	req *api.LoginRequest,
+	rep *api.LoginReply) {
+
+	uc.AppId.Store(rep.GetAppId())
+	uc.UserId.Store(rep.GetUserId())
+	uc.OS.Store(req.Os)
+	uc.IsLogin.Store(true)
+
+	uc.Refresh(time.Now().UnixMilli())
+
+	s.userHolder.HoldUserConn(uc)
+	s.userHolder.StoreUserConn(ctx, uc)
+	s.userHolder.StoreUserClients(ctx, uc)
 }
 
 // initContext 新连接到来时，初始化ctx

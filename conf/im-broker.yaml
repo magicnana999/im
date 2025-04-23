@@ -1,3 +1,7 @@
+tcp:
+  addr: 127.0.0.1:5075
+  interval: 60s
+
 gorm:
   dsn: "root:root@tcp(127.0.0.1:3306)/im?charset=utf8mb4&parseTime=True&loc=Local"
   maxOpenConns: 100
@@ -38,5 +42,5 @@ mss:
 
 rbs:
   network: "tcp"
-  addr: "127.0.0.1:8080"
+  addr: "127.0.0.1:5075"
   debugMode: true

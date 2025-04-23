@@ -18,9 +18,9 @@ type UserConn struct {
 	ClientAddr    string        `json:"clientAddr"`
 	BrokerAddr    string        `json:"brokerAddr"`
 	ConnectTime   int64         `json:"connectTime"` //首次连接时间 毫秒
-	IsLogin       atomic.Bool   `json:"isLogin"`
-	IsClosed      atomic.Bool   `json:"isClosed"`
-	LastHeartbeat atomic.Int64  `json:"lastHeartbeat"` //上次心跳 毫秒
+	IsLogin       atomic.Bool   `json:"-"`
+	IsClosed      atomic.Bool   `json:"-"`
+	LastHeartbeat atomic.Int64  `json:"-"` //上次心跳 毫秒
 	Reader        io.Reader     `json:"-"`
 	Writer        io.Writer     `json:"-"`
 }

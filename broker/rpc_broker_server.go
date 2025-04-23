@@ -2,6 +2,7 @@ package broker
 
 import (
 	"context"
+	"fmt"
 	"github.com/cloudwego/kitex/pkg/registry"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
 	"github.com/cloudwego/kitex/server"
@@ -86,8 +87,11 @@ func NewRpcBrokerServer(
 
 func (s *RpcBrokerServer) Start(ctx context.Context) error {
 	go func() {
+		fmt.Println("---------------", s.server.GetServiceInfos())
+
 		err := s.server.Run()
 		s.logger.SrvInfo("rpc server start", SrvLifecycle, err)
+		fmt.Println("---------------", s.server.GetServiceInfos())
 
 	}()
 	return nil
@@ -102,7 +106,7 @@ func (s *RpcBrokerServer) Stop(ctx context.Context) error {
 
 func (s *RpcBrokerServer) Deliver(ctx context.Context, req *api.DeliverRequest) (res *api.DeliverReply, err error) {
 	for _, label := range req.UserLabels {
-		uc := s.userHolder.LoadLocalUser(label)
+		uc := s.userHolder.GetUserConn(label)
 		s.mss.Send(req.Message, uc)
 	}
 

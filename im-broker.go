@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"github.com/magicnana999/im/broker"
 	"github.com/magicnana999/im/broker/cmd_service"
 	"github.com/magicnana999/im/broker/handler"
@@ -18,25 +19,16 @@ import (
 	"time"
 )
 
-type config struct {
-	conf string
-}
-
-func parseFlags() *config {
-	var confFile string
-	flag.StringVar(&confFile, "conf", "conf/im-broker.yaml", "config file path")
-	flag.Parse()
-
-	return &config{confFile}
-}
-
 func main() {
 	logger.Init(nil)
 	defer logger.Close()
 
-	c := parseFlags()
+	var confFile string
+	flag.StringVar(&confFile, "conf", "conf/im-broker.yaml", "config file path")
+	flag.Parse()
+
 	f := func() (*global.Config, error) {
-		return global.Load(c.conf)
+		return global.Load(confFile)
 	}
 
 	log := logger.Named("main")
@@ -51,7 +43,7 @@ func main() {
 			infra.NewEtcdResolver,
 			infra.NewBusinessClient,
 			infra.NewRouterClient,
-			infra.NewRedisLock,
+			infra.NewBrokerClientResolver,
 			holder.NewBrokerHolder,
 			holder.NewUserHolder,
 			broker.NewHeartbeatServer,
@@ -65,6 +57,7 @@ func main() {
 		),
 		fx.Invoke(func(tcp *broker.TcpServer, rpc *broker.RpcBrokerServer, delivery *broker.MessageSendServer) {
 			go func() {
+				fmt.Println("sdfsdfsdfsdfsfdsf ")
 			}()
 		}),
 	)
