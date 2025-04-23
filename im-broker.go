@@ -51,7 +51,7 @@ func main() {
 			infra.NewEtcdResolver,
 			infra.NewBusinessClient,
 			infra.NewRouterClient,
-			infra.NewSpinLock,
+			infra.NewRedisLock,
 			holder.NewBrokerHolder,
 			holder.NewUserHolder,
 			broker.NewHeartbeatServer,
