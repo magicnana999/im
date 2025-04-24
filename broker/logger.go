@@ -1,6 +1,7 @@
 package broker
 
 import (
+	"fmt"
 	"github.com/magicnana999/im/pkg/logger"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -25,6 +26,13 @@ func NewLogger(name string, debugMode bool) *Logger {
 		Logger:    logger.NameWithOptions(name, zap.AddCallerSkip(2)),
 		debugMode: debugMode,
 	}
+}
+
+func (s *Logger) Printf(format string, args ...any) {
+	if !s.debugMode || !s.Logger.IsDebugEnabled() {
+		return
+	}
+	s.Debug(fmt.Sprintf(format, args))
 }
 
 func (s *Logger) SrvInfo(msg string, ezf EventZapField, err error, field ...zap.Field) {

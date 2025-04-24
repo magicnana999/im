@@ -19,8 +19,8 @@ func (h HelloImpl) Echo(ctx context.Context, req *api.Request) (r *api.Response,
 
 func main() {
 
-	addr, _ := net.ResolveTCPAddr("tcp", "0.0.0.0:8080")
-	svr := hello.NewServer(new(HelloImpl), server.WithServiceAddr(addr))
+	addr, _ := net.ResolveTCPAddr("tcp4", "0.0.0.0:8080")
+	svr := hello.NewServer(new(HelloImpl), server.WithMuxTransport(), server.WithServiceAddr(addr))
 
 	err := svr.Run()
 	if err != nil {

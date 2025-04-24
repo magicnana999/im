@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"flag"
-	"fmt"
 	"github.com/magicnana999/im/broker"
 	"github.com/magicnana999/im/broker/cmd_service"
 	"github.com/magicnana999/im/broker/handler"
@@ -57,7 +56,6 @@ func main() {
 		),
 		fx.Invoke(func(tcp *broker.TcpServer, rpc *broker.RpcBrokerServer, delivery *broker.MessageSendServer) {
 			go func() {
-				fmt.Println("sdfsdfsdfsdfsfdsf ")
 			}()
 		}),
 	)

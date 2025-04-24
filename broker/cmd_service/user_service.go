@@ -48,7 +48,7 @@ func (s *UserService) Login(ctx context.Context, request *api.LoginRequest) (*ap
 	uc.UserId.Store(rep.GetUserId())
 	uc.OS.Store(request.Os)
 	uc.IsLogin.Store(true)
-	uc.Refresh(time.Now().UnixMilli())
+	uc.Refresh(time.Now())
 
 	//TODO ... 这里要做互踢
 	s.userHolder.HoldUserConn(uc)

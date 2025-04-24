@@ -72,7 +72,7 @@ func NewTimewheel(config *Config, logger logger.Interface, pool *ants.Pool) (*Ti
 
 	c := getOrDefaultConfig(config)
 
-	if c.MaxIntervalOfSubmit >= c.Tick*time.Duration(c.SlotCount) {
+	if c.MaxIntervalOfSubmit > c.Tick*time.Duration(c.SlotCount) {
 		c.MaxIntervalOfSubmit = c.Tick * time.Duration(c.SlotCount)
 		if logger != nil {
 			logger.Warn("invalid MaxIntervalOfSubmit,reset as default value")
@@ -177,12 +177,12 @@ func (tw *Timewheel) advance(now time.Time) error {
 	atomic.StoreInt64(&tw.currentIndex, slot)
 
 	// 记录日志
-	if tw.logger != nil && tw.logger.IsDebugEnabled() {
-		tw.logger.Debug("ticking",
-			zap.Int64("slot", slot),
-			zap.Time("now", now),
-			zap.Int64("slotsLen", tw.slots[slot].Len()))
-	}
+	//if tw.logger != nil && tw.logger.IsDebugEnabled() {
+	//	tw.logger.Debug("ticking",
+	//		zap.Int64("slot", slot),
+	//		zap.Time("now", now),
+	//		zap.Int64("slotsLen", tw.slots[slot].Len()))
+	//}
 
 	f := func(task Task) {
 		if tr := task.Execute(now); tr == Retry {
@@ -203,6 +203,14 @@ func (tw *Timewheel) advance(now time.Time) error {
 		}
 
 		if tw.pool != nil {
+
+			if tw.logger != nil && tw.logger.IsDebugEnabled() {
+				tw.logger.Debug("ticking",
+					zap.Int64("slot", slot),
+					zap.Time("now", now),
+					zap.Int64("slotsLen", tw.slots[slot].Len()))
+			}
+
 			if err := tw.pool.Submit(func() { f(task) }); err != nil && tw.logger != nil {
 				tw.logger.Error("pool submit failed,call it directly", zap.Error(err))
 				f(task)

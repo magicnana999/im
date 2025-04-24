@@ -5,7 +5,7 @@ import (
 	"github.com/magicnana999/im/api/kitex_gen/api"
 	"github.com/magicnana999/im/errors"
 	"github.com/magicnana999/im/infra"
-	"github.com/magicnana999/im/vo"
+	"github.com/magicnana999/im/router/vo"
 )
 
 type DeliveryService struct {

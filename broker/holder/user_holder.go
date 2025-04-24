@@ -168,7 +168,6 @@ func (s *UserHolder) HoldUserConn(uc *domain.UserConn) bool {
 	return !ok
 }
 
-// RemoveUserConn 从本地删除，内含gnet.Conn
 func (s *UserHolder) RemoveUserConn(uc *domain.UserConn) bool {
 	_, ok := s.m.LoadAndDelete(uc.Label())
 	return ok

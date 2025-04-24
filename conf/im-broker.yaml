@@ -1,6 +1,16 @@
 tcp:
   addr: 127.0.0.1:5075
   interval: 60s
+  heartbeat:
+    interval: 30s
+    timeout: 30s
+    tick: 1s
+    slots: 30
+    MaxLengthOfEachSlot: 100_0000
+  worker:
+    size: 0
+    expireDuration: 1m
+    maxBlockingTasks: 10000
 
 gorm:
   dsn: "root:root@tcp(127.0.0.1:3306)/im?charset=utf8mb4&parseTime=True&loc=Local"
@@ -26,11 +36,6 @@ etcd:
     - "127.0.0.1:2379"
   dial-timeout: 5s
 
-hts:
-  interval: 30s
-  timeout: 60s
-  debugMode: true
-
 mrs:
   interval: 1s
   timeout: 2s
@@ -42,5 +47,5 @@ mss:
 
 rbs:
   network: "tcp"
-  addr: "127.0.0.1:5075"
+  addr: "127.0.0.1:7539"
   debugMode: true

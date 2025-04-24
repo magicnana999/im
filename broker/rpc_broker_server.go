@@ -2,7 +2,6 @@ package broker
 
 import (
 	"context"
-	"fmt"
 	"github.com/cloudwego/kitex/pkg/registry"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
 	"github.com/cloudwego/kitex/server"
@@ -87,11 +86,8 @@ func NewRpcBrokerServer(
 
 func (s *RpcBrokerServer) Start(ctx context.Context) error {
 	go func() {
-		fmt.Println("---------------", s.server.GetServiceInfos())
-
 		err := s.server.Run()
 		s.logger.SrvInfo("rpc server start", SrvLifecycle, err)
-		fmt.Println("---------------", s.server.GetServiceInfos())
 
 	}()
 	return nil

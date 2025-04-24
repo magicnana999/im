@@ -11,21 +11,36 @@ import (
 )
 
 type Config struct {
-	TCP   *TCPConfig   `yaml:"tcp"`
+	TCP   *TCPConfig   `yaml:"tcp,omitempty"`
 	Gorm  *GormConfig  `yaml:"gorm"`
 	Redis *RedisConfig `yaml:"redis"`
 	Kafka *KafkaConfig `yaml:"kafka"`
 	Etcd  *EtcdConfig  `yaml:"etcd"`
-	HTS   *HTSConfig   `yaml:"hts"`
 	MRS   *MRSConfig   `yaml:"mrs"`
 	MSS   *MSSConfig   `yaml:"mss"`
 	RBS   *RBSConfig   `yaml:"rbs"`
-	RRS   *RRSConfig   `yaml:"rbs,omitempty"`
+	RRS   *RRSConfig   `yaml:"rrs,omitempty"`
 }
 
 type TCPConfig struct {
-	Addr     string        `yaml:"addr"`
-	Interval time.Duration `yaml:"interval"`
+	Addr      string              `yaml:"addr"`
+	Interval  time.Duration       `yaml:"interval"`
+	Heartbeat *TcpHeartbeatConfig `yaml:"heartbeat"`
+	Worker    *TcpWorkerConfig    `yaml:"worker"`
+}
+
+type TcpHeartbeatConfig struct {
+	Interval            time.Duration `yaml:"interval"`
+	Timeout             time.Duration `yaml:"timeout"`
+	Tick                time.Duration `yaml:"tick"`
+	Slots               int           `yaml:"slots"`
+	MaxLengthOfEachSlot int           `yaml:"maxLengthOfEachSlot"`
+}
+
+type TcpWorkerConfig struct {
+	Size             int           `yaml:"size"`
+	ExpireDuration   time.Duration `yaml:"expireDuration"`
+	MaxBlockingTasks int           `yaml:"maxBlockingTasks"`
 }
 
 type RBSConfig struct {
@@ -48,12 +63,6 @@ type MSSConfig struct {
 type MRSConfig struct {
 	Interval  time.Duration `yaml:"interval"` //重发间隔
 	Timeout   time.Duration `yaml:"timeout"`  //重发超时时间
-	DebugMode bool          `yaml:"debugMode"`
-}
-
-type HTSConfig struct {
-	Interval  time.Duration `yaml:"interval"` //心跳间隔
-	Timeout   time.Duration `yaml:"timeout"`  //心跳超时时间
 	DebugMode bool          `yaml:"debugMode"`
 }
 

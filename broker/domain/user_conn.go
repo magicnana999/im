@@ -20,7 +20,7 @@ type UserConn struct {
 	ConnectTime   int64         `json:"connectTime"` //首次连接时间 毫秒
 	IsLogin       atomic.Bool   `json:"-"`
 	IsClosed      atomic.Bool   `json:"-"`
-	LastHeartbeat atomic.Int64  `json:"-"` //上次心跳 毫秒
+	LastHeartbeat atomic.Time   `json:"-"` //上次心跳 毫秒
 	Reader        io.Reader     `json:"-"`
 	Writer        io.Writer     `json:"-"`
 }
@@ -35,7 +35,7 @@ func NewUserConn(c gnet.Conn) *UserConn {
 		Reader:      c,
 	}
 
-	uc.Refresh(time.Now().UnixMilli())
+	uc.Refresh(time.Now())
 
 	return uc
 }
@@ -69,8 +69,8 @@ func (u *UserConn) Label() string {
 	return fmt.Sprintf("%s#%s#%s", u.AppId.Load(), u.UserId.String(), u.OS.Load())
 }
 
-func (u *UserConn) Refresh(milli int64) {
-	u.LastHeartbeat.Store(milli)
+func (u *UserConn) Refresh(t time.Time) {
+	u.LastHeartbeat.Store(t)
 }
 
 func (u *UserConn) ToJSON() ([]byte, error) {

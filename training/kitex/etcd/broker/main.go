@@ -61,7 +61,7 @@ func GetRouterServiceClient() (routerservice.Client, error) {
 
 func main() {
 	go StartService(0)
-	go StartService(1)
+	//go StartService(1)
 	time.Sleep(time.Second)
 	client, err := GetRouterServiceClient()
 	if err != nil {

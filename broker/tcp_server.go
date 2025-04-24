@@ -8,19 +8,23 @@ import (
 	"github.com/magicnana999/im/broker/domain"
 	"github.com/magicnana999/im/broker/handler"
 	"github.com/magicnana999/im/broker/holder"
+	"github.com/magicnana999/im/global"
 	"github.com/magicnana999/im/pkg/jsonext"
 	"github.com/magicnana999/im/pkg/timewheel"
+	"github.com/panjf2000/ants/v2"
 	"github.com/panjf2000/gnet/v2"
 	"github.com/panjf2000/gnet/v2/pkg/logging"
 	bb "github.com/panjf2000/gnet/v2/pkg/pool/bytebuffer"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
+	"runtime"
 	"time"
 )
 
 type TcpServer struct {
 	*gnet.BuiltinEventEngine
 	eng            gnet.Engine
+	cfg            *global.TCPConfig
 	interval       time.Duration
 	hts            *HeartbeatServer
 	mrs            *MessageRetryServer
@@ -30,10 +34,71 @@ type TcpServer struct {
 	userHolder     *holder.UserHolder
 	codec          *Codec
 	ctx            context.Context
+	worker         *ants.Pool
 	logger         *Logger
 }
 
+func getOrDefaultTCPConfig(g *global.Config) *global.TCPConfig {
+	c := &global.TCPConfig{Worker: &global.TcpWorkerConfig{}, Heartbeat: &global.TcpHeartbeatConfig{}}
+	if g != nil && g.TCP != nil {
+		*c = *g.TCP
+	}
+
+	if c.Addr == "" {
+		c.Addr = "0.0.0.0:5075"
+	}
+
+	if c.Interval <= 0 {
+		c.Interval = time.Minute
+	}
+
+	if c.Heartbeat.Interval <= 0 {
+		c.Heartbeat.Interval = time.Second * 30
+	}
+
+	if c.Heartbeat.Timeout <= 0 {
+		c.Heartbeat.Timeout = time.Second * 30
+	}
+
+	if c.Worker.Size <= 0 {
+		c.Worker.Size = runtime.NumCPU() * 1000
+	}
+
+	if c.Worker.ExpireDuration <= 0 {
+		c.Worker.ExpireDuration = time.Minute
+	}
+
+	if c.Worker.MaxBlockingTasks <= 0 {
+		c.Worker.MaxBlockingTasks = 100_000
+	}
+
+	return c
+}
+
+func newWorkerPool(c *global.TcpWorkerConfig) (*ants.Pool, error) {
+
+	logger := NewLogger("tcp", true)
+
+	panicHandler := func(panicErr interface{}) {
+		logger.Error("tcp worker panic",
+			zap.Any("error", panicErr),
+			zap.Stack("stack"),
+		)
+	}
+
+	return ants.NewPool(c.Size,
+		ants.WithExpiryDuration(c.ExpireDuration),
+		ants.WithMaxBlockingTasks(c.MaxBlockingTasks),
+		ants.WithNonblocking(false),
+		ants.WithPanicHandler(panicHandler),
+		ants.WithLogger(logger),
+		ants.WithPreAlloc(false),
+		ants.WithDisablePurge(false),
+	)
+}
+
 func NewTcpServer(
+	conf *global.Config,
 	hts *HeartbeatServer,
 	mrs *MessageRetryServer,
 	ch *handler.CommandHandler,
@@ -43,7 +108,16 @@ func NewTcpServer(
 	lc fx.Lifecycle) (*TcpServer, error) {
 
 	logger := NewLogger("tcp", true)
+
+	c := getOrDefaultTCPConfig(conf)
+
+	worker, err := newWorkerPool(c.Worker)
+	if err != nil {
+		return nil, err
+	}
+
 	ts := &TcpServer{
+		cfg:            c,
 		hts:            hts,
 		mrs:            mrs,
 		commandHandler: ch,
@@ -53,6 +127,7 @@ func NewTcpServer(
 		codec:          NewCodec(),
 		interval:       time.Second * 30,
 		logger:         logger,
+		worker:         worker,
 	}
 
 	lc.Append(fx.Hook{
@@ -67,6 +142,10 @@ func NewTcpServer(
 	return ts, nil
 }
 
+func (s *TcpServer) Stop(ctx context.Context) error {
+	return s.eng.Stop(ctx)
+}
+
 func (s *TcpServer) Start(ctx context.Context) error {
 	s.ctx = ctx
 	go func() {
@@ -77,7 +156,7 @@ func (s *TcpServer) Start(ctx context.Context) error {
 			gnet.WithReadBufferCap(4096),
 			gnet.WithWriteBufferCap(4096),
 			gnet.WithLoadBalancing(gnet.RoundRobin),
-			gnet.WithNumEventLoop(1),
+			gnet.WithNumEventLoop(runtime.NumCPU()),
 			gnet.WithReuseAddr(true),
 			gnet.WithReusePort(true),
 			gnet.WithTCPKeepAlive(time.Minute),
@@ -108,7 +187,6 @@ func (s *TcpServer) OnBoot(eng gnet.Engine) (action gnet.Action) {
 
 func (s *TcpServer) OnShutdown(eng gnet.Engine) {
 	s.logger.SrvInfo("tcp shutdown", SrvLifecycle, nil)
-
 }
 
 func (s *TcpServer) OnOpen(c gnet.Conn) (out []byte, action gnet.Action) {
@@ -149,16 +227,16 @@ func (s *TcpServer) OnTraffic(c gnet.Conn) (action gnet.Action) {
 		return gnet.None
 	}
 
-	if packets != nil {
+	s.worker.Submit(func() {
 		for _, packet := range packets {
 
 			if packet.IsHeartbeat() {
+				uc.Refresh(time.Now())
 				s.response(c, uc, api.NewHeartbeatPacket(int32(1)))
-				uc.Refresh(time.Now().UnixMilli())
 				continue
 			}
 
-			s.logger.PktDebug("read", uc.Desc(), string(jsonext.PbMarshalNoErr(packet)), packet.GetPacketId(), PacketTracking, nil)
+			s.logger.PktDebug("read", uc.Desc(), packet.GetPacketId(), string(jsonext.PbMarshalNoErr(packet)), PacketTracking, nil)
 
 			if packet.IsCommand() {
 				ret, err := s.commandHandler.HandlePacket(ctx, packet)
@@ -169,7 +247,7 @@ func (s *TcpServer) OnTraffic(c gnet.Conn) (action gnet.Action) {
 				}
 
 				if packet.GetCommand().CommandType == api.CommandTypeUserLogin {
-					s.OnLogin(ctx, uc, packet.GetCommand().GetLoginRequest(), ret.GetCommand().GetLoginReply())
+					s.OnUserLogin(ctx, uc, packet.GetCommand().GetLoginRequest(), ret.GetCommand().GetLoginReply())
 				}
 
 				s.response(c, uc, ret)
@@ -200,26 +278,16 @@ func (s *TcpServer) OnTraffic(c gnet.Conn) (action gnet.Action) {
 				}
 			}
 		}
-	}
+	})
 
 	return gnet.None
 }
 
 func (s *TcpServer) OnTick() (delay time.Duration, action gnet.Action) {
-
-	//broker := domain.BrokerInfo{
-	//	Addr:    "hello",
-	//	StartAt: time.Now().UnixMilli(),
-	//}
-	//_, err := s.brokerHolder.RefreshBroker(s.ctx, broker)
-	//if err != nil {
-	//	s.logger.DebugOrError("tcp server could not tick", "", define.OpTicking, "", err)
-	//}
-
-	return time.Duration(s.interval) * time.Second, gnet.None
+	return time.Minute, gnet.None
 }
 
-func (s *TcpServer) OnLogin(
+func (s *TcpServer) OnUserLogin(
 	ctx context.Context,
 	uc *domain.UserConn,
 	req *api.LoginRequest,
@@ -230,7 +298,7 @@ func (s *TcpServer) OnLogin(
 	uc.OS.Store(req.Os)
 	uc.IsLogin.Store(true)
 
-	uc.Refresh(time.Now().UnixMilli())
+	uc.Refresh(time.Now())
 
 	s.userHolder.HoldUserConn(uc)
 	s.userHolder.StoreUserConn(ctx, uc)
@@ -268,27 +336,31 @@ func (s *TcpServer) openConn(c gnet.Conn, uc *domain.UserConn) error {
 
 	fun := func(now time.Time) timewheel.TaskResult {
 
+		if !uc.IsLogin.Load() {
+			s.logger.ConnDebug("heartbeat not login", uc.Desc(), ConnLifecycle, nil)
+			s.closeConn(c, uc, "heartbeat not login")
+			return timewheel.Break
+		}
+
 		if uc.IsClosed.Load() {
 			s.logger.ConnDebug("heartbeat break,conn is closed", uc.Desc(), ConnLifecycle, nil)
 			s.closeConn(c, uc, "heartbeat,conn has been closed")
 			return timewheel.Break
 		}
 
-		if time.Since(time.Unix(uc.LastHeartbeat.Load(), 0)) >= time.Second*60 {
-			s.logger.ConnDebug("heartbeat break,timeout", uc.Desc(), ConnLifecycle, nil)
+		if time.Since(uc.LastHeartbeat.Load()) >= s.cfg.Heartbeat.Timeout {
+			s.logger.ConnDebug("heartbeat timeout", uc.Desc(), ConnLifecycle, nil, zap.Time("lastHeartbeat", uc.LastHeartbeat.Load()))
 			s.closeConn(c, uc, "heartbeat timeout")
 			return timewheel.Break
 		}
 
-		s.logger.ConnDebug("heartbeat retry", uc.Desc(), ConnLifecycle, nil)
 		return timewheel.Retry
 	}
 
-	if _, err := s.hts.StartTicking(fun, time.Second*30); err != nil {
+	if _, err := s.hts.Ticking(fun, s.cfg.Heartbeat.Interval); err != nil {
 		return err
 	}
 
-	s.logger.ConnDebug("open connection", uc.Desc(), ConnLifecycle, nil)
 	return nil
 }
 
@@ -301,7 +373,6 @@ func (s *TcpServer) closeConn(c gnet.Conn, uc *domain.UserConn, reason string) {
 
 	s.userHolder.RemoveUserConn(uc)
 
-	//停止心跳不会从hts中删除任务，把uc的IsClose = true，在hts中自己根据IsClose退出
 	uc.Close()
 	ucd := ""
 	if uc != nil {
@@ -311,7 +382,6 @@ func (s *TcpServer) closeConn(c gnet.Conn, uc *domain.UserConn, reason string) {
 	err := c.CloseWithCallback(func(c gnet.Conn, err error) error {
 		s.logger.ConnDebug("close completed", ucd, ConnLifecycle, err, zap.String("reason", reason))
 		s.delContext(c)
-		s.logger.ConnDebug("close connection", ucd, ConnLifecycle, nil)
 		return nil
 	})
 
@@ -321,7 +391,11 @@ func (s *TcpServer) closeConn(c gnet.Conn, uc *domain.UserConn, reason string) {
 }
 
 func (s *TcpServer) response(c gnet.Conn, uc *domain.UserConn, packet *api.Packet) {
-	s.logger.PktDebug("write", uc.Desc(), packet.GetPacketId(), string(jsonext.PbMarshalNoErr(packet)), PacketTracking, nil)
+
+	if !packet.IsHeartbeat() {
+		s.logger.PktDebug("write", uc.Desc(), packet.GetPacketId(), string(jsonext.PbMarshalNoErr(packet)), PacketTracking, nil)
+	}
+
 	bs, err := s.codec.Encode(packet)
 	defer bb.Put(bs)
 

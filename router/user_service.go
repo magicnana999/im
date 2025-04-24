@@ -6,7 +6,7 @@ import (
 	"errors"
 	"github.com/go-redis/redis/v8"
 	"github.com/magicnana999/im/infra"
-	"github.com/magicnana999/im/vo"
+	"github.com/magicnana999/im/router/vo"
 	"go.uber.org/fx"
 )
 
