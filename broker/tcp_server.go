@@ -194,16 +194,22 @@ func (s *TcpServer) OnOpen(c gnet.Conn) (out []byte, action gnet.Action) {
 	err := s.openConn(c, uc)
 	s.logger.ConnDebug("connect", uc.Desc(), ConnLifecycle, err)
 	if err != nil {
-		s.closeConn(c, uc, err.Error())
+		s.closeConnFD(c, uc, err.Error())
 	}
 
 	return nil, gnet.None
 }
 
 func (s *TcpServer) OnClose(c gnet.Conn, err error) (action gnet.Action) {
+
 	ctx := s.getContext(c)
-	uc, _ := brokerctx.GetCurUserConn(ctx)
+	uc, err := brokerctx.GetCurUserConn(ctx)
+	if err != nil {
+		s.closeConn(ctx, c, uc)
+	}
 	s.logger.ConnDebug("close", uc.Desc(), ConnLifecycle, err)
+	uc = nil
+
 	return gnet.None
 }
 
@@ -215,23 +221,25 @@ func (s *TcpServer) OnTraffic(c gnet.Conn) (action gnet.Action) {
 	uc, err := brokerctx.GetCurUserConn(ctx)
 	if err != nil {
 		s.logger.ConnDebug("read", "", ConnLifecycle, err)
-		s.closeConn(c, uc, err.Error())
+		s.closeConnFD(c, uc, err.Error())
 		return gnet.None
 	}
 
-	packets, err := s.codec.Decode(c)
-
-	if err != nil {
-		s.logger.ConnDebug("decode", uc.Desc(), ConnLifecycle, err)
-		s.closeConn(c, uc, err.Error())
-		return gnet.None
-	}
+	s.RefreshUser(ctx, uc)
 
 	s.worker.Submit(func() {
+
+		packets, err := s.codec.Decode(c)
+
+		if err != nil {
+			s.logger.ConnDebug("decode", uc.Desc(), ConnLifecycle, err)
+			s.closeConnFD(c, uc, err.Error())
+			return
+		}
+
 		for _, packet := range packets {
 
 			if packet.IsHeartbeat() {
-				uc.Refresh(time.Now())
 				s.response(c, uc, api.NewHeartbeatPacket(int32(1)))
 				continue
 			}
@@ -242,7 +250,7 @@ func (s *TcpServer) OnTraffic(c gnet.Conn) (action gnet.Action) {
 				ret, err := s.commandHandler.HandlePacket(ctx, packet)
 				s.logger.PktDebug("command process", uc.Desc(), packet.GetPacketId(), string(jsonext.PbMarshalNoErr(packet)), PacketTracking, err)
 				if err != nil {
-					s.closeConn(c, uc, err.Error())
+					s.closeConnFD(c, uc, err.Error())
 					continue
 				}
 
@@ -261,7 +269,7 @@ func (s *TcpServer) OnTraffic(c gnet.Conn) (action gnet.Action) {
 					s.logger.PktDebug("message process", uc.Desc(), packet.GetPacketId(), string(jsonext.PbMarshalNoErr(packet)), PacketTracking, err)
 
 					if err != nil {
-						s.closeConn(c, uc, err.Error())
+						s.closeConnFD(c, uc, err.Error())
 						continue
 					}
 
@@ -271,7 +279,7 @@ func (s *TcpServer) OnTraffic(c gnet.Conn) (action gnet.Action) {
 					err := s.mrs.Ack(message.MessageId)
 					s.logger.PktDebug("ack process", uc.Desc(), packet.GetPacketId(), string(jsonext.PbMarshalNoErr(packet)), PacketTracking, err)
 					if err != nil {
-						s.closeConn(c, uc, err.Error())
+						s.closeConnFD(c, uc, err.Error())
 						continue
 					}
 					continue
@@ -287,20 +295,33 @@ func (s *TcpServer) OnTick() (delay time.Duration, action gnet.Action) {
 	return time.Minute, gnet.None
 }
 
+func (s *TcpServer) RefreshUser(ctx context.Context, uc *domain.UserConn) {
+
+	if uc.IsClosed.Load() {
+		return
+	}
+	uc.Refresh(time.Now())
+
+	if uc.IsLogin.Load() {
+		s.userHolder.RefreshUserConn(ctx, uc)
+	}
+}
+
 func (s *TcpServer) OnUserLogin(
 	ctx context.Context,
 	uc *domain.UserConn,
 	req *api.LoginRequest,
 	rep *api.LoginReply) {
 
+	if !s.userHolder.HoldUserConn(uc) {
+		return
+	}
+
 	uc.AppId.Store(rep.GetAppId())
 	uc.UserId.Store(rep.GetUserId())
 	uc.OS.Store(req.Os)
 	uc.IsLogin.Store(true)
 
-	uc.Refresh(time.Now())
-
-	s.userHolder.HoldUserConn(uc)
 	s.userHolder.StoreUserConn(ctx, uc)
 	s.userHolder.StoreUserClients(ctx, uc)
 }
@@ -338,19 +359,19 @@ func (s *TcpServer) openConn(c gnet.Conn, uc *domain.UserConn) error {
 
 		if !uc.IsLogin.Load() {
 			s.logger.ConnDebug("heartbeat not login", uc.Desc(), ConnLifecycle, nil)
-			s.closeConn(c, uc, "heartbeat not login")
+			s.closeConnFD(c, uc, "heartbeat not login")
 			return timewheel.Break
 		}
 
 		if uc.IsClosed.Load() {
 			s.logger.ConnDebug("heartbeat break,conn is closed", uc.Desc(), ConnLifecycle, nil)
-			s.closeConn(c, uc, "heartbeat,conn has been closed")
+			s.closeConnFD(c, uc, "heartbeat,conn has been closed")
 			return timewheel.Break
 		}
 
 		if time.Since(uc.LastHeartbeat.Load()) >= s.cfg.Heartbeat.Timeout {
 			s.logger.ConnDebug("heartbeat timeout", uc.Desc(), ConnLifecycle, nil, zap.Time("lastHeartbeat", uc.LastHeartbeat.Load()))
-			s.closeConn(c, uc, "heartbeat timeout")
+			s.closeConnFD(c, uc, "heartbeat timeout")
 			return timewheel.Break
 		}
 
@@ -364,53 +385,50 @@ func (s *TcpServer) openConn(c gnet.Conn, uc *domain.UserConn) error {
 	return nil
 }
 
+func (s *TcpServer) closeConn(ctx context.Context, c gnet.Conn, uc *domain.UserConn) {
+	if s.userHolder.RemoveUserConn(uc) {
+		s.userHolder.DeleteUserConn(ctx, uc)
+		s.userHolder.DeleteUserClient(ctx, uc)
+		s.delContext(c)
+	}
+}
+
 // 打开链接：删除ctx、删除uc到本地、停止心跳
-func (s *TcpServer) closeConn(c gnet.Conn, uc *domain.UserConn, reason string) {
+func (s *TcpServer) closeConnFD(c gnet.Conn, uc *domain.UserConn, reason string) {
 
 	if !uc.Close() {
 		return
 	}
 
-	s.userHolder.RemoveUserConn(uc)
-
-	uc.Close()
-	ucd := ""
-	if uc != nil {
-		ucd = uc.Desc()
-	}
-
 	err := c.CloseWithCallback(func(c gnet.Conn, err error) error {
-		s.logger.ConnDebug("close completed", ucd, ConnLifecycle, err, zap.String("reason", reason))
-		s.delContext(c)
+		s.logger.ConnDebug("close completed", uc.Desc(), ConnLifecycle, err, zap.String("reason", reason))
 		return nil
 	})
 
 	if err != nil {
-		s.logger.ConnDebug("close error", ucd, ConnLifecycle, err)
+		s.logger.ConnDebug("close error", uc.Desc(), ConnLifecycle, err)
 	}
 }
 
 func (s *TcpServer) response(c gnet.Conn, uc *domain.UserConn, packet *api.Packet) {
-
-	if !packet.IsHeartbeat() {
-		s.logger.PktDebug("write", uc.Desc(), packet.GetPacketId(), string(jsonext.PbMarshalNoErr(packet)), PacketTracking, nil)
-	}
 
 	bs, err := s.codec.Encode(packet)
 	defer bb.Put(bs)
 
 	if err != nil {
 		s.logger.PktDebug("encode error", uc.Desc(), packet.GetPacketId(), "", PacketTracking, err)
-		s.closeConn(c, uc, err.Error())
+		s.closeConnFD(c, uc, err.Error())
 		return
 	}
 
 	if err := c.AsyncWrite(bs.Bytes(), func(c gnet.Conn, err error) error {
-		s.logger.PktDebug("write completed", uc.Desc(), packet.GetPacketId(), "", PacketTracking, err)
+		if !packet.IsHeartbeat() {
+			s.logger.PktDebug("write completed", uc.Desc(), packet.GetPacketId(), "", PacketTracking, err)
+		}
 		return err
 	}); err != nil {
 		s.logger.PktDebug("write error", uc.Desc(), packet.GetPacketId(), "", PacketTracking, err)
-		s.closeConn(c, uc, err.Error())
+		s.closeConnFD(c, uc, err.Error())
 		return
 	}
 

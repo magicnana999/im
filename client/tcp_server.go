@@ -137,8 +137,10 @@ func (h *TcpServer) Stop() {
 	h.htsHandler.Stop()
 }
 
-func (h *TcpServer) connect() (gnet.Conn, error) {
-	return h.agent.Dial("tcp", "127.0.0.1:5075")
+func (h *TcpServer) connect(size int) {
+	for i := 0; i < size; i++ {
+		h.agent.Dial("tcp", "127.0.0.1:5075")
+	}
 }
 
 func (h *TcpServer) write(ht *api.Packet, user *User) {
@@ -161,7 +163,17 @@ func NewTcpServer(handler *PacketHandler, hts *HeartbeatServer) *TcpServer {
 	})
 
 	c.Command("conn", func(text string) {
-		eh.connect()
+
+		s := strings.Trim(text, " ")
+
+		if s != "" {
+			if size, err := strconv.Atoi(s); err == nil {
+				eh.connect(size)
+			}
+		} else {
+			eh.connect(1)
+		}
+
 	})
 
 	c.Command("login", func(text string) {

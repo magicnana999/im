@@ -63,17 +63,20 @@ func NewUserHolder(rds *redis.Client, lf fx.Lifecycle) (*UserHolder, error) {
 //	return nil
 //}
 
-func (s *UserHolder) StoreUserConn(ctx context.Context, uc *domain.UserConn) (string, error) {
-
+func (s *UserHolder) DeleteUserConn(ctx context.Context, uc *domain.UserConn) (int64, error) {
 	key := infra.KeyUserConn(uc.AppId.Load(), uc.Label())
+	ret := s.rds.Del(ctx, key)
+	return ret.Val(), ret.Err()
+}
 
+func (s *UserHolder) StoreUserConn(ctx context.Context, uc *domain.UserConn) (string, error) {
+	key := infra.KeyUserConn(uc.AppId.Load(), uc.Label())
 	js, err := json.Marshal(uc)
 	if err != nil {
 		return "", err
 	}
 
 	ret := s.rds.Set(ctx, key, string(js), time.Minute)
-
 	return ret.Val(), ret.Err()
 }
 
@@ -84,17 +87,19 @@ func (s *UserHolder) RefreshUserConn(ctx context.Context, uc *domain.UserConn) (
 
 }
 
-func (s *UserHolder) StoreUserClients(ctx context.Context, uc *domain.UserConn) (int64, error) {
-
+func (s *UserHolder) DeleteUserClient(ctx context.Context, uc *domain.UserConn) (int64, error) {
 	key := infra.KeyUserClients(uc.AppId.Load(), uc.UserId.Load())
+	ret := s.rds.HDel(ctx, key, uc.Label())
+	return ret.Val(), ret.Err()
+}
 
+func (s *UserHolder) StoreUserClients(ctx context.Context, uc *domain.UserConn) (int64, error) {
+	key := infra.KeyUserClients(uc.AppId.Load(), uc.UserId.Load())
 	js, err := json.Marshal(uc)
 	if err != nil {
 		return 0, err
 	}
-
 	ret := s.rds.HSet(ctx, key, uc.Label(), string(js))
-
 	return ret.Val(), ret.Err()
 }
 
