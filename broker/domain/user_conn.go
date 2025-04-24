@@ -23,6 +23,7 @@ type UserConn struct {
 	LastHeartbeat atomic.Time   `json:"-"` //上次心跳 毫秒
 	Reader        io.Reader     `json:"-"`
 	Writer        io.Writer     `json:"-"`
+	Conn          gnet.Conn     `json:"-"`
 }
 
 func NewUserConn(c gnet.Conn) *UserConn {
@@ -33,6 +34,7 @@ func NewUserConn(c gnet.Conn) *UserConn {
 		ConnectTime: time.Now().UnixMilli(),
 		Writer:      c,
 		Reader:      c,
+		Conn:        c,
 	}
 
 	uc.Refresh(time.Now())

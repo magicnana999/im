@@ -143,6 +143,15 @@ func NewTcpServer(
 }
 
 func (s *TcpServer) Stop(ctx context.Context) error {
+
+	s.userHolder.RangeAllUserConn(func(conn *domain.UserConn) bool {
+		s.closeConnFD(conn.Conn, conn, "tcp server shutting down")
+		return true
+	})
+
+	if !s.worker.IsClosed() {
+		s.worker.ReleaseTimeout(time.Millisecond * 500)
+	}
 	return s.eng.Stop(ctx)
 }
 
@@ -150,7 +159,7 @@ func (s *TcpServer) Start(ctx context.Context) error {
 	s.ctx = ctx
 	go func() {
 		err := gnet.Run(s,
-			"tcp://:5075",
+			fmt.Sprintf("tcp://%s", s.cfg.Addr),
 			gnet.WithMulticore(true),
 			gnet.WithLockOSThread(true),
 			gnet.WithReadBufferCap(4096),
@@ -169,6 +178,10 @@ func (s *TcpServer) Start(ctx context.Context) error {
 			gnet.WithEdgeTriggeredIOChunk(0))
 
 		s.logger.SrvInfo("tcp starting", SrvLifecycle, err)
+
+		if err != nil {
+			s.logger.Fatal("tcp start failed", zap.Error(err))
+		}
 	}()
 	return nil
 }
@@ -227,8 +240,7 @@ func (s *TcpServer) OnTraffic(c gnet.Conn) (action gnet.Action) {
 
 	s.RefreshUser(ctx, uc)
 
-	s.worker.Submit(func() {
-
+	err = s.worker.Submit(func() {
 		packets, err := s.codec.Decode(c)
 
 		if err != nil {
@@ -238,57 +250,70 @@ func (s *TcpServer) OnTraffic(c gnet.Conn) (action gnet.Action) {
 		}
 
 		for _, packet := range packets {
-
-			if packet.IsHeartbeat() {
-				s.response(c, uc, api.NewHeartbeatPacket(int32(1)))
-				continue
-			}
-
-			s.logger.PktDebug("read", uc.Desc(), packet.GetPacketId(), string(jsonext.PbMarshalNoErr(packet)), PacketTracking, nil)
-
-			if packet.IsCommand() {
-				ret, err := s.commandHandler.HandlePacket(ctx, packet)
-				s.logger.PktDebug("command process", uc.Desc(), packet.GetPacketId(), string(jsonext.PbMarshalNoErr(packet)), PacketTracking, err)
-				if err != nil {
-					s.closeConnFD(c, uc, err.Error())
-					continue
-				}
-
-				if packet.GetCommand().CommandType == api.CommandTypeUserLogin {
-					s.OnUserLogin(ctx, uc, packet.GetCommand().GetLoginRequest(), ret.GetCommand().GetLoginReply())
-				}
-
-				s.response(c, uc, ret)
-				continue
-			}
-
-			if packet.IsMessage() {
-				message := packet.GetMessage()
-				if message.IsRequest() {
-					ret, err := s.messageHandler.HandlePacket(ctx, packet)
-					s.logger.PktDebug("message process", uc.Desc(), packet.GetPacketId(), string(jsonext.PbMarshalNoErr(packet)), PacketTracking, err)
-
-					if err != nil {
-						s.closeConnFD(c, uc, err.Error())
-						continue
-					}
-
-					s.response(c, uc, ret)
-					continue
-				} else {
-					err := s.mrs.Ack(message.MessageId)
-					s.logger.PktDebug("ack process", uc.Desc(), packet.GetPacketId(), string(jsonext.PbMarshalNoErr(packet)), PacketTracking, err)
-					if err != nil {
-						s.closeConnFD(c, uc, err.Error())
-						continue
-					}
-					continue
-				}
-			}
+			s.processPacket(ctx, c, uc, packet)
 		}
 	})
 
+	if err != nil {
+		s.logger.ConnDebug("submit decode failed", uc.Desc(), ConnLifecycle, err)
+		s.closeConnFD(c, uc, "server busy")
+	}
 	return gnet.None
+}
+
+func (s *TcpServer) processPacket(ctx context.Context, c gnet.Conn, uc *domain.UserConn, packet *api.Packet) {
+	if packet.IsHeartbeat() {
+		s.response(c, uc, api.NewHeartbeatPacket(int32(1)))
+		return
+	}
+
+	s.logger.PktDebug("read", uc.Desc(), packet.GetPacketId(), string(jsonext.PbMarshalNoErr(packet)), PacketTracking, nil)
+
+	if packet.IsCommand() {
+		s.processCommand(ctx, c, uc, packet)
+		return
+	}
+
+	if packet.IsMessage() {
+		s.processMessage(ctx, c, uc, packet)
+		return
+	}
+}
+
+func (s *TcpServer) processMessage(ctx context.Context, c gnet.Conn, uc *domain.UserConn, packet *api.Packet) {
+	message := packet.GetMessage()
+	if message.IsRequest() {
+		ret, err := s.messageHandler.HandlePacket(ctx, packet)
+		s.logger.PktDebug("message process", uc.Desc(), packet.GetPacketId(), string(jsonext.PbMarshalNoErr(packet)), PacketTracking, err)
+		if err != nil {
+			s.closeConnFD(c, uc, err.Error())
+			return
+		}
+		s.response(c, uc, ret)
+	} else {
+		err := s.mrs.Ack(message.MessageId)
+		s.logger.PktDebug("ack process", uc.Desc(), packet.GetPacketId(), string(jsonext.PbMarshalNoErr(packet)), PacketTracking, err)
+		if err != nil {
+			s.closeConnFD(c, uc, err.Error())
+			return
+		}
+	}
+}
+
+func (s *TcpServer) processCommand(ctx context.Context, c gnet.Conn, uc *domain.UserConn, packet *api.Packet) {
+	ret, err := s.commandHandler.HandlePacket(ctx, packet)
+	s.logger.PktDebug("command process", uc.Desc(), packet.GetPacketId(), string(jsonext.PbMarshalNoErr(packet)), PacketTracking, err)
+	if err != nil {
+		s.closeConnFD(c, uc, err.Error())
+		return
+	}
+
+	if packet.GetCommand().CommandType == api.CommandTypeUserLogin {
+		s.OnUserLogin(ctx, uc, packet.GetCommand().GetLoginRequest(), ret.GetCommand().GetLoginReply())
+	}
+
+	s.response(c, uc, ret)
+	return
 }
 
 func (s *TcpServer) OnTick() (delay time.Duration, action gnet.Action) {
@@ -387,6 +412,7 @@ func (s *TcpServer) openConn(c gnet.Conn, uc *domain.UserConn) error {
 
 func (s *TcpServer) closeConn(ctx context.Context, c gnet.Conn, uc *domain.UserConn) {
 	if s.userHolder.RemoveUserConn(uc) {
+		uc.Close()
 		s.userHolder.DeleteUserConn(ctx, uc)
 		s.userHolder.DeleteUserClient(ctx, uc)
 		s.delContext(c)
