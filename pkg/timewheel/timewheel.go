@@ -95,7 +95,11 @@ func NewTimewheel(config *Config, logger logger.Interface, pool *ants.Pool) (*Ti
 	}
 
 	if tw.pool == nil {
-		p, err := ants.NewPool(runtime.NumCPU(), ants.WithPreAlloc(true))
+		p, err := ants.NewPool(
+			runtime.NumCPU()*100,
+			ants.WithNonblocking(true),
+			ants.WithExpiryDuration(10*time.Second),
+			ants.WithPreAlloc(true))
 		if err != nil {
 			if logger != nil {
 				logger.Error("new ants pool err", zap.Error(err))
@@ -177,62 +181,48 @@ func (tw *Timewheel) advance(now time.Time) error {
 	atomic.StoreInt64(&tw.currentIndex, slot)
 
 	// 记录日志
-	//if tw.logger != nil && tw.logger.IsDebugEnabled() {
-	//	tw.logger.Debug("ticking",
-	//		zap.Int64("slot", slot),
-	//		zap.Time("now", now),
-	//		zap.Int64("slotsLen", tw.slots[slot].Len()))
-	//}
-
-	f := func(task Task) {
-		if tr := task.Execute(now); tr == Retry {
-			if err := tw.slots[slot].Enqueue(task); err != nil && tw.logger != nil {
-				tw.logger.Error("executed,but enqueue failed", zap.Error(err))
-			}
-		}
+	if tw.logger != nil && tw.logger.IsDebugEnabled() {
+		tw.logger.Debug("ticking",
+			zap.Int64("slot", slot),
+			zap.Time("now", now),
+			zap.Int64("slotsLen", tw.slots[slot].Len()))
 	}
 
-	// 处理任务
-	for {
-		task, err := tw.slots[slot].Dequeue()
+	if tw.pool != nil {
+		err := tw.pool.Submit(func() {
+
+			for {
+				task, err := tw.slots[slot].Dequeue()
+				if err != nil {
+					break
+				}
+				if task == nil {
+					continue
+				}
+
+				if tr := task.Execute(now); tr == Retry {
+					if err := tw.slots[slot].Enqueue(task); err != nil && tw.logger != nil {
+						tw.logger.Error("executed,but enqueue failed", zap.Error(err))
+					}
+				}
+
+			}
+		})
 		if err != nil {
-			break
-		}
-		if task == nil {
-			continue
-		}
-
-		if tw.pool != nil {
-
-			if tw.logger != nil && tw.logger.IsDebugEnabled() {
-				tw.logger.Debug("ticking",
-					zap.Int64("slot", slot),
-					zap.Time("now", now),
-					zap.Int64("slotsLen", tw.slots[slot].Len()))
-			}
-
-			if err := tw.pool.Submit(func() { f(task) }); err != nil && tw.logger != nil {
-				tw.logger.Error("pool submit failed,call it directly", zap.Error(err))
-				f(task)
-				return err
-			}
-		} else {
-			f(task)
+			tw.logger.Error("pool submit failed,call it directly", zap.Error(err))
+			return err
 		}
 	}
-
 	return nil
 }
 
 func (tw *Timewheel) Submit(task Task, delay time.Duration) (int, error) {
-
 	if delay < 0 {
 		err := fmt.Errorf("negative delay %v is not allowed", delay)
 		tw.logger.Error("failed to submit", zap.Error(err))
 		return -1, err
 	}
 
-	// 检查最大延迟
 	if delay > tw.cfg.MaxIntervalOfSubmit {
 		err := fmt.Errorf("delay %v exceeds max interval %v", delay, tw.cfg.MaxIntervalOfSubmit)
 		if tw.logger != nil {
@@ -241,10 +231,14 @@ func (tw *Timewheel) Submit(task Task, delay time.Duration) (int, error) {
 		return -1, err
 	}
 
-	// 计算目标槽
-	slotsToAdvance := int64(delay / tw.cfg.Tick)
-	currentSlot := atomic.LoadInt64(&tw.currentIndex)
-	slot := int(currentSlot+slotsToAdvance) % tw.cfg.SlotCount
+	// 计算目标槽基于当前时间
+	tickMs := int64(tw.cfg.Tick / time.Millisecond)
+	currentMilli := atomic.LoadInt64(&tw.currentMilli)
+	if currentMilli == 0 {
+		currentMilli = time.Now().UnixMilli()
+	}
+	targetMilli := currentMilli + int64(delay/time.Millisecond)
+	slot := int((targetMilli / tickMs) % int64(tw.cfg.SlotCount))
 
 	err := tw.slots[slot].Enqueue(task)
 	if tw.logger != nil && err != nil {

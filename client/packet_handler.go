@@ -75,7 +75,9 @@ func (s *PacketHandler) Handle(p *api.Packet, user *User) *api.Packet {
 }
 
 func (s *PacketHandler) Write(ret *api.Packet, writer io.Writer, user *User) error {
-	logging.Infof("%d write: %s", user.UserID, toJson(ret))
+	if !ret.IsHeartbeat() {
+		logging.Infof("%d write: %s", user.UserID, toJson(ret))
+	}
 
 	buffer, err := s.codec.Encode(ret)
 	defer bb.Put(buffer)

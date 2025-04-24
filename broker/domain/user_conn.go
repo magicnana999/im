@@ -3,7 +3,6 @@ package domain
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/magicnana999/im/define"
 	"github.com/panjf2000/gnet/v2"
 	"go.uber.org/atomic"
 	"io"
@@ -45,11 +44,14 @@ func (u *UserConn) Close() bool {
 	return u.IsClosed.CompareAndSwap(false, true)
 }
 
-func (u *UserConn) Login(appId string, userId int64, os define.OSType) {
-	u.IsLogin.Store(true)
-	u.AppId.Store(appId)
-	u.UserId.Store(userId)
-	u.OS.Store(string(os))
+func (u *UserConn) Login(appId string, userId int64, os string) bool {
+	if u.IsLogin.CompareAndSwap(false, true) {
+		u.AppId.Store(appId)
+		u.UserId.Store(userId)
+		u.OS.Store(os)
+		return true
+	}
+	return false
 }
 
 func (u *UserConn) Desc() string {

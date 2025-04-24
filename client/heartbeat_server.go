@@ -21,8 +21,8 @@ type HeartbeatServer struct {
 func NewHeartbeatServer(interval time.Duration) *HeartbeatServer {
 	twc := &timewheel.Config{
 		Tick:                time.Second,
-		SlotCount:           60,
-		MaxLengthOfEachSlot: 100_0000,
+		SlotCount:           10,
+		MaxLengthOfEachSlot: 1_000_000,
 	}
 
 	tw, err := timewheel.NewTimewheel(twc, nil, nil)

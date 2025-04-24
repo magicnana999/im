@@ -82,7 +82,7 @@ func (h *TcpServer) OnOpen(c gnet.Conn) (out []byte, action gnet.Action) {
 		ht := api.NewHeartbeatPacket(100)
 		h.handler.Write(ht, c, user)
 		return timewheel.Retry
-	}, time.Second*20)
+	}, time.Second*10)
 
 	return
 }
@@ -106,7 +106,9 @@ func (h *TcpServer) OnTraffic(c gnet.Conn) gnet.Action {
 			user.LastHTS.Store(time.Now().Unix())
 		}
 
-		logging.Infof("%d read: %s", user.UserID, toJson(packet))
+		if !packet.IsHeartbeat() {
+			logging.Infof("%d read: %s", user.UserID, toJson(packet))
+		}
 		ret := h.handler.Handle(packet, user)
 		if ret != nil {
 			h.handler.Write(ret, c, user)
@@ -121,7 +123,21 @@ func (h *TcpServer) OnTraffic(c gnet.Conn) gnet.Action {
 }
 
 func (h *TcpServer) OnClose(c gnet.Conn, err error) gnet.Action {
-	logging.Infof("Connection closed: %v", err)
+
+	user := GetUser(c)
+	if user != nil {
+		user.IsClosed.Store(true)
+		h.curUsers.Delete(user.UserID)
+
+		loginUser := h.GetLoginUser()
+		if loginUser != nil && loginUser.UserID == user.UserID {
+			atomic.StorePointer(&h.curUser, nil)
+			logging.Infof("%d current user closed", user.UserID)
+		}
+	}
+
+	logging.Infof("%d Connection closed: %v", user.UserID, err)
+
 	return gnet.None
 }
 
@@ -140,6 +156,22 @@ func (h *TcpServer) Stop() {
 func (h *TcpServer) connect(size int) {
 	for i := 0; i < size; i++ {
 		h.agent.Dial("tcp", "127.0.0.1:5075")
+	}
+}
+
+func (h *TcpServer) login(size int) {
+	for i := 0; i < size; i++ {
+
+		h.connect(1)
+
+		req := &api.LoginRequest{
+			AppId:    "1201",
+			UserSig:  "",
+			Os:       "iOS",
+			DeviceId: "",
+		}
+		packet := api.NewCommand(req)
+		h.write(packet, h.GetLoginUser())
 	}
 }
 
@@ -165,7 +197,6 @@ func NewTcpServer(handler *PacketHandler, hts *HeartbeatServer) *TcpServer {
 	c.Command("conn", func(text string) {
 
 		s := strings.Trim(text, " ")
-
 		if s != "" {
 			if size, err := strconv.Atoi(s); err == nil {
 				eh.connect(size)
@@ -177,15 +208,14 @@ func NewTcpServer(handler *PacketHandler, hts *HeartbeatServer) *TcpServer {
 	})
 
 	c.Command("login", func(text string) {
-		req := &api.LoginRequest{
-			AppId:    "1201",
-			UserSig:  "",
-			Os:       "iOS",
-			DeviceId: "",
+		s := strings.Trim(text, " ")
+		if s != "" {
+			if size, err := strconv.Atoi(s); err == nil {
+				eh.login(size)
+			}
+		} else {
+			eh.login(1)
 		}
-
-		packet := api.NewCommand(req)
-		eh.write(packet, eh.GetLoginUser())
 	})
 
 	c.Command("show", func(text string) {

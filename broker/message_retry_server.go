@@ -144,17 +144,13 @@ func (s *MessageRetryServer) Submit(m *api.Message, uc *domain.UserConn, firstSe
 	return err
 }
 
-func (s *MessageRetryServer) Ack(messageID string) error {
-	if messageID == "" {
-		return errors.New("invalid message ID")
-	}
+func (s *MessageRetryServer) Ack(messageID string) {
 	value, ok := s.tasks.LoadAndDelete(messageID)
 	if ok {
 		if task, ok := value.(*messageRetryTask); ok {
 			task.isAckOK.Store(true)
 		}
 	}
-	return nil
 }
 
 type messageRetryTask struct {

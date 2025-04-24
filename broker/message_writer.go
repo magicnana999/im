@@ -38,10 +38,12 @@ func (s *MessageWriter) Write(m *api.Message, uc *domain.UserConn) error {
 		return err
 	}
 
+	//关闭要区分主动关闭还是被动关闭，主动的关闭，需要等写完之后才能关
+
 	total := buffer.Len()
 	sent := 0
 	for sent < total {
-		n, err := uc.Writer.Write(buffer.Bytes()[sent:])
+		n, err := uc.Conn.Write(buffer.Bytes()[sent:])
 		if err != nil {
 			s.logger.PktDebug("failed to write message", uc.Desc(), m.MessageId, "", PacketTracking, err)
 			return err

@@ -24,7 +24,7 @@ func (m *MessageHandler) HandlePacket(ctx context.Context, p *api.Packet) (*api.
 	mb := p.GetMessage()
 	if mb.IsRequest() {
 		_, err := m.routerClient.Route(ctx, mb)
-		return mb.Response(nil, err).Wrap(), nil
+		return mb.Response(nil, err).Wrap(), err
 	}
 
 	return nil, nil

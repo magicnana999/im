@@ -12,7 +12,7 @@ import (
 func TestUserConnToJSON(t *testing.T) {
 	uc := &UserConn{}
 	uc.Login("11", 100, define.Ios)
-	uc.Refresh(time.Now().UnixMilli())
+	uc.Refresh(time.Now())
 	bs, err := uc.ToJSON()
 	assert.Nil(t, err)
 	fmt.Println(string(bs))

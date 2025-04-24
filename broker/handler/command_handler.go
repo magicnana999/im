@@ -38,6 +38,6 @@ func (c *CommandHandler) HandlePacket(ctx context.Context, packet *api.Packet) (
 		err = errors.CmdUnknownType
 	}
 
-	return packet.GetCommand().Response(reply, err).Wrap(), nil
+	return packet.GetCommand().Response(reply, err).Wrap(), err
 
 }
