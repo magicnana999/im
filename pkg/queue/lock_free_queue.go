@@ -30,6 +30,47 @@ func NewLockFreeQueue[T any](maxSize int64) *LockFreeQueue[T] {
 	return &LockFreeQueue[T]{head: dummy, tail: dummy, maxSize: maxSize}
 }
 
+func (q *LockFreeQueue[T]) BatchEnqueue(values []T) error {
+	if q.maxSize > 0 && atomic.LoadInt64(&q.length)+int64(len(values)) > q.maxSize {
+		return ErrQueueFull
+	}
+
+	// 创建节点链
+	var first, last *lockFreeNode[T]
+	for i, value := range values {
+		node := &lockFreeNode[T]{value: value}
+		if i == 0 {
+			first = node
+		} else {
+			(*lockFreeNode[T])(last).next = unsafe.Pointer(node)
+		}
+		last = node
+	}
+
+	retries := 0
+	for {
+		tail := atomic.LoadPointer(&q.tail)
+		next := atomic.LoadPointer(&(*lockFreeNode[T])(tail).next)
+		if tail != atomic.LoadPointer(&q.tail) {
+			if retries > 100 {
+				runtime.Gosched()
+			}
+			retries++
+			continue
+		}
+		if next == nil {
+			if atomic.CompareAndSwapPointer(&(*lockFreeNode[T])(tail).next, nil, unsafe.Pointer(first)) {
+				atomic.AddInt64(&q.length, int64(len(values)))
+				atomic.CompareAndSwapPointer(&q.tail, tail, unsafe.Pointer(last))
+				return nil
+			}
+		} else {
+			atomic.CompareAndSwapPointer(&q.tail, tail, next)
+		}
+		retries++
+	}
+}
+
 // Enqueue 入队
 func (q *LockFreeQueue[T]) Enqueue(value T) error {
 
@@ -63,6 +104,48 @@ func (q *LockFreeQueue[T]) Enqueue(value T) error {
 		retries++
 
 	}
+}
+
+func (q *LockFreeQueue[T]) BatchDequeue(max int) ([]T, error) {
+	var values []T
+	if q.Len() == 0 {
+		return nil, ErrQueueEmpty
+	}
+	retries := 0
+	for len(values) < max {
+		head := atomic.LoadPointer(&q.head)
+		tail := atomic.LoadPointer(&q.tail)
+		next := atomic.LoadPointer(&(*lockFreeNode[T])(head).next)
+		if head != atomic.LoadPointer(&q.head) {
+			if retries > 100 {
+				runtime.Gosched()
+			}
+			retries++
+			continue
+		}
+		if head == tail {
+			if next == nil {
+				if len(values) == 0 {
+					return nil, ErrQueueEmpty
+				}
+				return values, nil
+			}
+			atomic.CompareAndSwapPointer(&q.tail, tail, next)
+		} else {
+			value := (*lockFreeNode[T])(next).value
+			if atomic.CompareAndSwapPointer(&q.head, head, next) {
+				atomic.AddInt64(&q.length, -1)
+				values = append(values, value)
+				retries = 0
+			} else {
+				if retries > 100 {
+					runtime.Gosched()
+				}
+				retries++
+			}
+		}
+	}
+	return values, nil
 }
 
 // Dequeue 出队
