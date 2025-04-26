@@ -89,18 +89,22 @@ type EtcdConfig struct {
 }
 
 type RedisConfig struct {
-	Addr     string        `yaml:"addr"`     // Redis 地址，如 "127.0.0.1:6379"
-	Password string        `yaml:"password"` // Redis 密码
-	DB       int           `yaml:"db"`       // Redis 数据库编号
-	Timeout  time.Duration `yaml:"timeout"`  // 连接超时，可选
+	Addr         string        `yaml:"addr"`     // Redis 地址，如 "127.0.0.1:6379"
+	Password     string        `yaml:"password"` // Redis 密码
+	DB           int           `yaml:"db"`       // Redis 数据库编号
+	Timeout      time.Duration `yaml:"timeout"`  // 连接超时，可选
+	PoolSize     int           `yaml:"poolSize"`
+	MinIdleConns int           `yaml:"minIdleConns"`
 }
 
 func (c *RedisConfig) ToOptions() *redis.Options {
 	return &redis.Options{
-		Addr:        c.Addr,
-		Password:    c.Password,
-		DB:          c.DB,
-		DialTimeout: c.Timeout,
+		Addr:         c.Addr,
+		Password:     c.Password,
+		DB:           c.DB,
+		DialTimeout:  c.Timeout,
+		PoolSize:     c.PoolSize,
+		MinIdleConns: c.MinIdleConns,
 	}
 }
 
