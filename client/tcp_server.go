@@ -11,6 +11,7 @@ import (
 	"github.com/magicnana999/im/pkg/logger"
 	"github.com/panjf2000/gnet/v2"
 	"github.com/panjf2000/gnet/v2/pkg/logging"
+	"go.uber.org/zap"
 	"strconv"
 	"strings"
 	"sync"
@@ -75,7 +76,7 @@ func (h *TcpServer) OnOpen(c gnet.Conn) (out []byte, action gnet.Action) {
 	ctx := context.WithValue(context.Background(), key, user)
 	c.SetContext(ctx)
 
-	h.htsHandler.StartTicking(&SendHeartbeat{user: user, handle: h.handler}, time.Second*10)
+	h.htsHandler.StartTicking(&SendHeartbeat{user: user, handle: h.handler})
 
 	//登录
 	req := &api.LoginRequest{
@@ -109,9 +110,9 @@ func (h *TcpServer) OnTraffic(c gnet.Conn) gnet.Action {
 			user.LastHTS.Store(time.Now().Unix())
 		}
 
-		//if !packet.IsHeartbeat() {
-		logging.Infof("%d read: %s", user.UserID, toJson(packet))
-		//}
+		if !packet.IsHeartbeat() {
+			logging.Infof("%d read: %s", user.UserID, toJson(packet))
+		}
 		ret := h.handler.Handle(packet, user)
 		if ret != nil {
 			h.handler.Write(ret, user)
@@ -186,15 +187,34 @@ func NewTcpServer(handler *PacketHandler, hts *HeartbeatServer) *TcpServer {
 
 	codec := broker.NewCodec()
 	eh := &TcpServer{codec: codec, handler: handler, htsHandler: hts}
+	l := logger.NameWithOptions("tcp-client", zap.AddCallerSkip(2))
 	client, err := gnet.NewClient(eh,
-		gnet.WithLogger(&log{log: logger.NamedAndAddSkip("tcp-client", 2)}),
-		gnet.WithReadBufferCap(1024),
-		gnet.WithWriteBufferCap(1024))
+		gnet.WithLogger(&log{log: l}),
+		gnet.WithReadBufferCap(8192),
+		gnet.WithWriteBufferCap(8192))
 	if err != nil {
 		logging.Fatalf("Failed to create client: %v", err)
 	}
 
 	c := console.NewConsole(func(s string) {
+	})
+
+	c.Command("connslowly", func(text string) {
+
+		s := strings.Trim(text, " ")
+		if s != "" {
+			if size, err := strconv.Atoi(s); err == nil {
+
+				for i := 0; i < 10; i++ {
+					time.Sleep(time.Second)
+					eh.connect(size)
+				}
+
+			}
+		} else {
+			eh.connect(1)
+		}
+
 	})
 
 	c.Command("conn", func(text string) {

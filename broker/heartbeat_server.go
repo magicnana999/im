@@ -71,7 +71,7 @@ func NewHeartbeatServer(g *global.Config, lc fx.Lifecycle) (*HeartbeatServer, er
 		WorkerPreAlloc:    c.WorkerPreAlloc,
 	}
 
-	twLogger := logger.NameWithOptions("hts", zap.IncreaseLevel(zapcore.DebugLevel))
+	twLogger := logger.NameWithOptions("hts", zap.IncreaseLevel(zapcore.InfoLevel))
 	tw, err := timewheel.NewTimewheel(twc, twLogger, nil)
 	if err != nil {
 		return nil, err

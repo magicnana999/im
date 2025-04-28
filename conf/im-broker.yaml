@@ -2,20 +2,19 @@ tcp:
   addr: 127.0.0.1:5075
   interval: 60s
   heartbeat:
-    timeout: 30s
+    timeout: 60s
     slotTick: 1s
     slotCount: 60
     slotMaxLength: 20000
-    workerCount: 400
+    workerCount: 800
     workerNonBlocking: false
     workerExpire: 10s
     workerPreAlloc: false
 
-
   worker:
-    size: 400
+    size: 800
     expireDuration: 10s
-    maxBlockingTasks: 10000
+    maxBlockingTasks: 100000
 
 gorm:
   dsn: "root:root@tcp(127.0.0.1:3306)/im?charset=utf8mb4&parseTime=True&loc=Local"

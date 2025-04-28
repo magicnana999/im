@@ -5,6 +5,8 @@ import (
 	"github.com/magicnana999/im/api/kitex_gen/api"
 	"github.com/magicnana999/im/pkg/logger"
 	"github.com/magicnana999/im/pkg/timewheel"
+	"go.uber.org/zap"
+	"runtime"
 	"time"
 )
 
@@ -29,12 +31,15 @@ type HeartbeatServer struct {
 
 func NewHeartbeatServer(interval time.Duration) *HeartbeatServer {
 	twc := &timewheel.Config{
-		Tick:                time.Second,
-		SlotCount:           10,
-		MaxLengthOfEachSlot: 1_000_000,
+		SlotTick:      time.Millisecond * 500,
+		SlotCount:     60,
+		SlotMaxLength: 1_000,
+		WorkerCount:   runtime.NumCPU() * 10,
 	}
 
-	tw, err := timewheel.NewTimewheel(twc, nil, nil)
+	log := logger.NameWithOptions("hts-client", zap.IncreaseLevel(zap.InfoLevel))
+
+	tw, err := timewheel.NewTimewheel(twc, log, nil)
 	if err != nil {
 		logger.Named("hts").Fatal("hts start fail")
 		return nil
@@ -58,6 +63,6 @@ func (s *HeartbeatServer) Stop() error {
 	return nil
 }
 
-func (s *HeartbeatServer) StartTicking(fun *SendHeartbeat, interval time.Duration) (int, error) {
-	return s.tw.Submit(fun, interval)
+func (s *HeartbeatServer) StartTicking(fun *SendHeartbeat) (int, int64, error) {
+	return s.tw.Submit(fun)
 }
