@@ -7,7 +7,6 @@ import (
 	bb "github.com/panjf2000/gnet/v2/pkg/pool/bytebuffer"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
-	"io"
 	"sync"
 )
 
@@ -38,7 +37,7 @@ func (s *PacketHandler) ACK(messageId string) {
 
 func (s *PacketHandler) Send(request *api.Packet, user *User) {
 	if user != nil && !user.IsClosed.Load() {
-		s.Write(request, user.Writer, user)
+		s.Write(request, user)
 	}
 
 	if request.IsMessage() {
@@ -74,10 +73,10 @@ func (s *PacketHandler) Handle(p *api.Packet, user *User) *api.Packet {
 	return nil
 }
 
-func (s *PacketHandler) Write(ret *api.Packet, writer io.Writer, user *User) error {
-	if !ret.IsHeartbeat() {
-		logging.Infof("%d write: %s", user.UserID, toJson(ret))
-	}
+func (s *PacketHandler) Write(ret *api.Packet, user *User) error {
+	//if !ret.IsHeartbeat() {
+	logging.Infof("%d write: %s", user.UserID, toJson(ret))
+	//}
 
 	buffer, err := s.codec.Encode(ret)
 	defer bb.Put(buffer)
@@ -88,7 +87,7 @@ func (s *PacketHandler) Write(ret *api.Packet, writer io.Writer, user *User) err
 	total := buffer.Len()
 	sent := 0
 	for sent < total {
-		n, err := writer.Write(buffer.Bytes()[sent:])
+		n, err := user.Writer.Write(buffer.Bytes()[sent:])
 		if err != nil {
 			return err
 		}

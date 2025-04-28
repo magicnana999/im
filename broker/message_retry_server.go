@@ -3,7 +3,6 @@ package broker
 import (
 	"context"
 	"errors"
-	"fmt"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -25,20 +24,8 @@ func getOrDefaultMRSConfig(g *global.Config) *global.MRSConfig {
 		*c = *g.MRS
 	}
 
-	if c.Interval <= 0 {
-		c.Interval = time.Second
-	}
 	if c.Timeout <= 0 {
-		c.Timeout = time.Second * 2
-	}
-
-	if c.Timeout < c.Interval {
-		s := fmt.Sprintf("timeout[%s] is less than interval[%s] ,set as %s",
-			c.Timeout.String(),
-			c.Interval.String(),
-			c.Interval.String())
-		logger.Named("mrs").Warn(s)
-		c.Timeout = c.Interval
+		c.Timeout = time.Second * 3
 	}
 
 	return c
@@ -49,7 +36,7 @@ type MessageRetryServer struct {
 	tw     *timewheel.Timewheel // tw schedules retry tasks.
 	cfg    *global.MRSConfig    // cfg holds retry configuration.
 	logger *Logger              // logger records server events.
-	mw     *MessageWriter
+	mw     *PacketWriter
 	mr     *MessageResaver
 }
 
@@ -60,9 +47,9 @@ func NewMessageRetryServer(g *global.Config, lc fx.Lifecycle) (*MessageRetryServ
 	log.SrvInfo(string(jsonext.MarshalNoErr(c)), SrvLifecycle, nil)
 
 	twc := &timewheel.Config{
-		Tick:                time.Millisecond * 100,
-		SlotCount:           30,
-		MaxLengthOfEachSlot: 100_0000,
+		SlotTick:      time.Millisecond * 100,
+		SlotCount:     30,
+		SlotMaxLength: 100_0000,
 	}
 	log.SrvInfo(string(jsonext.MarshalNoErr(twc)), SrvLifecycle, nil)
 
@@ -78,7 +65,7 @@ func NewMessageRetryServer(g *global.Config, lc fx.Lifecycle) (*MessageRetryServ
 		tw:     tw,
 		cfg:    c,
 		logger: log,
-		mw:     NewMessageWriter(NewCodec(), log),
+		mw:     NewPacketWriter(NewCodec(), log),
 		mr:     NewMessageResaver(),
 	}
 
@@ -132,7 +119,6 @@ func (s *MessageRetryServer) Submit(m *api.Message, uc *domain.UserConn, firstSe
 	task := &messageRetryTask{
 		uc:         uc,
 		m:          m,
-		interval:   s.cfg.Interval,
 		timeout:    s.cfg.Timeout,
 		writeFunc:  s.write,
 		resaveFunc: s.resave,
@@ -140,7 +126,7 @@ func (s *MessageRetryServer) Submit(m *api.Message, uc *domain.UserConn, firstSe
 	task.firstSendSecond.Store(firstSend)
 
 	s.tasks.Store(m.MessageId, task)
-	_, err := s.tw.Submit(task, s.cfg.Interval)
+	_, _, err := s.tw.Submit(task)
 	return err
 }
 
@@ -183,7 +169,7 @@ func (t *messageRetryTask) Execute(now time.Time) timewheel.TaskResult {
 }
 
 func (s *MessageRetryServer) write(m *api.Message, uc *domain.UserConn) error {
-	return s.mw.Write(m, uc)
+	return s.mw.Write(m.Wrap(), uc)
 }
 
 func (s *MessageRetryServer) resave(m *api.Message, uc *domain.UserConn) {

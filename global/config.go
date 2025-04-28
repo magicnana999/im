@@ -23,18 +23,21 @@ type Config struct {
 }
 
 type TCPConfig struct {
-	Addr      string              `yaml:"addr"`
+	Addr      string              `yaml:"addr",json:"addr"`
 	Interval  time.Duration       `yaml:"interval"`
 	Heartbeat *TcpHeartbeatConfig `yaml:"heartbeat"`
 	Worker    *TcpWorkerConfig    `yaml:"worker"`
 }
 
 type TcpHeartbeatConfig struct {
-	Interval            time.Duration `yaml:"interval"`
-	Timeout             time.Duration `yaml:"timeout"`
-	Tick                time.Duration `yaml:"tick"`
-	Slots               int           `yaml:"slots"`
-	MaxLengthOfEachSlot int           `yaml:"maxLengthOfEachSlot"`
+	Timeout           time.Duration `yaml:"timeout"`
+	SlotTick          time.Duration `yaml:"slotTick",json:"slotTick"`
+	SlotCount         int           `yaml:"slotCount",json:"slotCount"`
+	SlotMaxLength     int64         `yaml:"slotMaxLength",json:"slotMaxLength"`
+	WorkerCount       int           `yaml:"workerCount",json:"workerCount"`
+	WorkerNonBlocking bool          `yaml:"workerNonBlocking",json:"workerNonBlocking"`
+	WorkerExpire      time.Duration `yaml:"workerExpire",json:"workerExpire"`
+	WorkerPreAlloc    bool          `yaml:"workerPreAlloc",json:"workerPreAlloc"`
 }
 
 type TcpWorkerConfig struct {
@@ -61,8 +64,7 @@ type MSSConfig struct {
 }
 
 type MRSConfig struct {
-	Interval  time.Duration `yaml:"interval"` //重发间隔
-	Timeout   time.Duration `yaml:"timeout"`  //重发超时时间
+	Timeout   time.Duration `yaml:"timeout"` //重发超时时间
 	DebugMode bool          `yaml:"debugMode"`
 }
 

@@ -5,6 +5,7 @@ import (
 	"github.com/magicnana999/im/pkg/jsonext"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"runtime"
 	"time"
 
 	"github.com/magicnana999/im/global"
@@ -31,16 +32,24 @@ func getOrDefaultHTSConfig(g *global.Config) *global.TcpHeartbeatConfig {
 		*c = *g.TCP.Heartbeat
 	}
 
-	if c.Tick <= 0 {
-		c.Tick = time.Second
+	if c.SlotTick <= 0 {
+		c.SlotTick = time.Second
 	}
 
-	if c.Slots <= 0 {
-		c.Slots = 30
+	if c.SlotCount <= 0 {
+		c.SlotCount = 30
 	}
 
-	if c.MaxLengthOfEachSlot <= 0 {
-		c.MaxLengthOfEachSlot = 1_000_000
+	if c.SlotMaxLength <= 0 {
+		c.SlotMaxLength = 20000
+	}
+
+	if c.WorkerCount <= 0 {
+		c.WorkerCount = runtime.NumCPU() * 50
+	}
+
+	if c.WorkerExpire <= 0 {
+		c.WorkerExpire = time.Second * 10
 	}
 
 	return c
@@ -53,9 +62,13 @@ func NewHeartbeatServer(g *global.Config, lc fx.Lifecycle) (*HeartbeatServer, er
 	log.SrvInfo(string(jsonext.MarshalNoErr(c)), SrvLifecycle, nil)
 
 	twc := &timewheel.Config{
-		Tick:                c.Tick,
-		SlotCount:           c.Slots,
-		MaxLengthOfEachSlot: c.MaxLengthOfEachSlot,
+		SlotTick:          c.SlotTick,
+		SlotCount:         c.SlotCount,
+		SlotMaxLength:     c.SlotMaxLength,
+		WorkerCount:       c.WorkerCount,
+		WorkerExpire:      c.WorkerExpire,
+		WorkerNonBlocking: c.WorkerNonBlocking,
+		WorkerPreAlloc:    c.WorkerPreAlloc,
 	}
 
 	twLogger := logger.NameWithOptions("hts", zap.IncreaseLevel(zapcore.DebugLevel))
@@ -100,6 +113,6 @@ func (s *HeartbeatServer) Stop(ctx context.Context) error {
 	return nil
 }
 
-func (s *HeartbeatServer) Ticking(fun HeartbeatFunc, interval time.Duration) (int, error) {
-	return s.tw.Submit(fun, interval)
+func (s *HeartbeatServer) Ticking(fun HeartbeatFunc) (int, int64, error) {
+	return s.tw.Submit(fun)
 }

@@ -199,7 +199,6 @@ func (tw *Timewheel) advance(now time.Time) error {
 	if tw.logger != nil && tw.logger.IsDebugEnabled() {
 		tw.logger.Debug("ticking",
 			zap.Int64("slot", slot),
-			zap.Time("now", now),
 			zap.Int("running", tw.pool.Running()),
 			zap.Int("free", tw.pool.Free()),
 			zap.Int64("slotsLen", tw.slots[slot].Len()))

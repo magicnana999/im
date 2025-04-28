@@ -8,7 +8,7 @@ import (
 	"github.com/magicnana999/im/api/kitex_gen/api"
 	"github.com/magicnana999/im/broker"
 	"github.com/magicnana999/im/pkg/id"
-	"github.com/magicnana999/im/pkg/timewheel"
+	"github.com/magicnana999/im/pkg/logger"
 	"github.com/panjf2000/gnet/v2"
 	"github.com/panjf2000/gnet/v2/pkg/logging"
 	"strconv"
@@ -75,14 +75,17 @@ func (h *TcpServer) OnOpen(c gnet.Conn) (out []byte, action gnet.Action) {
 	ctx := context.WithValue(context.Background(), key, user)
 	c.SetContext(ctx)
 
-	h.htsHandler.StartTicking(func(now time.Time) timewheel.TaskResult {
-		if user.IsClosed.Load() {
-			return timewheel.Break
-		}
-		ht := api.NewHeartbeatPacket(100)
-		h.handler.Write(ht, c, user)
-		return timewheel.Retry
-	}, time.Second*10)
+	h.htsHandler.StartTicking(&SendHeartbeat{user: user, handle: h.handler}, time.Second*10)
+
+	//登录
+	req := &api.LoginRequest{
+		AppId:    "1201",
+		UserSig:  "",
+		Os:       "iOS",
+		DeviceId: "",
+	}
+	packet := api.NewCommand(req)
+	h.write(packet, user)
 
 	return
 }
@@ -106,12 +109,12 @@ func (h *TcpServer) OnTraffic(c gnet.Conn) gnet.Action {
 			user.LastHTS.Store(time.Now().Unix())
 		}
 
-		if !packet.IsHeartbeat() {
-			logging.Infof("%d read: %s", user.UserID, toJson(packet))
-		}
+		//if !packet.IsHeartbeat() {
+		logging.Infof("%d read: %s", user.UserID, toJson(packet))
+		//}
 		ret := h.handler.Handle(packet, user)
 		if ret != nil {
-			h.handler.Write(ret, c, user)
+			h.handler.Write(ret, user)
 		}
 
 		if packet.IsCommand() && packet.GetCommand().CommandType == api.CommandTypeUserLogin {
@@ -176,7 +179,7 @@ func (h *TcpServer) login(size int) {
 }
 
 func (h *TcpServer) write(ht *api.Packet, user *User) {
-	h.handler.Write(ht, user.Writer, user)
+	h.handler.Write(ht, user)
 }
 
 func NewTcpServer(handler *PacketHandler, hts *HeartbeatServer) *TcpServer {
@@ -184,7 +187,7 @@ func NewTcpServer(handler *PacketHandler, hts *HeartbeatServer) *TcpServer {
 	codec := broker.NewCodec()
 	eh := &TcpServer{codec: codec, handler: handler, htsHandler: hts}
 	client, err := gnet.NewClient(eh,
-		gnet.WithLogger(logging.GetDefaultLogger()),
+		gnet.WithLogger(&log{log: logger.NamedAndAddSkip("tcp-client", 2)}),
 		gnet.WithReadBufferCap(1024),
 		gnet.WithWriteBufferCap(1024))
 	if err != nil {
@@ -205,17 +208,6 @@ func NewTcpServer(handler *PacketHandler, hts *HeartbeatServer) *TcpServer {
 			eh.connect(1)
 		}
 
-	})
-
-	c.Command("login", func(text string) {
-		s := strings.Trim(text, " ")
-		if s != "" {
-			if size, err := strconv.Atoi(s); err == nil {
-				eh.login(size)
-			}
-		} else {
-			eh.login(1)
-		}
 	})
 
 	c.Command("show", func(text string) {
@@ -290,4 +282,32 @@ func MarshalNoError(any any) string {
 		return ""
 	}
 	return string(bs)
+}
+
+type log struct {
+	log *logger.Logger
+}
+
+func (l log) Debugf(format string, args ...any) {
+	l.log.Debug(fmt.Sprintf(format, args...))
+}
+
+func (l log) Infof(format string, args ...any) {
+	l.log.Info(fmt.Sprintf(format, args...))
+
+}
+
+func (l log) Warnf(format string, args ...any) {
+	l.log.Warn(fmt.Sprintf(format, args...))
+
+}
+
+func (l log) Errorf(format string, args ...any) {
+	l.log.Error(fmt.Sprintf(format, args...))
+
+}
+
+func (l log) Fatalf(format string, args ...any) {
+	l.log.Fatal(fmt.Sprintf(format, args...))
+
 }

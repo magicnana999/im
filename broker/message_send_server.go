@@ -34,7 +34,7 @@ type MessageSendServer struct {
 	ch        chan *messageSending //消息投递队列
 	logger    *Logger
 	mrs       *MessageRetryServer //消息重发服务
-	mw        *MessageWriter      //消息写入服务
+	mw        *PacketWriter       //消息写入服务
 }
 
 func getOrDefaultMSSConfig(g *global.Config) *global.MSSConfig {
@@ -60,7 +60,7 @@ func NewMessageSendServer(g *global.Config, mrs *MessageRetryServer, lc fx.Lifec
 		ch:     make(chan *messageSending, c.MaxRemaining),
 		logger: log,
 		mrs:    mrs,
-		mw:     NewMessageWriter(NewCodec(), log),
+		mw:     NewPacketWriter(NewCodec(), log),
 	}
 
 	lc.Append(fx.Hook{
@@ -138,7 +138,7 @@ func (mss *MessageSendServer) Send(m *api.Message, uc *domain.UserConn) error {
 
 // write 成功后开始消息重发逻辑，失败后直接写入离线
 func (mss *MessageSendServer) write(m *api.Message, uc *domain.UserConn) {
-	if err := mss.mw.Write(m, uc); err != nil {
+	if err := mss.mw.Write(m.Wrap(), uc); err != nil {
 		mss.resave(m, uc)
 	} else {
 		mss.submit(m, uc)

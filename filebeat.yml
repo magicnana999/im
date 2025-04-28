@@ -1,0 +1,26 @@
+filebeat.inputs:
+  - type: filestream
+    enabled: true
+    paths:
+      - /var/log/im/debug.*.log  # 只监控 debug 轮转日志
+    fields:
+      app: im
+    fields_under_root: true
+    scan_frequency: 1s  # 提高扫描频率以捕获快速轮转的日志
+
+output.kafka:
+  hosts: ["kafka:9092"]
+  topic: "im_logs"
+  codec.json:
+    pretty: false
+
+setup.kibana:
+  host: "kibana:5601"
+  username: "elastic"
+  password: "changeme"
+
+setup.template.settings:
+  index.number_of_shards: 1
+  index.codec: best_compression
+
+setup.dashboards.enabled: true

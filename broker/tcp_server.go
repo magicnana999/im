@@ -14,7 +14,6 @@ import (
 	"github.com/panjf2000/ants/v2"
 	"github.com/panjf2000/gnet/v2"
 	"github.com/panjf2000/gnet/v2/pkg/logging"
-	bb "github.com/panjf2000/gnet/v2/pkg/pool/bytebuffer"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 	"runtime"
@@ -36,6 +35,7 @@ type TcpServer struct {
 	ctx            context.Context
 	worker         *ants.Pool
 	logger         *Logger
+	pw             *PacketWriter
 }
 
 func getOrDefaultTCPConfig(g *global.Config) *global.TCPConfig {
@@ -50,10 +50,6 @@ func getOrDefaultTCPConfig(g *global.Config) *global.TCPConfig {
 
 	if c.Interval <= 0 {
 		c.Interval = time.Minute
-	}
-
-	if c.Heartbeat.Interval <= 0 {
-		c.Heartbeat.Interval = time.Second * 30
 	}
 
 	if c.Heartbeat.Timeout <= 0 {
@@ -128,6 +124,7 @@ func NewTcpServer(
 		interval:       time.Second * 30,
 		logger:         logger,
 		worker:         worker,
+		pw:             NewPacketWriter(NewCodec(), logger),
 	}
 
 	lc.Append(fx.Hook{
@@ -190,11 +187,6 @@ func (s *TcpServer) OnBoot(eng gnet.Engine) (action gnet.Action) {
 	s.eng = eng
 	s.logger.SrvInfo("tcp started", SrvLifecycle, nil)
 
-	//brokerInfo := domain.BrokerInfo{Addr: "", StartAt: time.Now().UnixMilli()}
-	//if _, e := s.brokerHolder.StoreBroker(s.ctx, brokerInfo); e != nil {
-	//	logger.Fatalf("failed to store broker info: %v", e)
-	//}
-
 	return gnet.None
 }
 
@@ -251,7 +243,7 @@ func (s *TcpServer) OnTraffic(c gnet.Conn) (action gnet.Action) {
 		for _, packet := range packets {
 			resp := s.processPacket(ctx, c, uc, packet)
 			if resp != nil {
-				s.response(c, uc, resp)
+				s.response(uc, resp)
 			}
 		}
 	})
@@ -265,12 +257,12 @@ func (s *TcpServer) OnTraffic(c gnet.Conn) (action gnet.Action) {
 }
 
 func (s *TcpServer) processPacket(ctx context.Context, c gnet.Conn, uc *domain.UserConn, packet *api.Packet) *api.Packet {
-	if packet.IsHeartbeat() {
-		s.response(c, uc, api.NewHeartbeatPacket(int32(1)))
-		return nil
-	}
 
 	s.logger.PktDebug("read", uc.Desc(), packet.GetPacketId(), string(jsonext.PbMarshalNoErr(packet)), PacketTracking, nil)
+
+	if packet.IsHeartbeat() {
+		return api.NewHeartbeatPacket(int32(1))
+	}
 
 	if packet.IsCommand() {
 		return s.processCommand(ctx, c, uc, packet)
@@ -310,7 +302,6 @@ func (s *TcpServer) processCommand(ctx context.Context, c gnet.Conn, uc *domain.
 }
 
 func (s *TcpServer) OnTick() (delay time.Duration, action gnet.Action) {
-	fmt.Println("--------- gnet.conns:", s.eng.CountConnections(), ",worker.running:", s.worker.Running())
 	return time.Second, gnet.None
 }
 
@@ -393,7 +384,7 @@ func (s *TcpServer) openConn(c gnet.Conn, uc *domain.UserConn) error {
 		return timewheel.Retry
 	}
 
-	if _, err := s.hts.Ticking(fun, s.cfg.Heartbeat.Interval); err != nil {
+	if _, _, err := s.hts.Ticking(fun); err != nil {
 		return err
 	}
 
@@ -421,26 +412,6 @@ func (s *TcpServer) closeConnFD(c gnet.Conn, uc *domain.UserConn, reason string)
 	}
 }
 
-func (s *TcpServer) response(c gnet.Conn, uc *domain.UserConn, packet *api.Packet) {
-
-	bs, err := s.codec.Encode(packet)
-	defer bb.Put(bs)
-
-	if err != nil {
-		s.logger.PktDebug("encode error", uc.Desc(), packet.GetPacketId(), "", PacketTracking, err)
-		s.closeConnFD(c, uc, err.Error())
-		return
-	}
-
-	if err := c.AsyncWrite(bs.Bytes(), func(c gnet.Conn, err error) error {
-		if !packet.IsHeartbeat() {
-			s.logger.PktDebug("write completed", uc.Desc(), packet.GetPacketId(), "", PacketTracking, err)
-		}
-		return err
-	}); err != nil {
-		s.logger.PktDebug("write error", uc.Desc(), packet.GetPacketId(), "", PacketTracking, err)
-		s.closeConnFD(c, uc, err.Error())
-		return
-	}
-
+func (s *TcpServer) response(uc *domain.UserConn, packet *api.Packet) {
+	s.pw.Write(packet, uc)
 }

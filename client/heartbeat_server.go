@@ -2,15 +2,24 @@ package main
 
 import (
 	"context"
+	"github.com/magicnana999/im/api/kitex_gen/api"
 	"github.com/magicnana999/im/pkg/logger"
 	"github.com/magicnana999/im/pkg/timewheel"
 	"time"
 )
 
-type HeartbeatFunc func(now time.Time) timewheel.TaskResult
+type SendHeartbeat struct {
+	user   *User
+	handle *PacketHandler
+}
 
-func (f HeartbeatFunc) Execute(now time.Time) timewheel.TaskResult {
-	return f(now)
+func (s *SendHeartbeat) Execute(now time.Time) timewheel.TaskResult {
+	if s.user.IsClosed.Load() {
+		return timewheel.Break
+	}
+	ht := api.NewHeartbeatPacket(100)
+	s.handle.Write(ht, s.user)
+	return timewheel.Retry
 }
 
 type HeartbeatServer struct {
@@ -49,6 +58,6 @@ func (s *HeartbeatServer) Stop() error {
 	return nil
 }
 
-func (s *HeartbeatServer) StartTicking(fun HeartbeatFunc, interval time.Duration) (int, error) {
+func (s *HeartbeatServer) StartTicking(fun *SendHeartbeat, interval time.Duration) (int, error) {
 	return s.tw.Submit(fun, interval)
 }

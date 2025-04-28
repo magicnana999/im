@@ -1,6 +1,9 @@
 package api
 
-import "google.golang.org/protobuf/proto"
+import (
+	"google.golang.org/protobuf/proto"
+	"strconv"
+)
 
 func (p *Packet) GetPacketId() string {
 	switch p.Type {
@@ -8,6 +11,8 @@ func (p *Packet) GetPacketId() string {
 		return p.GetCommand().GetCommandId()
 	case TypeMessage:
 		return p.GetMessage().GetMessageId()
+	case TypeHeartbeat:
+		return strconv.Itoa(int(p.GetHeartbeat().GetValue()))
 	default:
 		return ""
 	}

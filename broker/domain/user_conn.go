@@ -21,7 +21,6 @@ type UserConn struct {
 	IsClosed      atomic.Bool   `json:"-"`
 	LastHeartbeat atomic.Time   `json:"-"` //上次心跳 毫秒
 	Reader        io.Reader     `json:"-"`
-	Writer        io.Writer     `json:"-"`
 	Conn          gnet.Conn     `json:"-"`
 }
 
@@ -31,7 +30,6 @@ func NewUserConn(c gnet.Conn) *UserConn {
 		ClientAddr:  c.RemoteAddr().String(),
 		BrokerAddr:  c.LocalAddr().String(),
 		ConnectTime: time.Now().UnixMilli(),
-		Writer:      c,
 		Reader:      c,
 		Conn:        c,
 	}

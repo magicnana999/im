@@ -2,14 +2,19 @@ tcp:
   addr: 127.0.0.1:5075
   interval: 60s
   heartbeat:
-    interval: 30s
     timeout: 30s
-    tick: 1s
-    slots: 30
-    MaxLengthOfEachSlot: 100_0000
+    slotTick: 1s
+    slotCount: 60
+    slotMaxLength: 20000
+    workerCount: 400
+    workerNonBlocking: false
+    workerExpire: 10s
+    workerPreAlloc: false
+
+
   worker:
-    size: 0
-    expireDuration: 1m
+    size: 400
+    expireDuration: 10s
     maxBlockingTasks: 10000
 
 gorm:
