@@ -38,10 +38,13 @@ func NewUserConn(c gnet.Conn) *UserConn {
 
 	return uc
 }
+
+// Close 关闭标识
 func (u *UserConn) Close() bool {
 	return u.IsClosed.CompareAndSwap(false, true)
 }
 
+// Login 登录时修改状态
 func (u *UserConn) Login(appId string, userId int64, os string) bool {
 	if u.IsLogin.CompareAndSwap(false, true) {
 		u.AppId.Store(appId)
@@ -52,10 +55,12 @@ func (u *UserConn) Login(appId string, userId int64, os string) bool {
 	return false
 }
 
+// Desc 用于打印日志，追踪一个具体的connection  clientAddr#appId#userId#iO
 func (u *UserConn) Desc() string {
 	return fmt.Sprintf("%s#%s", u.ClientAddr, u.Label())
 }
 
+// Label 返回Connect的label appId#userId#iOS
 func (u *UserConn) Label() string {
 	if u.AppId.Load() == "" {
 		return ""
@@ -71,10 +76,12 @@ func (u *UserConn) Label() string {
 	return fmt.Sprintf("%s#%s#%s", u.AppId.Load(), u.UserId.String(), u.OS.Load())
 }
 
+// Refresh 刷新上次心跳时间
 func (u *UserConn) Refresh(t time.Time) {
 	u.LastHeartbeat.Store(t)
 }
 
+// ToJSON 序列化，在高并发下慎用
 func (u *UserConn) ToJSON() ([]byte, error) {
 	return json.Marshal(u)
 }

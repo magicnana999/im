@@ -22,6 +22,7 @@ func NewCommandHandler(uh *holder.UserHolder, us *cmd_service.UserService) (*Com
 
 }
 
+// HandlePacket HandlerPacket 处理command类型的packet
 func (c *CommandHandler) HandlePacket(ctx context.Context, packet *api.Packet) (*api.Packet, error) {
 
 	var reply proto.Message

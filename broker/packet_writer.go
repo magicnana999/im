@@ -32,26 +32,26 @@ func NewPacketWriter(codec *Codec, logger *Logger) *PacketWriter {
 func (s *PacketWriter) Write(packet *api.Packet, uc *domain.UserConn) error {
 
 	if s.IsClose.Load() {
-		s.logger.PktDebug("tcp is shutting down", uc.Desc(), packet.GetPacketId(), "", PacketTracking, errGetShutting)
+		s.logger.PktDebug("tcp is shutting down", uc.Desc(), packet.GetPacketId(), nil, PacketTracking, errGetShutting)
 		return errGetShutting
 	}
 
 	s.IsWriting.Store(true)
 
 	if uc.IsClosed.Load() {
-		s.logger.PktDebug("failed to write message,client closed", uc.Desc(), packet.GetPacketId(), "", PacketTracking, errUcIsClosed)
+		s.logger.PktDebug("failed to write message,client closed", uc.Desc(), packet.GetPacketId(), nil, PacketTracking, errUcIsClosed)
 		return errUcIsClosed
 	}
 
 	buffer, err := s.codec.Encode(packet)
 	defer bb.Put(buffer)
 	if err != nil {
-		s.logger.PktDebug("failed to decode message", uc.Desc(), packet.GetPacketId(), "", PacketTracking, err)
+		s.logger.PktDebug("failed to decode message", uc.Desc(), packet.GetPacketId(), nil, PacketTracking, err)
 		return err
 	}
 
 	err = uc.Conn.AsyncWrite(buffer.Bytes(), func(c gnet.Conn, err error) error {
-		s.logger.PktDebug("write completed", uc.Desc(), packet.GetPacketId(), "", PacketTracking, err)
+		s.logger.PktDebug("write completed", uc.Desc(), packet.GetPacketId(), nil, PacketTracking, err)
 		s.IsWriting.Store(false)
 		return nil
 	})

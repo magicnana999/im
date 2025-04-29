@@ -19,6 +19,7 @@ func NewMessageHandler(rc routerservice.Client, lc fx.Lifecycle) (*MessageHandle
 	return h, nil
 }
 
+// HandlePacket 处理Message类型的Packet
 func (m *MessageHandler) HandlePacket(ctx context.Context, p *api.Packet) (*api.Packet, error) {
 
 	mb := p.GetMessage()

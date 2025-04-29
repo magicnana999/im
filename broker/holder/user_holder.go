@@ -173,11 +173,13 @@ func (s *UserHolder) HoldUserConn(uc *domain.UserConn) bool {
 	return !ok
 }
 
+// RemoveUserConn 删除本地UC
 func (s *UserHolder) RemoveUserConn(uc *domain.UserConn) bool {
 	_, ok := s.m.LoadAndDelete(uc.Label())
 	return ok
 }
 
+// RangeAllUserConn 遍历本地UC
 func (s *UserHolder) RangeAllUserConn(fun func(*domain.UserConn) bool) {
 	s.m.Range(func(key, value any) bool {
 		return fun(value.(*domain.UserConn))

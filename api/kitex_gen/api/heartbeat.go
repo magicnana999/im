@@ -1,5 +1,9 @@
 package api
 
+var (
+	HeartbeatACK = NewHeartbeatPacket(int32(1))
+)
+
 func NewHeartbeatPacket(v int32) *Packet {
 	return NewHeartbeat(v).Wrap()
 }

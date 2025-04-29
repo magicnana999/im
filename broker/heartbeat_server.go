@@ -58,7 +58,7 @@ func getOrDefaultHTSConfig(g *global.Config) *global.TcpHeartbeatConfig {
 func NewHeartbeatServer(g *global.Config, lc fx.Lifecycle) (*HeartbeatServer, error) {
 	c := getOrDefaultHTSConfig(g)
 
-	log := NewLogger("hts", true)
+	log := NewLogger("hts")
 	log.SrvInfo(string(jsonext.MarshalNoErr(c)), SrvLifecycle, nil)
 
 	twc := &timewheel.Config{
@@ -95,6 +95,7 @@ func NewHeartbeatServer(g *global.Config, lc fx.Lifecycle) (*HeartbeatServer, er
 	return hs, nil
 }
 
+// Start 启动心跳
 func (s *HeartbeatServer) Start(ctx context.Context) error {
 	go func() {
 		s.tw.Start(context.Background())
@@ -103,6 +104,7 @@ func (s *HeartbeatServer) Start(ctx context.Context) error {
 	return nil
 }
 
+// Stop 停止心跳
 func (s *HeartbeatServer) Stop(ctx context.Context) error {
 	s.tw.Stop()
 	s.logger.SrvInfo("timewheel stop", SrvLifecycle, nil)
@@ -113,6 +115,7 @@ func (s *HeartbeatServer) Stop(ctx context.Context) error {
 	return nil
 }
 
+// Ticking 添加新的心跳任务
 func (s *HeartbeatServer) Ticking(fun HeartbeatFunc) (int, int64, error) {
 	return s.tw.Submit(fun)
 }

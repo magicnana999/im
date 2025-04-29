@@ -50,7 +50,7 @@ func NewRpcBrokerServer(
 		return nil, err
 	}
 
-	logger := NewLogger("rbs", c.DebugMode)
+	logger := NewLogger("rbs")
 
 	s := &RpcBrokerServer{
 		cfg:        c,

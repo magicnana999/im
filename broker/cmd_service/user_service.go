@@ -20,6 +20,7 @@ func NewUserService(uh *holder.UserHolder, bc businessservice.Client, lf fx.Life
 	return bs, nil
 }
 
+// Login 登录 RPC
 func (s *UserService) Login(ctx context.Context, request *api.LoginRequest) (*api.LoginReply, error) {
 
 	//rep, err := s.businessCli.Login(ctx, request)
@@ -40,6 +41,7 @@ func (s *UserService) Login(ctx context.Context, request *api.LoginRequest) (*ap
 	return rep, nil
 }
 
+// Logout 登出
 func (s *UserService) Logout(ctx context.Context, request *api.LogoutRequest) (*api.LogoutReply, error) {
 	return nil, nil
 }

@@ -53,7 +53,7 @@ func getOrDefaultMSSConfig(g *global.Config) *global.MSSConfig {
 func NewMessageSendServer(g *global.Config, mrs *MessageRetryServer, lc fx.Lifecycle) (*MessageSendServer, error) {
 	c := getOrDefaultMSSConfig(g)
 
-	log := NewLogger("mss", c.DebugMode)
+	log := NewLogger("mss")
 	log.SrvInfo(string(jsonext.MarshalNoErr(c)), SrvLifecycle, nil)
 
 	mss := &MessageSendServer{
@@ -147,12 +147,12 @@ func (mss *MessageSendServer) write(m *api.Message, uc *domain.UserConn) {
 
 func (mss *MessageSendServer) submit(ms *api.Message, uc *domain.UserConn) {
 	if err := mss.mrs.Submit(ms, uc, time.Now().Unix()); err != nil {
-		mss.logger.PktDebug("failed to submit mrs,resave it", uc.Desc(), ms.MessageId, "", PacketTracking, nil)
+		mss.logger.PktDebug("failed to submit mrs,resave it", uc.Desc(), ms.MessageId, nil, PacketTracking, nil)
 		mss.resave(ms, uc)
 	}
 }
 
 func (mss *MessageSendServer) resave(ms *api.Message, uc *domain.UserConn) {
-	mss.logger.PktDebug("resave message", uc.Desc(), ms.MessageId, "", PacketTracking, nil)
+	mss.logger.PktDebug("resave message", uc.Desc(), ms.MessageId, nil, PacketTracking, nil)
 	fmt.Print(jsonext.PbMarshalNoErr(ms))
 }

@@ -43,7 +43,7 @@ type MessageRetryServer struct {
 func NewMessageRetryServer(g *global.Config, lc fx.Lifecycle) (*MessageRetryServer, error) {
 	c := getOrDefaultMRSConfig(g)
 
-	log := NewLogger("mrs", c.DebugMode)
+	log := NewLogger("mrs")
 	log.SrvInfo(string(jsonext.MarshalNoErr(c)), SrvLifecycle, nil)
 
 	twc := &timewheel.Config{
