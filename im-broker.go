@@ -19,7 +19,7 @@ import (
 )
 
 func main() {
-	logger.Init(nil)
+	logger.Init(&logger.Config{Dir: "./logs/im-broker/"})
 	defer logger.Close()
 
 	var confFile string

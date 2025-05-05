@@ -39,3 +39,22 @@ go run im-broker.go
 cd client
 go run im-client.go
 ```
+
+
+## Kibana
+docker exec -it elasticsearch /bin/bash
+cd /usr/share/elasticsearch
+./bin/elasticsearch-service-tokens create elastic/kibana kibana-docker-token
+## 复制token到 docker-compose中ELASTICSEARCH_SERVICEACCOUNTTOKEN=xxx
+
+
+curl -u elastic:elastic -X GET "localhost:9200/logstash-*/_search?pretty&q=*&size=5"
+
+
+## 关于ELK
+### DataView
+im-logs-*
+### 可用fields
+![img.png](img.png)
+### 示例
+![img_1.png](img_1.png)

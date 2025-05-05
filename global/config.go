@@ -74,13 +74,13 @@ type MRSConfig struct {
 // GormConfig infra.NewGorm()时使用
 type GormConfig struct {
 	gorm.Config                   //继承
-	Dsn             string        `yaml:"dsn"` //链接字符串
-	MaxOpenConns    int           `yaml:"maxOpenConns"` //最大连接数
-	MaxIdleConns    int           `yaml:"maxIdleConns"` //最大空闲数
+	Dsn             string        `yaml:"dsn"`             //链接字符串
+	MaxOpenConns    int           `yaml:"maxOpenConns"`    //最大连接数
+	MaxIdleConns    int           `yaml:"maxIdleConns"`    //最大空闲数
 	ConnMaxLifetime time.Duration `yaml:"connMaxLifetime"` //最大存活时间
 	ConnMaxIdleTime time.Duration `yaml:"connMaxIdleTime"` //最大空闲时间
-	SlowThreshold   time.Duration `yaml:"slowThreshold"` // 慢查询阈值
-	ConnTimeout     time.Duration `yaml:"connTimeout"` // 连接超时
+	SlowThreshold   time.Duration `yaml:"slowThreshold"`   // 慢查询阈值
+	ConnTimeout     time.Duration `yaml:"connTimeout"`     // 连接超时
 }
 
 // KafkaConfig infra.NewKafkaProducer() 时使用

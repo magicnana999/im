@@ -3,20 +3,23 @@ package infra
 import (
 	"context"
 	"errors"
-	"fmt"
 	"github.com/cloudwego/kitex/client"
 	"github.com/cloudwego/kitex/pkg/discovery"
 	"github.com/cloudwego/kitex/pkg/registry"
 	jsoniter "github.com/json-iterator/go"
 	etcd "github.com/kitex-contrib/registry-etcd"
+	"github.com/magicnana999/im/api/kitex_gen/api"
 	"github.com/magicnana999/im/api/kitex_gen/api/brokerservice"
 	"github.com/magicnana999/im/api/kitex_gen/api/businessservice"
 	"github.com/magicnana999/im/api/kitex_gen/api/routerservice"
 	"github.com/magicnana999/im/global"
 	"github.com/magicnana999/im/pkg/logger"
+	"go.etcd.io/etcd/api/v3/mvccpb"
 	etcdclient "go.etcd.io/etcd/client/v3"
+	"go.uber.org/atomic"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
+	"strings"
 	"sync"
 	"time"
 )
@@ -109,89 +112,146 @@ func NewRouterClient(resolver discovery.Resolver, lc fx.Lifecycle) (routerservic
 	return cli, nil
 }
 
+var (
+	BrokerIsDown = errors.New("broker is down")
+)
+
+type LockableBrokerClient struct {
+	isShutdown   atomic.Bool
+	brokerClient brokerservice.Client
+}
+
+func (l *LockableBrokerClient) Deliver(ctx context.Context, req *api.DeliverRequest) (res *api.DeliverReply, err error) {
+	if l.isShutdown.Load() {
+		return nil, BrokerIsDown
+	}
+	return l.brokerClient.Deliver(ctx, req)
+}
+
 type BrokerClientResolver struct {
-	Endpoints map[string]brokerservice.Client
-	lock      sync.RWMutex
+	endpoints map[string]*LockableBrokerClient
 	client    *etcdclient.Client
 	logger    *logger.Logger
+	lock      sync.RWMutex
 }
 
 func NewBrokerClientResolver(g *global.Config, lc fx.Lifecycle) (*BrokerClientResolver, error) {
 	c := getOrDefaultEtcdConfig(g)
-
 	cli, err := etcdclient.New(etcdclient.Config{
 		Endpoints:   c.Endpoints,
 		DialTimeout: c.DialTimeout,
 	})
-
 	if err != nil {
 		return nil, err
+	}
+
+	srv := &BrokerClientResolver{
+		endpoints: make(map[string]*LockableBrokerClient),
+		client:    cli,
+		logger:    logger.Named("kitex"),
 	}
 
 	lc.Append(fx.Hook{
+		OnStart: func(ctx context.Context) error {
+			return srv.Start(ctx)
+		},
 		OnStop: func(ctx context.Context) error {
-			return cli.Close()
+			return srv.Stop(ctx)
 		},
 	})
 
-	return &BrokerClientResolver{
-		Endpoints: make(map[string]brokerservice.Client),
-		client:    cli,
-		logger:    logger.Named("kitex"),
-	}, nil
+	return srv, nil
 }
 
-func (r *BrokerClientResolver) Client(ctx context.Context, addr string) (brokerservice.Client, error) {
-	r.lock.RLock()
-	defer r.lock.RUnlock()
-
-	if v, ok := r.Endpoints[addr]; ok && v != nil {
-		return v, nil
-	}
-
-	r.lock.Lock()
-	defer r.lock.Unlock()
-
-	if v, ok := r.Endpoints[addr]; ok && v != nil {
-		return v, nil
-	}
-
-	if err := r.fetch(ctx); err != nil {
-		return nil, err
-	}
-
-	if v, ok := r.Endpoints[addr]; ok && v != nil {
-		return v, nil
-	}
-
-	r.logger.Error("no registered broker service client")
-	return nil, errors.New("no registered broker service client")
+func (s *BrokerClientResolver) Deliver(ctx context.Context, req *api.DeliverRequest) (res *api.DeliverReply, err error) {
+	s.lock.RLock()
+	defer s.lock.RUnlock()
+	return s.endpoints["127.0.0.1:5075"].Deliver(ctx, req)
 }
 
-func (r *BrokerClientResolver) fetch(ctx context.Context) error {
-	resp, err := r.client.Get(ctx, "kitex/registry-etcd/im.broker", etcdclient.WithPrefix())
-	if err != nil {
-		return err
+func (s *BrokerClientResolver) Stop(ctx context.Context) error {
+	if err := s.client.Close(); err != nil {
+		s.logger.Error("Failed to close etcd client", zap.Error(err))
 	}
 
-	for _, v := range resp.Kvs {
-		addr := jsoniter.Get(v.Value, "addr").ToString()
-		errMsg := fmt.Sprintf("invalid and ignore json:%s", string(v.Value))
-		r.logger.Error(errMsg)
-		if addr == "" {
-			continue
-		}
-		cli, err := brokerservice.NewClient("im.broker", client.WithHostPorts(addr))
-		if err != nil {
-			return err
-		}
-		r.Endpoints[addr] = cli
+	s.lock.Lock()
+	defer s.lock.Unlock()
+	for k, v := range s.endpoints {
+		v.isShutdown.Store(true)
+		delete(s.endpoints, k)
 	}
 	return nil
 }
 
-func (r *BrokerClientResolver) Close() {
-	r.client.Close()
+func (s *BrokerClientResolver) Start(ctx context.Context) error {
+	// 获取现有服务
+	resp, err := s.client.Get(ctx, "kitex/registry-etcd/im.broker", etcdclient.WithPrefix())
+	if err != nil {
+		s.logger.Error("Failed to get initial brokers", zap.Error(err))
+		return err
+	}
+	for _, kv := range resp.Kvs {
+		addr := jsoniter.Get(kv.Value, "addr").ToString()
+		for i := 0; i < 3; i++ {
+			cli, err := brokerservice.NewClient("im.broker", client.WithHostPorts(addr))
+			if err == nil {
+				s.lock.Lock()
+				s.endpoints[addr] = &LockableBrokerClient{brokerClient: cli}
+				s.lock.Unlock()
+				s.logger.Info("broker client,ok", zap.String("addr", addr), zap.String("event", "INIT"), zap.String("key", string(kv.Key)))
+				break
+			}
+			s.logger.Error("broker client,error", zap.Error(err), zap.Int("attempt", i+1))
+			time.Sleep(time.Duration(i*100) * time.Millisecond)
+		}
+	}
+
+	// 启动 watch
+	go func() {
+		watchChan := s.client.Watch(ctx, "kitex/registry-etcd/im.broker", etcdclient.WithPrefix())
+		for watchResp := range watchChan {
+			if err := watchResp.Err(); err != nil {
+				s.logger.Error("Watch error", zap.Error(err))
+				continue
+			}
+			for _, event := range watchResp.Events {
+				if event.Type == mvccpb.PUT {
+					addr := jsoniter.Get(event.Kv.Value, "addr").ToString()
+					for i := 0; i < 3; i++ {
+						cli, err := brokerservice.NewClient("im.broker", client.WithHostPorts(addr))
+						if err == nil {
+							s.lock.Lock()
+							s.endpoints[addr] = &LockableBrokerClient{brokerClient: cli}
+							s.lock.Unlock()
+							s.logger.Info("broker client,ok", zap.String("addr", addr), zap.String("event", "PUT"), zap.String("key", string(event.Kv.Key)))
+							break
+						}
+						s.logger.Error("broker client,error", zap.Error(err), zap.Int("attempt", i+1))
+						time.Sleep(time.Duration(i*100) * time.Millisecond)
+					}
+					continue
+				}
+				if event.Type == mvccpb.DELETE {
+					key := string(event.Kv.Key)
+					if !strings.HasPrefix(key, "kitex/registry-etcd/im.broker/") {
+						s.logger.Warn("Invalid key for DELETE event", zap.String("key", key))
+						continue
+					}
+					addr := key[len("kitex/registry-etcd/im.broker/"):]
+					s.lock.Lock()
+					c, ok := s.endpoints[addr]
+					if ok && c != nil {
+						c.isShutdown.Store(true)
+						delete(s.endpoints, addr)
+						s.logger.Info("broker client,deleted", zap.String("addr", addr), zap.String("event", "DELETE"), zap.String("key", key))
+					}
+					s.lock.Unlock()
+				}
+			}
+		}
+		s.logger.Info("Watch stopped", zap.Error(ctx.Err()))
+	}()
+	return nil
 }
 
 // 以后再说

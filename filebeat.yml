@@ -1,26 +1,72 @@
 filebeat.inputs:
-  - type: filestream
+  - type: log
     enabled: true
     paths:
-      - /var/log/im/debug.*.log  # 只监控 debug 轮转日志
+      - /var/log/im/im-broker/debug.*.log
     fields:
-      app: im
+      app: im-broker
+    json.keys_under_root: true
+    json.add_error_key: true
+    json.message_key: "message"
     fields_under_root: true
-    scan_frequency: 1s  # 提高扫描频率以捕获快速轮转的日志
+    scan_frequency: 1s
+    multiline.pattern: '^{'
+    multiline.negate: true
+    multiline.match: after
+    clean_removed: true
+    close_removed: true
+    processors:
+      - add_fields:
+          target: ""
+          fields:
+            app: "${[fields][app]}"
+      - timestamp:
+          field: time
+          layouts:
+            - "2006-01-02 15:04:05"
+          test:
+            - "2006-01-02 15:04:05"
+          target_field: "@timestamp"
+  - type: log
+    enabled: true
+    paths:
+      - /var/log/im/im-router/debug.*.log
+    fields:
+      app: im-router
+    json.keys_under_root: true
+    json.add_error_key: true
+    json.message_key: "message"
+    fields_under_root: true
+    scan_frequency: 1s
+    multiline.pattern: '^{'
+    multiline.negate: true
+    multiline.match: after
+    clean_removed: true
+    close_removed: true
+    processors:
+      - add_fields:
+          target: ""
+          fields:
+            app: "${[fields][app]}"
+      - timestamp:
+          field: time
+          layouts:
+            - "2006-01-02 15:04:05"
+          test:
+            - "2006-01-02 15:04:05"
+          target_field: "@timestamp"
 
-output.kafka:
-  hosts: ["kafka:9092"]
-  topic: "im_logs"
-  codec.json:
-    pretty: false
+output.elasticsearch:
+  hosts: ["http://elasticsearch:9200"]
+  username: "elastic"
+  password: "elastic"
+  index: "im-logs-%{[@timestamp][yyyy.MM.dd]}"  # 基于 @timestamp 生成索引名
 
 setup.kibana:
-  host: "kibana:5601"
+  host: "http://kibana:5601"
   username: "elastic"
-  password: "changeme"
+  password: "elastic"
 
-setup.template.settings:
-  index.number_of_shards: 1
-  index.codec: best_compression
-
-setup.dashboards.enabled: true
+setup.template.name: "im-logs"
+setup.template.pattern: "im-logs-*"
+setup.template.enabled: true
