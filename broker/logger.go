@@ -28,6 +28,26 @@ func NewLogger(name string) *Logger {
 	}
 }
 
+func (s *Logger) Debugf(format string, args ...any) {
+	s.Debug(fmt.Sprintf(format, args...))
+}
+
+func (s *Logger) Infof(format string, args ...any) {
+	s.Info(fmt.Sprintf(format, args...))
+}
+
+func (s *Logger) Warnf(format string, args ...any) {
+	s.Warn(fmt.Sprintf(format, args...))
+}
+
+func (s *Logger) Errorf(format string, args ...any) {
+	s.Error(fmt.Sprintf(format, args...))
+}
+
+func (s *Logger) Fatalf(format string, args ...any) {
+	s.Fatal(fmt.Sprintf(format, args...))
+}
+
 func (s *Logger) Printf(format string, args ...any) {
 	if !s.Logger.IsDebugEnabled() {
 		return

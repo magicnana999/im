@@ -272,6 +272,7 @@ func (s *TcpServer) Start(ctx context.Context) error {
 			gnet.WithSocketRecvBuffer(DefSocketRecvBuffer),
 			gnet.WithSocketSendBuffer(DefSocketSendBuffer),
 			gnet.WithTicker(DefTicker),
+			gnet.WithLogger(s.logger),
 			gnet.WithLogLevel(DefLogLevel),
 			gnet.WithEdgeTriggeredIO(DefEdgeTriggeredIO),
 			gnet.WithEdgeTriggeredIOChunk(DefEdgeTriggeredIOChunk))
